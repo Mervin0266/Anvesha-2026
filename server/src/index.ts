@@ -5,11 +5,18 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Resolve __dirname in a way that is compatible with both ESM and CommonJS
+const getDirname = () => {
+  try {
+    return __dirname;
+  } catch (e) {
+    const filename = fileURLToPath(import.meta.url);
+    return path.dirname(filename);
+  }
+};
 
 // Ensure the uploads directory exists
-const uploadsDir = path.join(__dirname, '../../uploads');
+const uploadsDir = path.join(getDirname(), '../../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }

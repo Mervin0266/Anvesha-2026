@@ -48055,9 +48055,15 @@ var getAnalyticsData = async (req, res) => {
 
 // server/src/index.ts
 var import_meta = {};
-var __filename = (0, import_url.fileURLToPath)(import_meta.url);
-var __dirname = import_path.default.dirname(__filename);
-var uploadsDir = import_path.default.join(__dirname, "../../uploads");
+var getDirname = () => {
+  try {
+    return __dirname;
+  } catch (e) {
+    const filename = (0, import_url.fileURLToPath)(import_meta.url);
+    return import_path.default.dirname(filename);
+  }
+};
+var uploadsDir = import_path.default.join(getDirname(), "../../uploads");
 if (!import_fs.default.existsSync(uploadsDir)) {
   import_fs.default.mkdirSync(uploadsDir, { recursive: true });
 }
