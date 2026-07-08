@@ -45562,9 +45562,24 @@ var INITIAL_USERS = [
 // server/src/services/db.ts
 var { Pool: Pool2, Client: Client2 } = esm_default;
 import_dotenv.default.config();
-var connectionString = process.env.DATABASE_URL || "postgres://postgres:Mervin@0206@localhost:5432/AnveshaDB";
+var connectionString = process.env.DATABASE_URL || "";
+var isRender = process.env.RENDER === "true";
+if (isRender && (!connectionString || connectionString.includes("localhost") || connectionString.includes("127.0.0.1"))) {
+  console.error("\n========================================================================");
+  console.error("\u274C ERROR: DATABASE_URL is missing or pointing to localhost on Render.");
+  console.error("Please configure the DATABASE_URL environment variable in your Render Web Service settings.");
+  console.error("Go to: Render Dashboard -> Web Service -> Settings -> Env Variables");
+  console.error("And add: DATABASE_URL = [Your Render PostgreSQL External Connection String]");
+  console.error("========================================================================\n");
+  process.exit(1);
+}
+if (!connectionString) {
+  connectionString = "postgres://postgres:Mervin@0206@localhost:5432/AnveshaDB";
+}
+var isLocal = connectionString.includes("localhost") || connectionString.includes("127.0.0.1");
 var pool = new Pool2({
-  connectionString
+  connectionString,
+  ssl: isLocal ? false : { rejectUnauthorized: false }
 });
 var dbQuery = async (text, params = []) => {
   return await pool.query(text, params);
@@ -45602,7 +45617,10 @@ var getPostgresConnectionStr = (dbUrl) => {
 var initDb = async () => {
   console.log('Ensuring PostgreSQL Database "AnveshaDB" exists...');
   const adminConnectionStr = getPostgresConnectionStr(connectionString);
-  const adminClient = new Client2({ connectionString: adminConnectionStr });
+  const adminClient = new Client2({
+    connectionString: adminConnectionStr,
+    ssl: isLocal ? false : { rejectUnauthorized: false }
+  });
   try {
     await adminClient.connect();
     const checkDb = await adminClient.query("SELECT 1 FROM pg_database WHERE datname = 'AnveshaDB'");

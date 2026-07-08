@@ -11,11 +11,29 @@ import {
 
 dotenv.config();
 
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:Mervin@0206@localhost:5432/AnveshaDB';
+let connectionString = process.env.DATABASE_URL || '';
+const isRender = process.env.RENDER === 'true';
+
+if (isRender && (!connectionString || connectionString.includes('localhost') || connectionString.includes('127.0.0.1'))) {
+  console.error('\n========================================================================');
+  console.error('❌ ERROR: DATABASE_URL is missing or pointing to localhost on Render.');
+  console.error('Please configure the DATABASE_URL environment variable in your Render Web Service settings.');
+  console.error('Go to: Render Dashboard -> Web Service -> Settings -> Env Variables');
+  console.error('And add: DATABASE_URL = [Your Render PostgreSQL External Connection String]');
+  console.error('========================================================================\n');
+  process.exit(1);
+}
+
+if (!connectionString) {
+  connectionString = 'postgres://postgres:Mervin@0206@localhost:5432/AnveshaDB';
+}
+
+const isLocal = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
 
 // Configure pool to connect specifically to AnveshaDB
 export const pool = new Pool({
-  connectionString
+  connectionString,
+  ssl: isLocal ? false : { rejectUnauthorized: false }
 });
 
 export const dbQuery = async (text: string, params: any[] = []): Promise<any> => {
@@ -60,7 +78,10 @@ export const initDb = async (): Promise<void> => {
   
   // 1. Connect to default 'postgres' database to check / create AnveshaDB
   const adminConnectionStr = getPostgresConnectionStr(connectionString);
-  const adminClient = new Client({ connectionString: adminConnectionStr });
+  const adminClient = new Client({ 
+    connectionString: adminConnectionStr,
+    ssl: isLocal ? false : { rejectUnauthorized: false }
+  });
   
   try {
     await adminClient.connect();
