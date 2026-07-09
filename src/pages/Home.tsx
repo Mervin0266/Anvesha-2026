@@ -123,7 +123,7 @@ export const Home: React.FC = () => {
       <Navbar />
 
       {/* 2. Hero Section */}
-      <section className="pt-32 pb-20 relative overflow-hidden border-b border-slate-200/80">
+      <section className="pt-32 pb-20 relative overflow-hidden border-b border-slate-200/80 isolate">
         
         {/* Background Slideshow with smooth cross-fade */}
         <div className="absolute inset-0 -z-20">
@@ -137,7 +137,10 @@ export const Home: React.FC = () => {
             />
           ))}
           {/* Subtle gradient overlay to balance image visibility & text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/72 via-slate-50/68 to-white/65" />
+          <div 
+            className="absolute inset-0" 
+            style={{ backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.58), rgba(248, 250, 252, 0.52))' }}
+          />
         </div>
 
         {/* Subtle background decorative shapes */}
