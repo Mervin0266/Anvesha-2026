@@ -122,124 +122,114 @@ export const Home: React.FC = () => {
       {/* 1. Navbar */}
       <Navbar />
 
-      {/* 2. Hero Section */}
-      <section className="pt-32 pb-20 relative overflow-hidden border-b border-slate-200/80 isolate">
-        
-        {/* Background Slideshow with smooth cross-fade */}
+      {/* 2. Hero Section — Full-bleed Cinematic */}
+      <section className="relative min-h-[90vh] flex flex-col justify-end overflow-hidden isolate">
+
+        {/* ── Slideshow Background ── */}
         <div className="absolute inset-0 -z-20">
           {heroImages.map((src, index) => (
             <div
               key={src}
-              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-[1400ms] ease-in-out ${
                 index === bgIndex ? 'opacity-100' : 'opacity-0'
               }`}
               style={{ backgroundImage: `url('${src}')` }}
             />
           ))}
-          {/* Subtle gradient overlay to balance image visibility & text readability */}
-          <div 
-            className="absolute inset-0" 
-            style={{ backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.58), rgba(248, 250, 252, 0.52))' }}
-          />
         </div>
 
-        {/* Subtle background decorative shapes */}
-        <div className="absolute top-10 right-0 w-96 h-96 bg-christ-gold/10 rounded-full blur-3xl -z-10 pointer-events-none" />
-        <div className="absolute top-40 left-0 w-80 h-80 bg-christ-navy/5 rounded-full blur-3xl -z-10 pointer-events-none" />
+        {/* ── Dark cinematic overlay ── */}
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            backgroundImage:
+              'linear-gradient(to top, rgba(10,18,40,0.96) 0%, rgba(10,18,40,0.72) 50%, rgba(10,18,40,0.30) 100%)',
+          }}
+        />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            {/* Left Content */}
-            <div className="lg:col-span-7 space-y-6">
-              
-              <div className="inline-flex items-center space-x-2 bg-christ-navy/5 border border-christ-navy/15 px-3.5 py-1.5 rounded-full text-xs font-semibold text-christ-navy shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-christ-gold" />
-                <span>CHRIST UNIVERSITY PRESENTS</span>
-              </div>
+        {/* ── Slide dots ── */}
+        <div className="absolute top-8 right-8 flex space-x-2 z-10">
+          {heroImages.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setBgIndex(i)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                i === bgIndex ? 'bg-christ-gold w-6' : 'bg-white/40 hover:bg-white/70'
+              }`}
+            />
+          ))}
+        </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-christ-navy tracking-tight leading-[1.1] font-serif">
-                ANVESHA <span className="text-christ-gold italic font-serif">2026</span>
-              </h1>
+        {/* ── Main content ── */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-20 pt-40">
+          <div className="max-w-4xl">
 
-              <p className="text-lg text-slate-700 font-medium leading-relaxed max-w-2xl">
-                The premier Annual Inter Pre-University Sports & Cultural Championship of Christ University. Uniting talent, grit, and spirit across Karnataka & neighboring regions.
-              </p>
-
-              {/* Action Buttons */}
-              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                <Link
-                  to="/register"
-                  className="inline-flex items-center justify-center space-x-2 px-7 py-3.5 text-sm font-bold rounded-xl bg-christ-gold text-christ-navy shadow-christ-gold hover:bg-christ-lightGold transition-all transform hover:-translate-y-0.5"
-                >
-                  <span>Register Institution</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-
-                <Link
-                  to="/login"
-                  className="inline-flex items-center justify-center space-x-2 px-6 py-3.5 text-sm font-semibold rounded-xl text-christ-navy bg-white border border-slate-300 hover:border-christ-navy hover:bg-slate-50 transition-all shadow-sm"
-                >
-                  <ShieldCheck className="w-4 h-4 text-christ-navy" />
-                  <span>Crew Portal Login</span>
-                </Link>
-              </div>
-
-              {/* Quick Key Highlights */}
-              <div className="pt-6 grid grid-cols-3 gap-4 border-t border-slate-200/80">
-                <div>
-                  <p className="text-2xl font-black text-christ-navy font-serif">50+</p>
-                  <p className="text-xs text-slate-500 font-medium">PU Institutions</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-christ-gold font-serif">9</p>
-                  <p className="text-xs text-slate-500 font-medium">Flagship Events</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-christ-navy font-serif">1000+</p>
-                  <p className="text-xs text-slate-500 font-medium">Participants</p>
-                </div>
-              </div>
-
+            {/* Badge */}
+            <div className="inline-flex items-center space-x-2 bg-christ-gold/20 border border-christ-gold/40 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-christ-gold uppercase tracking-widest mb-8">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Christ University Presents</span>
             </div>
 
-            {/* Right Illustration / Poster Card */}
-            <div className="lg:col-span-5">
-              <div className="bg-white p-4 rounded-2xl shadow-christ-card border border-slate-200/80 relative">
-                <div 
-                  className="rounded-xl p-8 text-white relative overflow-hidden bg-christ-navy"
-                  style={{
-                    backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.9)), url('public\images\fest-banner.jpeg')`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center'
-                  }}
-                >
-                  <div className="absolute -right-6 -bottom-6 opacity-10 font-serif text-9xl font-bold">CU</div>
-                  <div className="flex justify-between items-start mb-6">
-                    <span className="bg-christ-gold text-christ-navy text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Official Fest Banner</span>
-                    <span className="text-xs text-slate-300">July 04 - 05, 2026</span>
-                  </div>
-                  <h3 className="text-2xl font-bold font-serif mb-2 text-white">ANVESHA 2026</h3>
-                  <p className="text-xs text-christ-gold mb-6 font-medium">Christ University Kengeri Campus, Bengaluru</p>
+            {/* Headline */}
+            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-extrabold text-white leading-[1.0] tracking-tight font-serif mb-6 drop-shadow-xl">
+              ANVESHA{' '}
+              <span className="text-christ-gold italic">2026</span>
+            </h1>
 
-                  <div className="space-y-3 pt-4 border-t border-white/10 text-xs">
-                    <div className="flex items-center space-x-2">
-                      <Trophy className="w-4 h-4 text-christ-gold" />
-                      <span>4 Major Sports Tournaments</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Flame className="w-4 h-4 text-christ-gold" />
-                      <span>5 Cultural Stage Competitions</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <ShieldCheck className="w-4 h-4 text-christ-gold" />
-                      <span>Verified Digital Chest Number System</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* Sub-headline */}
+            <p className="text-lg sm:text-xl text-white/80 font-medium leading-relaxed max-w-2xl mb-4">
+              The premier Annual Inter Pre-University Sports &amp; Cultural Championship of Christ University — uniting talent, grit, and spirit across Karnataka.
+            </p>
+
+            {/* Location + Date pill */}
+            <div className="flex flex-wrap gap-3 mb-10">
+              <span className="inline-flex items-center space-x-1.5 text-sm text-white/70 bg-white/10 border border-white/15 backdrop-blur-sm px-4 py-1.5 rounded-full">
+                <MapPin className="w-3.5 h-3.5 text-christ-gold shrink-0" />
+                <span>Kengeri Campus, Mysore Road, Bangalore</span>
+              </span>
+              <span className="inline-flex items-center space-x-1.5 text-sm text-white/70 bg-white/10 border border-white/15 backdrop-blur-sm px-4 py-1.5 rounded-full">
+                <Calendar className="w-3.5 h-3.5 text-christ-gold shrink-0" />
+                <span>July 04 – 05, 2026</span>
+              </span>
             </div>
 
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                to="/register"
+                className="inline-flex items-center justify-center space-x-2 px-8 py-4 text-sm font-bold rounded-xl bg-christ-gold text-christ-navy shadow-lg hover:bg-christ-lightGold transition-all transform hover:-translate-y-0.5 hover:shadow-xl"
+              >
+                <span>Register Institution</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center space-x-2 px-7 py-4 text-sm font-semibold rounded-xl text-white bg-white/10 border border-white/25 backdrop-blur-sm hover:bg-white/20 transition-all"
+              >
+                <ShieldCheck className="w-4 h-4 text-christ-gold" />
+                <span>Crew Portal Login</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Stats strip at bottom ── */}
+        <div className="relative z-10 border-t border-white/10 bg-black/30 backdrop-blur-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-3 divide-x divide-white/10 py-5">
+              {[
+                { value: '50+', label: 'PU Institutions' },
+                { value: '9', label: 'Flagship Events', gold: true },
+                { value: '1000+', label: 'Participants' },
+              ].map(({ value, label, gold }) => (
+                <div key={label} className="flex flex-col items-center px-4 text-center">
+                  <span className={`text-3xl font-black font-serif ${gold ? 'text-christ-gold' : 'text-white'}`}>
+                    {value}
+                  </span>
+                  <span className="text-xs text-white/55 font-medium mt-0.5">{label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
