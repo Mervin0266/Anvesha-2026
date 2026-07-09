@@ -126,7 +126,7 @@ export const Home: React.FC = () => {
       <section 
         className="pt-32 pb-20 relative overflow-hidden border-b border-slate-200/80 transition-all duration-1000"
         style={{
-          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.93), rgba(248, 250, 252, 0.96)), url('${heroImages[bgIndex]}')`,
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.78), rgba(248, 250, 252, 0.82)), url('${heroImages[bgIndex]}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
