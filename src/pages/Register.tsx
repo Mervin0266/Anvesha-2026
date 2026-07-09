@@ -1685,21 +1685,12 @@ export const Register: React.FC = () => {
                   </div>
 
                   <div>
-                    {isPreFilledFromBank ? (
-                      <div>
-                        <label className="block font-bold text-slate-800 mb-1">Payment Verification Proof</label>
-                        <div className="px-3.5 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg text-xs">
-                          SIB Feebook Portal Verification Record
-                        </div>
-                      </div>
-                    ) : (
-                      <FileUploadField
-                        label="Upload Payment Proof Photo *"
-                        value={payment.paymentProofUrl}
-                        onChange={(url) => setPayment({ ...payment, paymentProofUrl: url })}
-                        required
-                      />
-                    )}
+                    <FileUploadField
+                      label="Upload Payment Proof Photo *"
+                      value={payment.paymentProofUrl}
+                      onChange={(url) => setPayment({ ...payment, paymentProofUrl: url })}
+                      required
+                    />
                   </div>
                 </div>
               </div>
