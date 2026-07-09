@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Trophy, Flame, ShieldCheck, Calendar, Users, Award, ChevronDown, 
@@ -71,6 +71,24 @@ const FestGallery: React.FC = () => {
 export const Home: React.FC = () => {
   const { events } = useEvents();
   const [activeTab, setActiveTab] = useState<EventCategory>('SPORTS');
+
+  const heroImages = [
+    '/images/images/54803382962_a491a06135_o.jpg',
+    '/images/images/54804478864_83a7ab18a8_o.jpg',
+    '/images/images/54804479024_964acda267_o.jpg',
+    '/images/images/54804479254_3b773ea6b7_o.jpg',
+    '/images/images/54804486843_fcd3f03b8f_o.jpg',
+    '/images/images/54804568260_62c289f9eb_o.jpg'
+  ];
+
+  const [bgIndex, setBgIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setBgIndex((prev) => (prev + 1) % heroImages.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
   
   // Group sports to avoid duplicate cards for Boys and Girls on the Home page
   const displayEvents = React.useMemo(() => {
@@ -105,7 +123,14 @@ export const Home: React.FC = () => {
       <Navbar />
 
       {/* 2. Hero Section */}
-      <section className="pt-32 pb-20 bg-gradient-to-b from-white via-slate-50 to-christ-lightBg relative overflow-hidden border-b border-slate-200/80">
+      <section 
+        className="pt-32 pb-20 relative overflow-hidden border-b border-slate-200/80 transition-all duration-1000"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.93), rgba(248, 250, 252, 0.96)), url('${heroImages[bgIndex]}')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
         
         {/* Subtle background decorative shapes */}
         <div className="absolute top-10 right-0 w-96 h-96 bg-christ-gold/10 rounded-full blur-3xl -z-10 pointer-events-none" />
