@@ -48161,7 +48161,7 @@ app.post("/api/upload", (req, res) => {
     import_fs.default.writeFileSync(filePath, dataBuffer);
     res.json({
       success: true,
-      url: `http://localhost:5000/uploads/${uniqueName}`
+      url: `${req.protocol}://${req.get("host")}/uploads/${uniqueName}`
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || "Upload failed." });
