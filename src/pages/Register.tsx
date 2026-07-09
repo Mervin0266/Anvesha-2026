@@ -1033,7 +1033,6 @@ export const Register: React.FC = () => {
             !p.name.trim() ||
             !p.dob ||
             !p.className.trim() ||
-            !p.section.trim() ||
             !p.govtIdProof.trim() ||
             !p.emergencyContact.trim()
           ) return false;
@@ -1778,7 +1777,7 @@ export const Register: React.FC = () => {
                                       <div key={pIdx} className="bg-white p-2.5 rounded-lg border border-slate-100 space-y-0.5">
                                         <div className="font-semibold text-slate-800">{p.name || 'Unnamed Participant'} ({p.gender})</div>
                                         <div className="text-[10px] text-slate-500">
-                                          <div>DOB: {p.dob || 'Not specified'} | Class: {p.className || 'Not specified'} - Sec {p.section || 'N/A'}</div>
+                                          <div>DOB: {p.dob || 'Not specified'} | Class: {p.className || 'Not specified'}</div>
                                           <div>Govt ID: {p.govtIdProof || 'Not specified'}</div>
                                           <div>Emergency Contact: {p.emergencyContact || 'Not specified'}</div>
                                         </div>
