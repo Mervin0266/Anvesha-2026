@@ -123,15 +123,23 @@ export const Home: React.FC = () => {
       <Navbar />
 
       {/* 2. Hero Section */}
-      <section 
-        className="pt-32 pb-20 relative overflow-hidden border-b border-slate-200/80 transition-all duration-1000"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.78), rgba(248, 250, 252, 0.82)), url('${heroImages[bgIndex]}')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
+      <section className="pt-32 pb-20 relative overflow-hidden border-b border-slate-200/80">
         
+        {/* Background Slideshow with smooth cross-fade */}
+        <div className="absolute inset-0 -z-20">
+          {heroImages.map((src, index) => (
+            <div
+              key={src}
+              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+                index === bgIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{ backgroundImage: `url('${src}')` }}
+            />
+          ))}
+          {/* Subtle gradient overlay to balance image visibility & text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/72 via-slate-50/68 to-white/65" />
+        </div>
+
         {/* Subtle background decorative shapes */}
         <div className="absolute top-10 right-0 w-96 h-96 bg-christ-gold/10 rounded-full blur-3xl -z-10 pointer-events-none" />
         <div className="absolute top-40 left-0 w-80 h-80 bg-christ-navy/5 rounded-full blur-3xl -z-10 pointer-events-none" />
