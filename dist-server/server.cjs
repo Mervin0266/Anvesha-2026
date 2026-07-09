@@ -47954,6 +47954,58 @@ var updateBankPayment = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to update bank payment." });
   }
 };
+var deleteCrewUser = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const userRes = await dbQuery("SELECT * FROM users WHERE id = $1", [userId]);
+    const userObj = userRes.rows[0];
+    if (!userObj) {
+      res.status(404).json({ success: false, message: "User account not found." });
+      return;
+    }
+    if (userObj.role === "admin") {
+      res.status(400).json({ success: false, message: "Cannot delete the Chief Admin account." });
+      return;
+    }
+    await dbQuery("DELETE FROM users WHERE id = $1", [userId]);
+    await addAuditLog(
+      "Chief Admin",
+      "admin",
+      "DELETE_USER",
+      `Deleted crew user account: ${userObj.username} (${userObj.name})`
+    );
+    res.json({ success: true, message: "User account deleted successfully." });
+  } catch (error) {
+    console.error("deleteCrewUser error:", error);
+    res.status(500).json({ success: false, message: "Failed to delete user account." });
+  }
+};
+var deleteBankPayment = async (req, res) => {
+  const { paymentId } = req.params;
+  try {
+    const bpRes = await dbQuery("SELECT * FROM bank_payments WHERE id = $1", [paymentId]);
+    const bp = bpRes.rows[0];
+    if (!bp) {
+      res.status(404).json({ success: false, message: "Transaction record not found." });
+      return;
+    }
+    if (bp.status === "USED") {
+      res.status(400).json({ success: false, message: "Cannot delete a transaction record that has already been used for registration." });
+      return;
+    }
+    await dbQuery("DELETE FROM bank_payments WHERE id = $1", [paymentId]);
+    await addAuditLog(
+      "Chief Admin",
+      "admin",
+      "DELETE_BANK_PAYMENT",
+      `Deleted SIB transaction record: ${bp.transaction_id} (${bp.institution_name})`
+    );
+    res.json({ success: true, message: "Transaction record deleted successfully." });
+  } catch (error) {
+    console.error("deleteBankPayment error:", error);
+    res.status(500).json({ success: false, message: "Failed to delete transaction record." });
+  }
+};
 
 // server/src/controllers/analyticsController.ts
 var getAnalyticsData = async (req, res) => {
@@ -48152,6 +48204,8 @@ app.post("/api/admin/bank-payments/bulk", bulkAddBankPayments);
 app.post("/api/admin/bank-payments/invite", sendRegistrationInvitation);
 app.post("/api/admin/bank-payments/invite-bulk", bulkSendRegistrationInvitations);
 app.post("/api/admin/bank-payments/update", updateBankPayment);
+app.delete("/api/admin/users/:userId", deleteCrewUser);
+app.delete("/api/admin/bank-payments/:paymentId", deleteBankPayment);
 app.get("/api/analytics", getAnalyticsData);
 initDb().then(() => {
   app.listen(PORT, () => {

@@ -515,6 +515,40 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete the crew account for '${userName}'? This action cannot be undone.`);
+    if (!confirmDelete) return;
+
+    try {
+      const res = await apiFetch<{ success: boolean; message: string }>(`/admin/users/${userId}`, {
+        method: 'DELETE'
+      });
+      if (res.success) {
+        setActionMsg(`Crew account '${userName}' deleted successfully.`);
+        fetchAdminOverview();
+      }
+    } catch (err: any) {
+      alert(`User deletion error: ${err.message}`);
+    }
+  };
+
+  const handleDeleteBankPayment = async (paymentId: string, txnId: string) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete the payment transaction record '${txnId}'? This action cannot be undone.`);
+    if (!confirmDelete) return;
+
+    try {
+      const res = await apiFetch<{ success: boolean; message: string }>(`/admin/bank-payments/${paymentId}`, {
+        method: 'DELETE'
+      });
+      if (res.success) {
+        setActionMsg(`Transaction record '${txnId}' deleted successfully.`);
+        fetchBankPayments();
+      }
+    } catch (err: any) {
+      alert(`Transaction deletion error: ${err.message}`);
+    }
+  };
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
       <Sidebar currentRole="admin" />
@@ -718,9 +752,21 @@ export const AdminDashboard: React.FC = () => {
                         <strong className="text-slate-900 font-bold">{u.name}</strong> ({u.username})
                         <p className="text-[10px] text-slate-500">{u.email}</p>
                       </div>
-                      <span className="px-2.5 py-1 rounded bg-christ-navy/10 text-christ-navy font-bold uppercase text-[10px]">
-                        {u.role.replace(/_/g, ' ')}
-                      </span>
+                      <div className="flex items-center space-x-3">
+                        <span className="px-2.5 py-1 rounded bg-christ-navy/10 text-christ-navy font-bold uppercase text-[10px]">
+                          {u.role.replace(/_/g, ' ')}
+                        </span>
+                        {u.role !== 'admin' && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteUser(u.id, u.name)}
+                            className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition-colors"
+                            title="Delete User Account"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1257,6 +1303,14 @@ export const AdminDashboard: React.FC = () => {
                                     className="px-3 py-1.5 bg-christ-navy hover:bg-christ-darkNavy text-white font-bold rounded-lg transition-all shadow-sm text-[10px]"
                                   >
                                     {p.invitationSent ? 'Resend Invite' : 'Send Invite'}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteBankPayment(p.id, p.transactionId)}
+                                    className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition-all"
+                                    title="Delete Transaction"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
                                   </button>
                                 </div>
                               ) : (

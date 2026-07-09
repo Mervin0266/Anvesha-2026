@@ -493,3 +493,67 @@ export const updateBankPayment = async (req: Request, res: Response): Promise<vo
     res.status(500).json({ success: false, message: 'Failed to update bank payment.' });
   }
 };
+
+export const deleteCrewUser = async (req: Request, res: Response): Promise<void> => {
+  const { userId } = req.params;
+
+  try {
+    const userRes = await dbQuery('SELECT * FROM users WHERE id = $1', [userId]);
+    const userObj = userRes.rows[0];
+
+    if (!userObj) {
+      res.status(404).json({ success: false, message: 'User account not found.' });
+      return;
+    }
+
+    if (userObj.role === 'admin') {
+      res.status(400).json({ success: false, message: 'Cannot delete the Chief Admin account.' });
+      return;
+    }
+
+    await dbQuery('DELETE FROM users WHERE id = $1', [userId]);
+    await addAuditLog(
+      'Chief Admin',
+      'admin',
+      'DELETE_USER',
+      `Deleted crew user account: ${userObj.username} (${userObj.name})`
+    );
+
+    res.json({ success: true, message: 'User account deleted successfully.' });
+  } catch (error: any) {
+    console.error('deleteCrewUser error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete user account.' });
+  }
+};
+
+export const deleteBankPayment = async (req: Request, res: Response): Promise<void> => {
+  const { paymentId } = req.params;
+
+  try {
+    const bpRes = await dbQuery('SELECT * FROM bank_payments WHERE id = $1', [paymentId]);
+    const bp = bpRes.rows[0];
+
+    if (!bp) {
+      res.status(404).json({ success: false, message: 'Transaction record not found.' });
+      return;
+    }
+
+    if (bp.status === 'USED') {
+      res.status(400).json({ success: false, message: 'Cannot delete a transaction record that has already been used for registration.' });
+      return;
+    }
+
+    await dbQuery('DELETE FROM bank_payments WHERE id = $1', [paymentId]);
+    await addAuditLog(
+      'Chief Admin',
+      'admin',
+      'DELETE_BANK_PAYMENT',
+      `Deleted SIB transaction record: ${bp.transaction_id} (${bp.institution_name})`
+    );
+
+    res.json({ success: true, message: 'Transaction record deleted successfully.' });
+  } catch (error: any) {
+    console.error('deleteBankPayment error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete transaction record.' });
+  }
+};

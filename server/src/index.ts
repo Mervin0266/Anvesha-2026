@@ -27,7 +27,11 @@ import { getPendingVerifications, approveVerification, rejectVerification } from
 import { getEventData, createOrUpdateFixture, submitEventResult, requestEdit, getEventsList, updateEventLiveStatus, updateRosterStatus } from './controllers/eventController';
 import { getHospitalityData, updateHospitalityStatus } from './controllers/hospitalityController';
 import { getCertificateData } from './controllers/certificateController';
-import { getAdminOverview, handleEditRequest, createCrewUser, getBankPayments, addBankPayment, sendRegistrationInvitation, bulkAddBankPayments, bulkSendRegistrationInvitations, updateBankPayment } from './controllers/adminController';
+import { 
+  getAdminOverview, handleEditRequest, createCrewUser, getBankPayments, 
+  addBankPayment, sendRegistrationInvitation, bulkAddBankPayments, 
+  bulkSendRegistrationInvitations, updateBankPayment, deleteCrewUser, deleteBankPayment 
+} from './controllers/adminController';
 import { getAnalyticsData } from './controllers/analyticsController';
 import { initDb } from './services/db';
 
@@ -125,6 +129,8 @@ app.post('/api/admin/bank-payments/bulk', bulkAddBankPayments);
 app.post('/api/admin/bank-payments/invite', sendRegistrationInvitation);
 app.post('/api/admin/bank-payments/invite-bulk', bulkSendRegistrationInvitations);
 app.post('/api/admin/bank-payments/update', updateBankPayment);
+app.delete('/api/admin/users/:userId', deleteCrewUser);
+app.delete('/api/admin/bank-payments/:paymentId', deleteBankPayment);
 
 // Officials Analytics Routes
 app.get('/api/analytics', getAnalyticsData);
