@@ -20,7 +20,7 @@ export const Footer: React.FC = () => {
               </div>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Official Inter Pre-University Sports and Cultural Fest organized by Christ University, Main Campus, Hosur Road, Bengaluru.
+              Official Inter Pre-University Sports and Cultural Fest organized by Christ University, Kengeri Campus, Mysore Road, Bengaluru.
             </p>
             <div className="flex items-center space-x-2 text-xs text-christ-gold font-semibold pt-2">
               <Shield className="w-4 h-4" />
@@ -59,7 +59,7 @@ export const Footer: React.FC = () => {
             <div className="space-y-3 text-xs text-slate-300">
               <div className="flex items-start space-x-2.5">
                 <MapPin className="w-4 h-4 text-christ-gold shrink-0 mt-0.5" />
-                <span>Christ University, Hosur Road, Bhavani Nagar, S.G. Palya, Bengaluru, Karnataka 560029</span>
+                <span>Christ University, Kanmanike, Kumbalgodu, Mysore Road, Bangalore, Karnataka - 560074, India.</span>
               </div>
               <div className="flex items-center space-x-2.5">
                 <Phone className="w-4 h-4 text-christ-gold shrink-0" />

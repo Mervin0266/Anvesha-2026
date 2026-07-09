@@ -184,7 +184,7 @@ export const Home: React.FC = () => {
                     <span className="text-xs text-slate-300">July 04 - 05, 2026</span>
                   </div>
                   <h3 className="text-2xl font-bold font-serif mb-2 text-white">ANVESHA 2026</h3>
-                  <p className="text-xs text-christ-gold mb-6 font-medium">Christ University Main Campus, Bengaluru</p>
+                  <p className="text-xs text-christ-gold mb-6 font-medium">Christ University Kengeri Campus, Bengaluru</p>
 
                   <div className="space-y-3 pt-4 border-t border-white/10 text-xs">
                     <div className="flex items-center space-x-2">
@@ -388,8 +388,7 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Fest Gallery Section */}
-      <FestGallery />
+
 
       {/* 6. Rules Section */}
       <section id="rules" className="py-20 bg-slate-50 border-b border-slate-200/80">
@@ -451,8 +450,8 @@ export const Home: React.FC = () => {
                 <div className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-slate-200">
                   <MapPin className="w-5 h-5 text-christ-navy shrink-0 mt-0.5" />
                   <div>
-                    <strong className="block text-slate-900 font-serif mb-1">Christ University Main Campus</strong>
-                    <span>Hosur Road, Bhavani Nagar, S.G. Palya, Bengaluru, Karnataka 560029</span>
+                    <strong className="block text-slate-900 font-serif mb-1">Christ University Kengeri Campus</strong>
+                    <span>Kanmanike, Kumbalgodu, Mysore Road, Bangalore, Karnataka - 560074, India.</span>
                   </div>
                 </div>
 
@@ -479,10 +478,10 @@ export const Home: React.FC = () => {
               <div className="w-full h-80 rounded-xl bg-slate-200 relative overflow-hidden flex items-center justify-center border border-slate-300">
                 <div className="text-center p-6 bg-white/90 backdrop-blur-md rounded-xl shadow-md max-w-md">
                   <MapPin className="w-8 h-8 text-christ-navy mx-auto mb-2" />
-                  <h4 className="font-bold text-christ-navy font-serif text-sm">Christ University Main Campus Map</h4>
-                  <p className="text-xs text-slate-500 mt-1">Hosur Road, Near Dairy Circle, Bengaluru</p>
+                  <h4 className="font-bold text-christ-navy font-serif text-sm">Christ University Kengeri Campus Map</h4>
+                  <p className="text-xs text-slate-500 mt-1">Kanmanike, Kumbalgodu, Mysore Road, Bangalore - 560074</p>
                   <a
-                    href="https://maps.google.com/?q=Christ+University+Hosur+Road+Bengaluru"
+                    href="https://maps.google.com/?q=Christ+University+Kengeri+Campus+Bangalore"
                     target="_blank"
                     rel="noreferrer"
                     className="inline-block mt-3 px-4 py-1.5 bg-christ-navy text-white text-xs font-bold rounded-lg hover:bg-christ-darkNavy"
