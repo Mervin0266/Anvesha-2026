@@ -94,7 +94,14 @@ export const Home: React.FC = () => {
             {/* Right Illustration / Poster Card */}
             <div className="lg:col-span-5">
               <div className="bg-white p-4 rounded-2xl shadow-christ-card border border-slate-200/80 relative">
-                <div className="bg-christ-navy rounded-xl p-8 text-white relative overflow-hidden">
+                <div 
+                  className="rounded-xl p-8 text-white relative overflow-hidden bg-christ-navy"
+                  style={{
+                    backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.9)), url('/images/hero-banner.jpg')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                >
                   <div className="absolute -right-6 -bottom-6 opacity-10 font-serif text-9xl font-bold">CU</div>
                   <div className="flex justify-between items-start mb-6">
                     <span className="bg-christ-gold text-christ-navy text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Official Fest Banner</span>
@@ -290,6 +297,69 @@ export const Home: React.FC = () => {
             ))}
           </div>
 
+        </div>
+      </section>
+
+      {/* Fest Gallery Section */}
+      <section id="gallery" className="py-20 bg-slate-50 border-b border-slate-200/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center space-y-3 mb-16">
+            <span className="text-xs font-bold text-christ-gold uppercase tracking-wider bg-christ-navy/5 px-3 py-1 rounded-full border border-christ-navy/10">Highlights</span>
+            <h2 className="text-3xl font-bold text-christ-navy font-serif">ANVESHA Fest Gallery</h2>
+            <p className="text-slate-600 text-xs leading-relaxed">Catch a glimpse of the fierce athletic battles, stage performances, and victory celebrations.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="group relative overflow-hidden rounded-xl shadow-sm border border-slate-200 bg-white">
+               <div className="aspect-square overflow-hidden bg-slate-100">
+                 <img src="/images/fest-sports1.png" alt="Sports Tournament" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+               </div>
+               <div className="p-3">
+                 <h4 className="font-bold text-christ-navy text-xs font-serif">Football Arena</h4>
+                 <p className="text-[10px] text-slate-500">Intense inter-PU battles</p>
+               </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-xl shadow-sm border border-slate-200 bg-white">
+               <div className="aspect-square overflow-hidden bg-slate-100">
+                 <img src="/images/fest-sports2.png" alt="Basketball Tournament" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+               </div>
+               <div className="p-3">
+                 <h4 className="font-bold text-christ-navy text-xs font-serif">Basketball Courts</h4>
+                 <p className="text-[10px] text-slate-500">Showcasing elite teamwork</p>
+               </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-xl shadow-sm border border-slate-200 bg-white">
+               <div className="aspect-square overflow-hidden bg-slate-100">
+                 <img src="/images/fest-cultural1.png" alt="Dance Competition" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+               </div>
+               <div className="p-3">
+                 <h4 className="font-bold text-christ-navy text-xs font-serif">Cultural Showcase</h4>
+                 <p className="text-[10px] text-slate-500">Vibrant stage performances</p>
+               </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-xl shadow-sm border border-slate-200 bg-white">
+               <div className="aspect-square overflow-hidden bg-slate-100">
+                 <img src="/images/fest-cultural2.png" alt="Stage Performance" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+               </div>
+               <div className="p-3">
+                 <h4 className="font-bold text-christ-navy text-xs font-serif">Theater & Music</h4>
+                 <p className="text-[10px] text-slate-500">Expressing artistic talent</p>
+               </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-xl shadow-sm border border-slate-200 bg-white">
+               <div className="aspect-square overflow-hidden bg-slate-100">
+                 <img src="/images/fest-championship.png" alt="Championship Trophy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+               </div>
+               <div className="p-3">
+                 <h4 className="font-bold text-christ-navy text-xs font-serif">Overall Championship</h4>
+                 <p className="text-[10px] text-slate-500">Celebrating absolute glory</p>
+               </div>
+            </div>
+          </div>
         </div>
       </section>
 
