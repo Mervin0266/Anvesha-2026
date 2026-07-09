@@ -33,7 +33,7 @@ import {
   bulkSendRegistrationInvitations, updateBankPayment, deleteCrewUser, deleteBankPayment 
 } from './controllers/adminController';
 import { getAnalyticsData } from './controllers/analyticsController';
-import { initDb } from './services/db';
+import { initDb, dbQuery } from './services/db';
 
 dotenv.config();
 
@@ -48,8 +48,8 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(uploadsDir));
 
-// File upload receiver
-app.post('/api/upload', (req, res) => {
+// File upload receiver (Stops local disk storage, uploads directly to DB)
+app.post('/api/upload', async (req, res) => {
   try {
     const { base64, fileName } = req.body;
     if (!base64 || !fileName) {
@@ -61,19 +61,43 @@ app.post('/api/upload', (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid base64 encoding.' });
     }
 
+    const mimeType = matches[1];
     const dataBuffer = Buffer.from(matches[2], 'base64');
-    const extension = path.extname(fileName) || '.png';
-    const uniqueName = `${Date.now()}-${Math.floor(Math.random() * 1000)}${extension}`;
-    const filePath = path.join(uploadsDir, uniqueName);
+    const id = `file_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
-    fs.writeFileSync(filePath, dataBuffer);
+    await dbQuery(
+      `INSERT INTO uploaded_files (id, file_name, mime_type, file_data)
+       VALUES ($1, $2, $3, $4)`,
+      [id, fileName, mimeType, dataBuffer]
+    );
 
     res.json({
       success: true,
-      url: `${req.protocol}://${req.get('host')}/uploads/${uniqueName}`
+      url: `${req.protocol}://${req.get('host')}/api/files/${id}`
     });
   } catch (error: any) {
+    console.error('File upload error:', error);
     res.status(500).json({ success: false, message: error.message || 'Upload failed.' });
+  }
+});
+
+// Binary file streamer endpoint
+app.get('/api/files/:fileId', async (req, res) => {
+  const { fileId } = req.params;
+  try {
+    const fileRes = await dbQuery('SELECT * FROM uploaded_files WHERE id = $1', [fileId]);
+    const file = fileRes.rows[0];
+
+    if (!file) {
+      return res.status(404).send('File not found.');
+    }
+
+    res.setHeader('Content-Type', file.mime_type);
+    res.setHeader('Content-Disposition', `inline; filename="${file.file_name}"`);
+    res.send(file.file_data);
+  } catch (error: any) {
+    console.error('File retrieval error:', error);
+    res.status(500).send('Failed to retrieve file.');
   }
 });
 

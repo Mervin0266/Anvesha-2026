@@ -45637,6 +45637,15 @@ var initDb = async () => {
   console.log('Initializing Database Schema inside "AnveshaDB"...');
   try {
     await dbQuery(`
+      CREATE TABLE IF NOT EXISTS uploaded_files (
+        id VARCHAR(100) PRIMARY KEY,
+        file_name VARCHAR(255) NOT NULL,
+        mime_type VARCHAR(100) NOT NULL,
+        file_data BYTEA NOT NULL,
+        uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    await dbQuery(`
       CREATE TABLE IF NOT EXISTS events (
         id VARCHAR(100) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -48144,7 +48153,7 @@ var PORT = process.env.PORT || 5e3;
 app.use((0, import_cors.default)());
 app.use(import_express.default.json({ limit: "10mb" }));
 app.use("/uploads", import_express.default.static(uploadsDir));
-app.post("/api/upload", (req, res) => {
+app.post("/api/upload", async (req, res) => {
   try {
     const { base64, fileName } = req.body;
     if (!base64 || !fileName) {
@@ -48154,17 +48163,37 @@ app.post("/api/upload", (req, res) => {
     if (!matches || matches.length !== 3) {
       return res.status(400).json({ success: false, message: "Invalid base64 encoding." });
     }
+    const mimeType = matches[1];
     const dataBuffer = Buffer.from(matches[2], "base64");
-    const extension = import_path.default.extname(fileName) || ".png";
-    const uniqueName = `${Date.now()}-${Math.floor(Math.random() * 1e3)}${extension}`;
-    const filePath = import_path.default.join(uploadsDir, uniqueName);
-    import_fs.default.writeFileSync(filePath, dataBuffer);
+    const id = `file_${Date.now()}_${Math.floor(Math.random() * 1e3)}`;
+    await dbQuery(
+      `INSERT INTO uploaded_files (id, file_name, mime_type, file_data)
+       VALUES ($1, $2, $3, $4)`,
+      [id, fileName, mimeType, dataBuffer]
+    );
     res.json({
       success: true,
-      url: `${req.protocol}://${req.get("host")}/uploads/${uniqueName}`
+      url: `${req.protocol}://${req.get("host")}/api/files/${id}`
     });
   } catch (error) {
+    console.error("File upload error:", error);
     res.status(500).json({ success: false, message: error.message || "Upload failed." });
+  }
+});
+app.get("/api/files/:fileId", async (req, res) => {
+  const { fileId } = req.params;
+  try {
+    const fileRes = await dbQuery("SELECT * FROM uploaded_files WHERE id = $1", [fileId]);
+    const file = fileRes.rows[0];
+    if (!file) {
+      return res.status(404).send("File not found.");
+    }
+    res.setHeader("Content-Type", file.mime_type);
+    res.setHeader("Content-Disposition", `inline; filename="${file.file_name}"`);
+    res.send(file.file_data);
+  } catch (error) {
+    console.error("File retrieval error:", error);
+    res.status(500).send("Failed to retrieve file.");
   }
 });
 app.get("/api/health", (req, res) => {

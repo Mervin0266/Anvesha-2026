@@ -99,6 +99,17 @@ export const initDb = async (): Promise<void> => {
 
   console.log('Initializing Database Schema inside "AnveshaDB"...');
   try {
+    // 0. Create files table
+    await dbQuery(`
+      CREATE TABLE IF NOT EXISTS uploaded_files (
+        id VARCHAR(100) PRIMARY KEY,
+        file_name VARCHAR(255) NOT NULL,
+        mime_type VARCHAR(100) NOT NULL,
+        file_data BYTEA NOT NULL,
+        uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     // 2. Create tables in proper dependency order
     await dbQuery(`
       CREATE TABLE IF NOT EXISTS events (
