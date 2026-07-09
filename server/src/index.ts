@@ -63,7 +63,8 @@ app.post('/api/upload', async (req, res) => {
 
     const mimeType = matches[1];
     const dataBuffer = Buffer.from(matches[2], 'base64');
-    const id = `file_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const extension = path.extname(fileName) || '.png';
+    const id = `file_${Date.now()}_${Math.floor(Math.random() * 1000)}${extension}`;
 
     await dbQuery(
       `INSERT INTO uploaded_files (id, file_name, mime_type, file_data)

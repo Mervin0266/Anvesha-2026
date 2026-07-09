@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { 
   Building2, UserCheck, Users, Trophy, CreditCard, CheckCircle2, 
   ArrowLeft, ArrowRight, Plus, Trash2, AlertCircle, ShieldCheck, Download,
-  Upload, Loader2, FileSpreadsheet
+  Upload, Loader2, FileSpreadsheet, FileText
 } from 'lucide-react';
 import { Navbar } from '../components/common/Navbar';
 import { Footer } from '../components/common/Footer';
@@ -81,7 +81,11 @@ const FileUploadField: React.FC<FileUploadFieldProps> = ({ label, value, onChang
         <div className="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
           <div className="flex items-center space-x-2.5 overflow-hidden">
             <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-emerald-100 bg-white flex items-center justify-center">
-              <img src={value} alt="Preview" className="w-full h-full object-cover" />
+              {value.toLowerCase().endsWith('.pdf') ? (
+                <FileText className="w-5 h-5 text-rose-500" />
+              ) : (
+                <img src={value} alt="Preview" className="w-full h-full object-cover" />
+              )}
             </div>
             <div className="overflow-hidden">
               <span className="font-bold text-emerald-800 truncate block">Document Uploaded Successfully</span>
@@ -104,7 +108,7 @@ const FileUploadField: React.FC<FileUploadFieldProps> = ({ label, value, onChang
         }`}>
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,application/pdf"
             onChange={handleFileChange}
             id={`file-input-${label.replace(/\s+/g, '-')}`}
             className="hidden"
@@ -121,8 +125,8 @@ const FileUploadField: React.FC<FileUploadFieldProps> = ({ label, value, onChang
               className="flex flex-col items-center cursor-pointer space-y-1 w-full text-center"
             >
               <Upload className="w-6 h-6 text-slate-400" />
-              <span className="font-bold text-christ-navy hover:underline">Click to Upload Document Photo</span>
-              <span className="text-[10px] text-slate-400">PNG, JPG or JPEG up to 5MB</span>
+              <span className="font-bold text-christ-navy hover:underline">Click to Upload Document or PDF</span>
+              <span className="text-[10px] text-slate-400">PNG, JPG, JPEG or PDF up to 5MB</span>
             </label>
           )}
         </div>
