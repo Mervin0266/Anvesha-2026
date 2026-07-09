@@ -71,7 +71,24 @@ const FestGallery: React.FC = () => {
 export const Home: React.FC = () => {
   const { events } = useEvents();
   const [activeTab, setActiveTab] = useState<EventCategory>('SPORTS');
-  const filteredEvents = events.filter(e => e.category === activeTab);
+  
+  // Group sports to avoid duplicate cards for Boys and Girls on the Home page
+  const displayEvents = React.useMemo(() => {
+    const filtered = events.filter(e => e.category === activeTab);
+    if (activeTab === 'CULTURAL') return filtered;
+    
+    const groupedMap = new Map<string, typeof events[0]>();
+    filtered.forEach(e => {
+      const baseName = e.name.replace(/\s*\((Boys|Girls)\)/i, '').trim();
+      if (!groupedMap.has(baseName)) {
+        groupedMap.set(baseName, {
+          ...e,
+          name: `${baseName} (Boys & Girls)`
+        });
+      }
+    });
+    return Array.from(groupedMap.values());
+  }, [events, activeTab]);
 
   const timelineSteps = [
     { date: 'June 01, 2026', title: 'Online Registration Opens', desc: 'PU Colleges initiate registration on the official ANVESHA portal.' },
@@ -275,7 +292,7 @@ export const Home: React.FC = () => {
 
           {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((evt) => (
+            {displayEvents.map((evt) => (
               <div key={evt.id} className="bg-white rounded-xl border border-slate-200 flex flex-col justify-between hover:shadow-christ-card transition-all group overflow-hidden">
                 <div>
                   {/* Image Header */}
