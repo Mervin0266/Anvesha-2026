@@ -9,6 +9,61 @@ import { Footer } from '../components/common/Footer';
 import { useEvents } from '../contexts/EventsContext';
 import { EventCategory } from '../types';
 
+const getEventImage = (id: string): string => {
+  const normalized = id.toLowerCase();
+  if (normalized.includes('football')) return '/images/events/football.jpg';
+  if (normalized.includes('volleyball')) return '/images/events/volleyball.jpg';
+  if (normalized.includes('basketball')) return '/images/events/basketball.jpg';
+  if (normalized.includes('tug_of_war') || normalized.includes('tugofwar')) return '/images/events/tug_of_war.jpg';
+  if (normalized.includes('dance')) return '/images/events/dance.jpg';
+  if (normalized.includes('music')) return '/images/events/music.jpg';
+  if (normalized.includes('debate')) return '/images/events/debate.jpg';
+  if (normalized.includes('open_mic') || normalized.includes('openmic')) return '/images/events/open_mic.jpg';
+  if (normalized.includes('treasure_hunt')) return '/images/events/treasure_hunt.jpg';
+  return '/images/events/default.jpg';
+};
+
+const FestGallery: React.FC = () => {
+  const galleryImages = [
+    { src: '/images/gallery/fest-sports1.png', title: 'Football Arena', desc: 'Fierce competition' },
+    { src: '/images/gallery/fest-sports2.png', title: 'Basketball Courts', desc: 'Team coordination' },
+    { src: '/images/gallery/fest-cultural1.png', title: 'Dance Stage', desc: 'Stunning choreography' },
+    { src: '/images/gallery/fest-cultural2.png', title: 'Musical Performance', desc: 'Vocal excellence' },
+    { src: '/images/gallery/fest-championship.png', title: 'Overall Victory', desc: 'Trophy ceremony' }
+  ];
+
+  return (
+    <section id="gallery" className="py-20 bg-slate-50 border-b border-slate-200/80">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto text-center space-y-3 mb-16">
+          <span className="text-xs font-bold text-christ-gold uppercase tracking-wider bg-christ-navy/5 px-3 py-1 rounded-full border border-christ-navy/10">Highlights</span>
+          <h2 className="text-3xl font-bold text-christ-navy font-serif">Glimpses of ANVESHA</h2>
+          <p className="text-slate-600 text-xs leading-relaxed">
+            Relive the action, emotions, and crowning moments of the PU Fest.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {galleryImages.map((img, idx) => (
+            <div key={idx} className="group relative h-64 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 bg-slate-200 border border-slate-200/60">
+              <img 
+                src={img.src} 
+                alt={img.title} 
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                loading="lazy" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/30 to-transparent opacity-85 group-hover:opacity-95 transition-opacity flex flex-col justify-end p-5 text-white">
+                <h4 className="font-bold text-sm font-serif text-white">{img.title}</h4>
+                <p className="text-[10px] text-slate-300">{img.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export const Home: React.FC = () => {
   const { events } = useEvents();
   const [activeTab, setActiveTab] = useState<EventCategory>('SPORTS');
@@ -217,39 +272,51 @@ export const Home: React.FC = () => {
           {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((evt) => (
-              <div key={evt.id} className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between hover:shadow-christ-card transition-all group">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-christ-gold/20 text-christ-navy border border-christ-gold/30">
-                      {evt.type} EVENT
-                    </span>
-                    <span className="text-xs font-extrabold text-christ-navy font-serif">
-                      ₹{evt.registrationFee} / Team
-                    </span>
+              <div key={evt.id} className="bg-white rounded-xl border border-slate-200 flex flex-col justify-between hover:shadow-christ-card transition-all group overflow-hidden">
+                <div>
+                  {/* Image Header */}
+                  <div className="h-48 w-full overflow-hidden relative bg-slate-100">
+                    <img 
+                      src={getEventImage(evt.id)} 
+                      alt={evt.name} 
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    {/* Badge overlays on top of the image corner */}
+                    <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-christ-navy text-white shadow-sm">
+                        {evt.type} EVENT
+                      </span>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-christ-gold text-christ-navy shadow-sm">
+                        ₹{evt.registrationFee}
+                      </span>
+                    </div>
                   </div>
 
-                  <h3 className="text-xl font-bold text-slate-900 font-serif group-hover:text-christ-navy transition-colors">
-                    {evt.name}
-                  </h3>
+                  <div className="p-6 space-y-4">
+                    <h3 className="text-lg font-bold text-slate-900 font-serif group-hover:text-christ-navy transition-colors">
+                      {evt.name}
+                    </h3>
 
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    {evt.description}
-                  </p>
+                    <p className="text-xs text-slate-600 leading-relaxed min-h-[40px]">
+                      {evt.description}
+                    </p>
 
-                  <div className="space-y-2 pt-2 border-t border-slate-100 text-xs text-slate-700">
-                    <p className="font-bold text-slate-900">Key Guidelines:</p>
-                    <ul className="space-y-1">
-                      {evt.rules.map((rule, idx) => (
-                        <li key={idx} className="flex items-start space-x-1.5 text-[11px] text-slate-600">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-christ-gold shrink-0 mt-0.5" />
-                          <span>{rule}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="space-y-2 pt-2 border-t border-slate-100 text-xs text-slate-700">
+                      <p className="font-bold text-slate-900">Key Guidelines:</p>
+                      <ul className="space-y-1">
+                        {evt.rules.map((rule, idx) => (
+                          <li key={idx} className="flex items-start space-x-1.5 text-[11px] text-slate-600">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-christ-gold shrink-0 mt-0.5" />
+                            <span>{rule}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
 
-                <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
+                <div className="p-6 pt-0 flex items-center justify-between border-t border-slate-100 mt-4">
                   <span className="text-[11px] font-medium text-slate-500">
                     Team Size: <strong className="text-slate-800">{evt.minTeamSize}-{evt.maxTeamSize} Members</strong>
                   </span>
@@ -301,67 +368,7 @@ export const Home: React.FC = () => {
       </section>
 
       {/* Fest Gallery Section */}
-      <section id="gallery" className="py-20 bg-slate-50 border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center space-y-3 mb-16">
-            <span className="text-xs font-bold text-christ-gold uppercase tracking-wider bg-christ-navy/5 px-3 py-1 rounded-full border border-christ-navy/10">Highlights</span>
-            <h2 className="text-3xl font-bold text-christ-navy font-serif">ANVESHA Fest Gallery</h2>
-            <p className="text-slate-600 text-xs leading-relaxed">Catch a glimpse of the fierce athletic battles, stage performances, and victory celebrations.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="group relative overflow-hidden rounded-xl shadow-sm border border-slate-200 bg-white">
-               <div className="aspect-square overflow-hidden bg-slate-100">
-                 <img src="/images/fest-sports1.png" alt="Sports Tournament" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-               </div>
-               <div className="p-3">
-                 <h4 className="font-bold text-christ-navy text-xs font-serif">Football Arena</h4>
-                 <p className="text-[10px] text-slate-500">Intense inter-PU battles</p>
-               </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-xl shadow-sm border border-slate-200 bg-white">
-               <div className="aspect-square overflow-hidden bg-slate-100">
-                 <img src="/images/fest-sports2.png" alt="Basketball Tournament" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-               </div>
-               <div className="p-3">
-                 <h4 className="font-bold text-christ-navy text-xs font-serif">Basketball Courts</h4>
-                 <p className="text-[10px] text-slate-500">Showcasing elite teamwork</p>
-               </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-xl shadow-sm border border-slate-200 bg-white">
-               <div className="aspect-square overflow-hidden bg-slate-100">
-                 <img src="/images/fest-cultural1.png" alt="Dance Competition" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-               </div>
-               <div className="p-3">
-                 <h4 className="font-bold text-christ-navy text-xs font-serif">Cultural Showcase</h4>
-                 <p className="text-[10px] text-slate-500">Vibrant stage performances</p>
-               </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-xl shadow-sm border border-slate-200 bg-white">
-               <div className="aspect-square overflow-hidden bg-slate-100">
-                 <img src="/images/fest-cultural2.png" alt="Stage Performance" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-               </div>
-               <div className="p-3">
-                 <h4 className="font-bold text-christ-navy text-xs font-serif">Theater & Music</h4>
-                 <p className="text-[10px] text-slate-500">Expressing artistic talent</p>
-               </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-xl shadow-sm border border-slate-200 bg-white">
-               <div className="aspect-square overflow-hidden bg-slate-100">
-                 <img src="/images/fest-championship.png" alt="Championship Trophy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-               </div>
-               <div className="p-3">
-                 <h4 className="font-bold text-christ-navy text-xs font-serif">Overall Championship</h4>
-                 <p className="text-[10px] text-slate-500">Celebrating absolute glory</p>
-               </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <FestGallery />
 
       {/* 6. Rules Section */}
       <section id="rules" className="py-20 bg-slate-50 border-b border-slate-200/80">
