@@ -173,7 +173,7 @@ export const Home: React.FC = () => {
                 <div 
                   className="rounded-xl p-8 text-white relative overflow-hidden bg-christ-navy"
                   style={{
-                    backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.9)), url('/images/hero-banner.jpg')`,
+                    backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.9)), url('public\images\fest-banner.jpeg')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                   }}
