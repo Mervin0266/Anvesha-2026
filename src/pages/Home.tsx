@@ -11,10 +11,14 @@ import { EventCategory } from '../types';
 
 const getEventImage = (id: string): string => {
   const normalized = id.toLowerCase();
-  if (normalized.includes('football')) return '/images/events/football.jpg';
-  if (normalized.includes('volleyball')) return '/images/events/volleyball.jpg';
-  if (normalized.includes('basketball')) return '/images/events/basketball.jpg';
-  if (normalized.includes('tug_of_war') || normalized.includes('tugofwar')) return '/images/events/tug_of_war.jpg';
+  if (normalized.includes('football_boys')) return '/images/events/football_boys.jpg';
+  if (normalized.includes('football_girls')) return '/images/events/football_girls.jpg';
+  if (normalized.includes('volleyball_boys')) return '/images/events/volleyball_boys.jpg';
+  if (normalized.includes('volleyball_girls')) return '/images/events/volleyball_girls.jpg';
+  if (normalized.includes('basketball_boys')) return '/images/events/basketball_boys.jpg';
+  if (normalized.includes('basketball_girls')) return '/images/events/basketball_girls.jpg';
+  if (normalized.includes('tug_of_war_boys') || normalized.includes('tugofwar_boys')) return '/images/events/tug_of_war_boys.jpg';
+  if (normalized.includes('tug_of_war_girls') || normalized.includes('tugofwar_girls')) return '/images/events/tug_of_war_girls.jpg';
   if (normalized.includes('dance')) return '/images/events/dance.jpg';
   if (normalized.includes('music')) return '/images/events/music.jpg';
   if (normalized.includes('debate')) return '/images/events/debate.jpg';
