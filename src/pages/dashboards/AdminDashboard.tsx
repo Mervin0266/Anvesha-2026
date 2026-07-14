@@ -1701,9 +1701,9 @@ export const AdminDashboard: React.FC = () => {
                           .map((m) => (
                             <tr key={m.id} className="hover:bg-slate-50/50">
                               <td className="px-4 py-3.5 font-bold text-slate-800">{m.institutionName}</td>
-                              <td className="px-4 py-3.5 font-medium">{m.pocName || <span className="text-slate-400 italic">Leave Blank</span>}</td>
-                              <td className="px-4 py-3.5">{m.pocNumber || <span className="text-slate-400 italic">Leave Blank</span>}</td>
-                              <td className="px-4 py-3.5">{m.pocEmailId || <span className="text-slate-400 italic">Leave Blank</span>}</td>
+                              <td className="px-4 py-3.5 font-medium">{m.pocName || <span className="text-slate-400 italic">NIL</span>}</td>
+                              <td className="px-4 py-3.5">{m.pocNumber || <span className="text-slate-400 italic">NIL</span>}</td>
+                              <td className="px-4 py-3.5">{m.pocEmailId || <span className="text-slate-400 italic">NIL</span>}</td>
                               <td className="px-4 py-3.5 text-center">
                                 <button
                                   type="button"
