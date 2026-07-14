@@ -7,7 +7,7 @@ import { Register } from './pages/Register';
 import { Login } from './pages/Login';
 import { VerificationDashboard } from './pages/dashboards/VerificationDashboard';
 import { HospitalityDashboard } from './pages/dashboards/HospitalityDashboard';
-import { EventFacultyDashboard } from './pages/dashboards/EventFacultyDashboard';
+import { EventCoordinatorDashboard } from './pages/dashboards/EventCoordinatorDashboard';
 import { CertificateDashboard } from './pages/dashboards/CertificateDashboard';
 import { AdminDashboard } from './pages/dashboards/AdminDashboard';
 import { AnalyticsDashboard } from './pages/dashboards/AnalyticsDashboard';
@@ -48,10 +48,18 @@ export const App: React.FC = () => {
               }
             />
             <Route
-              path="/dashboard/event/:eventId"
+              path="/dashboard/sports"
               element={
                 <ProtectedRoute>
-                  <EventFacultyDashboard />
+                  <EventCoordinatorDashboard category="SPORTS" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/culturals"
+              element={
+                <ProtectedRoute>
+                  <EventCoordinatorDashboard category="CULTURAL" />
                 </ProtectedRoute>
               }
             />

@@ -557,3 +557,132 @@ export const deleteBankPayment = async (req: Request, res: Response): Promise<vo
     res.status(500).json({ success: false, message: 'Failed to delete transaction record.' });
   }
 };
+
+export const bulkAddInstitutionMaster = async (req: Request, res: Response): Promise<void> => {
+  const { institutions } = req.body;
+
+  if (!Array.isArray(institutions)) {
+    res.status(400).json({ success: false, message: 'Invalid payload. institutions must be an array.' });
+    return;
+  }
+
+  try {
+    const results = await withTransaction(async (client) => {
+      let addedCount = 0;
+      let updatedCount = 0;
+
+      for (const item of institutions) {
+        const { institutionName, pocName, pocNumber, pocEmailId } = item;
+
+        if (!institutionName || !institutionName.trim()) {
+          continue;
+        }
+
+        const nameTrimmed = institutionName.trim();
+        const checkRes = await client.query(
+          'SELECT id FROM institution_master WHERE LOWER(institution_name) = LOWER($1)',
+          [nameTrimmed]
+        );
+
+        if (checkRes.rows.length > 0) {
+          await client.query(
+            `UPDATE institution_master 
+             SET poc_name = $1, poc_number = $2, poc_email_id = $3
+             WHERE LOWER(institution_name) = LOWER($4)`,
+            [
+              pocName && pocName.trim() ? pocName.trim() : null,
+              pocNumber && pocNumber.trim() ? pocNumber.trim() : null,
+              pocEmailId && pocEmailId.trim() ? pocEmailId.trim() : null,
+              nameTrimmed
+            ]
+          );
+          updatedCount++;
+        } else {
+          const id = `inst_m_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+          await client.query(
+            `INSERT INTO institution_master (id, institution_name, poc_name, poc_number, poc_email_id)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [
+              id,
+              nameTrimmed,
+              pocName && pocName.trim() ? pocName.trim() : null,
+              pocNumber && pocNumber.trim() ? pocNumber.trim() : null,
+              pocEmailId && pocEmailId.trim() ? pocEmailId.trim() : null
+            ]
+          );
+          addedCount++;
+        }
+      }
+
+      await client.query(
+        `INSERT INTO audit_logs (id, timestamp, user_name, role, action, details)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          `log_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          new Date().toISOString(),
+          'Chief Admin',
+          'admin',
+          'BULK_ADD_INSTITUTION_MASTER',
+          `Bulk uploaded master institutions: ${addedCount} added, ${updatedCount} updated.`
+        ]
+      );
+
+      return { addedCount, updatedCount };
+    });
+
+    res.json({
+      success: true,
+      message: `Bulk import completed successfully.`,
+      addedCount: results.addedCount,
+      updatedCount: results.updatedCount
+    });
+  } catch (error: any) {
+    console.error('bulkAddInstitutionMaster error:', error);
+    res.status(500).json({ success: false, message: 'Failed to bulk import master institutions.' });
+  }
+};
+
+export const getInstitutionMastersList = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const listRes = await dbQuery('SELECT * FROM institution_master ORDER BY institution_name ASC');
+    const mapped = listRes.rows.map((m: any) => ({
+      id: m.id,
+      institutionName: m.institution_name,
+      pocName: m.poc_name || '',
+      pocNumber: m.poc_number || '',
+      pocEmailId: m.poc_email_id || ''
+    }));
+
+    res.json({ success: true, institutions: mapped });
+  } catch (error: any) {
+    console.error('getInstitutionMastersList error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch master institutions list.' });
+  }
+};
+
+export const deleteInstitutionMaster = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+
+  try {
+    const checkRes = await dbQuery('SELECT * FROM institution_master WHERE id = $1', [id]);
+    const inst = checkRes.rows[0];
+
+    if (!inst) {
+      res.status(404).json({ success: false, message: 'Master record not found.' });
+      return;
+    }
+
+    await dbQuery('DELETE FROM institution_master WHERE id = $1', [id]);
+    await addAuditLog(
+      'Chief Admin',
+      'admin',
+      'DELETE_INSTITUTION_MASTER',
+      `Deleted master institution: ${inst.institution_name}`
+    );
+
+    res.json({ success: true, message: 'Master record deleted successfully.' });
+  } catch (error: any) {
+    console.error('deleteInstitutionMaster error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete master record.' });
+  }
+};

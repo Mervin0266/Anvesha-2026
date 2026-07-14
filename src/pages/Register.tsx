@@ -197,10 +197,10 @@ export const Register: React.FC = () => {
                 }
 
                 setPoc({
-                  name: '',
-                  designation: '',
-                  phone: '',
-                  email: '',
+                  name: matchingMaster ? matchingMaster.pocName || '' : '',
+                  designation: matchingMaster ? 'Sports Director / Coordinator' : '',
+                  phone: matchingMaster ? matchingMaster.pocNumber || '' : '',
+                  email: matchingMaster ? matchingMaster.pocEmailId || '' : '',
                   govtIdProof: ''
                 });
 
@@ -276,10 +276,10 @@ export const Register: React.FC = () => {
                 setSelectedMasterId(matchingMaster ? (matchingMaster.id || matchingMaster.name) : 'OTHER');
                 
                 setPoc({
-                  name: '',
+                  name: matchingMaster ? matchingMaster.pocName || '' : '',
                   designation: 'Sports Director / Coordinator',
-                  phone: '',
-                  email: '',
+                  phone: matchingMaster ? matchingMaster.pocNumber || '' : '',
+                  email: matchingMaster ? matchingMaster.pocEmailId || '' : '',
                   govtIdProof: ''
                 });
 
@@ -400,10 +400,10 @@ export const Register: React.FC = () => {
       });
 
       setPoc({
-        name: '',
+        name: f.pocName || '',
         designation: 'Sports Director / Coordinator',
-        phone: '',
-        email: '',
+        phone: f.pocNumber || '',
+        email: f.pocEmailId || '',
         govtIdProof: ''
       });
 
@@ -1083,64 +1083,105 @@ export const Register: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans" style={{ background: 'linear-gradient(160deg, #f8fafc 0%, #eef2f7 100%)' }}>
       <Navbar />
 
-      <main className="pt-28 pb-20 flex-1">
+      <main className="pt-28 pb-24 flex-1">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* Header Banner */}
-          <div className="text-center mb-8 space-y-2">
-            <span className="text-xs font-bold text-christ-gold uppercase tracking-wider bg-christ-navy/5 px-3 py-1 rounded-full border border-christ-navy/10">Official Registration Form</span>
-            <h1 className="text-3xl font-extrabold text-christ-navy font-serif">PU Institution Registration Portal</h1>
-            <p className="text-xs text-slate-600">ANVESHA 2026 • Inter PU Sports & Cultural Fest • Christ University</p>
+          {/* ── Hero Header ── */}
+          <div className="relative text-center mb-10 py-8 px-6 rounded-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-christ-navy to-christ-darkNavy" />
+            <div
+              className="absolute inset-0 opacity-[0.04]"
+              style={{ backgroundImage: 'repeating-linear-gradient(45deg, #C5A059 0px, #C5A059 1px, transparent 1px, transparent 28px)' }}
+            />
+            <div className="relative z-10 space-y-3">
+              <span className="inline-flex items-center space-x-2 text-[11px] font-bold text-christ-gold uppercase tracking-widest bg-christ-gold/10 border border-christ-gold/25 px-4 py-1.5 rounded-full">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Official Registration Form</span>
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white font-serif tracking-tight">
+                PU Institution Registration Portal
+              </h1>
+              <p className="text-sm text-slate-400">
+                ANVESHA 2026 &nbsp;•&nbsp; Inter PU Sports &amp; Cultural Fest &nbsp;•&nbsp; Christ University
+              </p>
+            </div>
           </div>
 
-          {/* Stepper Progress Bar */}
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-8 overflow-x-auto">
-            <div className="flex items-center justify-between min-w-[640px]">
-              {steps.map((s) => {
+          {/* ── Stepper ── */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-christ-card mb-8 overflow-x-auto">
+            <div className="flex items-stretch min-w-[640px]">
+              {steps.map((s, idx) => {
                 const Icon = s.icon;
                 const isCompleted = isStepFullyCompleted(s.num);
                 const isCurrent = currentStep === s.num;
                 return (
-                  <div key={s.num} className="flex items-center">
-                    <div className={`flex flex-col items-center cursor-pointer ${isCurrent ? 'text-christ-navy' : isCompleted ? 'text-emerald-600' : 'text-slate-400'}`} onClick={() => setCurrentStep(s.num)}>
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs border-2 transition-all ${
-                        isCurrent ? 'bg-christ-navy text-christ-gold border-christ-gold ring-4 ring-christ-gold/20' :
-                        isCompleted ? 'bg-emerald-50 text-emerald-600 border-emerald-500' :
-                        'bg-slate-100 text-slate-400 border-slate-300'
+                  <React.Fragment key={s.num}>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(s.num)}
+                      className={`flex-1 flex flex-col items-center py-4 px-3 gap-2 transition-all relative ${
+                        isCurrent
+                          ? 'bg-christ-navy text-white'
+                          : isCompleted
+                            ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100/80'
+                            : 'text-slate-400 hover:bg-slate-50'
+                      } ${idx === 0 ? 'rounded-l-2xl' : ''} ${idx === steps.length - 1 ? 'rounded-r-2xl' : ''}`}
+                    >
+                      {/* Bottom active indicator */}
+                      {isCurrent && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-christ-gold" />
+                      )}
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
+                        isCurrent
+                          ? 'bg-christ-gold border-christ-gold text-christ-navy'
+                          : isCompleted
+                            ? 'bg-emerald-100 border-emerald-400 text-emerald-700'
+                            : 'bg-slate-100 border-slate-300 text-slate-500'
                       }`}>
-                        {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : s.num}
+                        {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
                       </div>
-                      <span className="text-[11px] font-semibold mt-1 font-serif">{s.label}</span>
-                    </div>
-                    {s.num < 6 && (
-                      <div className={`h-0.5 w-10 sm:w-16 mx-2 ${isStepFullyCompleted(s.num) ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                      <span className={`text-[11px] font-bold font-serif whitespace-nowrap ${
+                        isCurrent ? 'text-white' : isCompleted ? 'text-emerald-700' : 'text-slate-500'
+                      }`}>{s.label}</span>
+                    </button>
+                    {idx < steps.length - 1 && (
+                      <div className={`w-px self-stretch my-3 ${ isStepFullyCompleted(s.num) ? 'bg-emerald-200' : 'bg-slate-200' }`} />
                     )}
-                  </div>
+                  </React.Fragment>
                 );
               })}
             </div>
           </div>
 
           {errorMsg && (
-            <div className="mb-6 p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-800 text-xs font-medium rounded-r-xl flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              <span>{errorMsg}</span>
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium rounded-xl flex items-start space-x-3 shadow-sm">
+              <div className="w-5 h-5 rounded-full bg-rose-100 border border-rose-300 flex items-center justify-center shrink-0 mt-0.5">
+                <AlertCircle className="w-3 h-3 text-rose-600" />
+              </div>
+              <span className="leading-relaxed">{errorMsg}</span>
             </div>
           )}
 
-          {/* Form Step Cards */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-christ-card p-6 sm:p-8">
+          {/* ── Form Step Cards ── */}
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-christ-card overflow-hidden">
             
             {/* STEP 1: Institution Details */}
             {currentStep === 1 && (
-              <div className="space-y-6">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-lg font-bold text-christ-navy font-serif">Step 1: Institution Master Details</h3>
-                  <p className="text-xs text-slate-500">Provide official college information as registered with Pre-University Board.</p>
+              <div>
+                {/* Step header accent strip */}
+                <div className="bg-gradient-to-r from-christ-navy to-[#003070] px-6 sm:px-8 py-5 flex items-center space-x-3">
+                  <div className="w-9 h-9 rounded-xl bg-christ-gold/20 border border-christ-gold/30 flex items-center justify-center shrink-0">
+                    <Building2 className="w-5 h-5 text-christ-gold" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white font-serif">Step 1: Institution Master Details</h3>
+                    <p className="text-[11px] text-slate-400">Provide official college information as registered with Pre-University Board.</p>
+                  </div>
                 </div>
+                <div className="space-y-6 p-6 sm:p-8">
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
                   <div className="md:col-span-2">
@@ -1248,16 +1289,23 @@ export const Register: React.FC = () => {
                     />
                   </div>
                 </div>
+                </div>
               </div>
             )}
 
             {/* STEP 2: Point of Contact Details */}
             {currentStep === 2 && (
-              <div className="space-y-6">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-lg font-bold text-christ-navy font-serif">Step 2: Point of Contact (POC)</h3>
-                  <p className="text-xs text-slate-500">Authorized staff member responsible for team coordination.</p>
+              <div>
+                <div className="bg-gradient-to-r from-[#1a3a6e] to-[#003070] px-6 sm:px-8 py-5 flex items-center space-x-3">
+                  <div className="w-9 h-9 rounded-xl bg-christ-gold/20 border border-christ-gold/30 flex items-center justify-center shrink-0">
+                    <UserCheck className="w-5 h-5 text-christ-gold" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white font-serif">Step 2: Point of Contact (POC)</h3>
+                    <p className="text-[11px] text-slate-400">Authorized staff member responsible for team coordination.</p>
+                  </div>
                 </div>
+                <div className="space-y-6 p-6 sm:p-8">
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
                   <div>
@@ -1317,25 +1365,32 @@ export const Register: React.FC = () => {
                     />
                   </div>
                 </div>
+                </div>
               </div>
             )}
 
             {/* STEP 3: Team Selection (Rule 1: Max 2 Teams per Event) */}
             {currentStep === 3 && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div>
-                    <h3 className="text-lg font-bold text-christ-navy font-serif">Step 3: Event & Team Configuration</h3>
-                    <p className="text-xs text-slate-500">Select competitions. Strictly max 2 teams per institution per event (Team A / Team B).</p>
+              <div>
+                <div className="bg-gradient-to-r from-[#0d2d5a] to-[#003070] px-6 sm:px-8 py-5 flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-9 h-9 rounded-xl bg-christ-gold/20 border border-christ-gold/30 flex items-center justify-center shrink-0">
+                      <Trophy className="w-5 h-5 text-christ-gold" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-white font-serif">Step 3: Event & Team Configuration</h3>
+                      <p className="text-[11px] text-slate-400">Select competitions. Max 2 teams per event (Team A / Team B).</p>
+                    </div>
                   </div>
                   <button
                     onClick={handleAddTeam}
-                    className="inline-flex items-center space-x-1 px-3 py-1.5 text-xs font-bold bg-christ-navy text-white rounded-lg hover:bg-christ-darkNavy"
+                    className="inline-flex items-center space-x-1.5 px-3.5 py-2 text-xs font-bold bg-christ-gold text-christ-navy rounded-lg hover:bg-christ-lightGold shrink-0"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Add Another Team</span>
+                    <span>Add Team</span>
                   </button>
                 </div>
+                <div className="p-6 sm:p-8 space-y-6">
 
                 <div className="space-y-4">
                   {teams.map((t, idx) => (
@@ -1407,18 +1462,23 @@ export const Register: React.FC = () => {
                     </div>
                   ))}
                 </div>
+                </div>
               </div>
             )}
 
             {/* STEP 4: Participant Roster (Rule 2 & Duplicate Validation) */}
             {currentStep === 4 && (
-              <div className="space-y-6">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-lg font-bold text-christ-navy font-serif">Step 4: Participant Roster & Validation</h3>
-                  <p className="text-xs text-slate-500">
-                    Rule 2 Enforcement: One participant can participate in <strong>ONLY ONE EVENT</strong>. Uniqueness checked on Govt ID & Name.
-                  </p>
+              <div>
+                <div className="bg-gradient-to-r from-[#002147] to-[#0d3d6e] px-6 sm:px-8 py-5 flex items-center space-x-3">
+                  <div className="w-9 h-9 rounded-xl bg-christ-gold/20 border border-christ-gold/30 flex items-center justify-center shrink-0">
+                    <Users className="w-5 h-5 text-christ-gold" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white font-serif">Step 4: Participant Roster & Validation</h3>
+                    <p className="text-[11px] text-slate-400">Rule 2: One participant per event only. Uniqueness checked on Govt ID & Name.</p>
+                  </div>
                 </div>
+                <div className="p-6 sm:p-8 space-y-6">
 
                 {teams.map((t, teamIdx) => {
                   const teamEvt = events.find(e => e.id === t.eventId);
@@ -1653,15 +1713,22 @@ export const Register: React.FC = () => {
                   );
                 })}
               </div>
+                </div>
             )}
 
             {/* STEP 5: Payment Details */}
             {currentStep === 5 && (
-              <div className="space-y-6">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-lg font-bold text-christ-navy font-serif">Step 5: Registration Fee & Payment Upload</h3>
-                  <p className="text-xs text-slate-500">Event-wise fee calculation. Transfer fee to Christ University account and upload transaction proof.</p>
+              <div>
+                <div className="bg-gradient-to-r from-[#002147] to-[#004080] px-6 sm:px-8 py-5 flex items-center space-x-3">
+                  <div className="w-9 h-9 rounded-xl bg-christ-gold/20 border border-christ-gold/30 flex items-center justify-center shrink-0">
+                    <CreditCard className="w-5 h-5 text-christ-gold" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white font-serif">Step 5: Registration Fee & Payment Upload</h3>
+                    <p className="text-[11px] text-slate-400">Transfer fee to Christ University account and upload your transaction proof.</p>
+                  </div>
                 </div>
+                <div className="p-6 sm:p-8 space-y-6">
 
                 <div className="p-4 bg-christ-navy/5 border border-christ-navy/15 rounded-xl flex items-center justify-between text-xs">
                   <div>
@@ -1697,12 +1764,25 @@ export const Register: React.FC = () => {
                     />
                   </div>
                 </div>
+                </div>
               </div>
             )}
 
             {/* STEP 6: Review & Final Submission / Summary */}
             {currentStep === 6 && (
-              <div className="space-y-6 text-center py-6">
+              <div>
+                {!submittedRegId && (
+                  <div className="bg-gradient-to-r from-[#002147] to-[#003060] px-6 sm:px-8 py-5 flex items-center space-x-3">
+                    <div className="w-9 h-9 rounded-xl bg-christ-gold/20 border border-christ-gold/30 flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="w-5 h-5 text-christ-gold" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-white font-serif">Step 6: Review & Submit</h3>
+                      <p className="text-[11px] text-slate-400">Verify all information before submitting your final registration.</p>
+                    </div>
+                  </div>
+                )}
+                <div className="space-y-6 text-center py-6 px-6 sm:px-8">
                 {submittedRegId ? (
                   <div className="space-y-4 max-w-xl mx-auto">
                     <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-md">
@@ -1788,41 +1868,59 @@ export const Register: React.FC = () => {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
             )}
 
             {/* Stepper Footer Buttons */}
             {(currentStep < 6 || (currentStep === 6 && !submittedRegId)) && (
-              <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between">
+              <div className="px-6 sm:px-8 py-5 mt-0 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between rounded-b-2xl">
                 <button
                   type="button"
                   disabled={currentStep === 1}
                   onClick={() => setCurrentStep(currentStep - 1)}
-                  className={`inline-flex items-center space-x-1.5 px-4 py-2 text-xs font-semibold rounded-lg border ${
-                    currentStep === 1 ? 'opacity-50 cursor-not-allowed border-slate-200 text-slate-400' : 'border-slate-300 text-slate-700 hover:bg-slate-50'
+                  className={`inline-flex items-center space-x-2 px-5 py-2.5 text-sm font-semibold rounded-xl border transition-all ${
+                    currentStep === 1
+                      ? 'opacity-40 cursor-not-allowed border-slate-200 text-slate-400 bg-white'
+                      : 'border-slate-300 text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-400 shadow-sm'
                   }`}
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Previous</span>
                 </button>
 
+                {/* Step indicator pill */}
+                <span className="text-[11px] font-bold text-slate-500 hidden sm:block">
+                  Step {currentStep} of 6
+                </span>
+
                 {currentStep === 6 ? (
                   <button
                     type="button"
                     disabled={isSubmitting}
                     onClick={handleSubmitAll}
-                    className="inline-flex items-center space-x-2 px-6 py-2.5 text-xs font-bold rounded-lg bg-christ-gold text-christ-navy shadow-christ-gold hover:bg-christ-lightGold"
+                    className="inline-flex items-center space-x-2 px-7 py-3 text-sm font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    <span>{isSubmitting ? 'Submitting...' : 'Submit Official Registration'}</span>
-                    <CheckCircle2 className="w-4 h-4" />
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Submitting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Submit Official Registration</span>
+                        <CheckCircle2 className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={handleNextStep}
-                    className="inline-flex items-center space-x-1.5 px-5 py-2.5 text-xs font-bold rounded-lg bg-christ-navy text-white hover:bg-christ-darkNavy"
+                    className="inline-flex items-center space-x-2 px-6 py-2.5 text-sm font-bold rounded-xl transition-all shadow-md"
+                    style={{ background: 'linear-gradient(135deg, #002147 0%, #003070 100%)', color: '#fff' }}
                   >
-                    <span>Next Step</span>
+                    <span>Continue to Next Step</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 )}

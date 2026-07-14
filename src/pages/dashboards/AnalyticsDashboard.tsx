@@ -50,10 +50,10 @@ export const AnalyticsDashboard: React.FC = () => {
   const COLORS = ['#002147', '#C5A059', '#10B981', '#6366F1', '#EC4899'];
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 font-sans">
       <Sidebar currentRole={user?.role || 'officials'} />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden pt-16 lg:pt-0">
         <Header title="Officials Executive Reports & Analytics" subtitle="Comprehensive view-only analytics suite for Christ University leadership." />
 
         <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">

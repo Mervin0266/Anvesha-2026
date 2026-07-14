@@ -29,9 +29,10 @@ const getEventImage = (id: string): string => {
 };
 
 const HERO_IMAGES = [
-  '/images/images/54803382962_a491a06135_o.jpg',
+  '/images/fest-banner.jpeg',
   '/images/images/54804478864_83a7ab18a8_o.jpg',
   '/images/images/54804479024_964acda267_o.jpg',
+  '/images/images/54803382962_a491a06135_o.jpg',
   '/images/images/54804479254_3b773ea6b7_o.jpg',
   '/images/images/54804486843_fcd3f03b8f_o.jpg',
   '/images/images/54804568260_62c289f9eb_o.jpg',
@@ -99,14 +100,14 @@ export const Home: React.FC = () => {
               {HERO_IMAGES.map((src, i) => (
                 <div
                   key={src}
-                  className={`absolute inset-0 bg-cover bg-center transition-opacity duration-[1600ms] ease-in-out ${i === bgIndex ? 'opacity-100' : 'opacity-0'}`}
+                  className={`absolute inset-0 bg-cover bg-center transition-opacity duration-[1000ms] ease-in-out ${i === bgIndex ? 'opacity-100' : 'opacity-0'}`}
                   style={{ backgroundImage: `url('${src}')` }}
                 />
               ))}
               {/* Light vignette only on the right edge so images stay vivid */}
               <div
                 className="absolute inset-0"
-                style={{ backgroundImage: 'linear-gradient(to right, transparent 60%, rgba(248,250,252,0.55) 100%)' }}
+                style={{ backgroundImage: 'linear-gradient(to right, transparent 60%, rgba(0, 0, 0, 0.55) 100%)' }}
               />
               {/* Bottom text overlay — dark strip so caption is readable */}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent px-6 pb-6 pt-20">

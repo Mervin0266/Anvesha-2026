@@ -619,3 +619,158 @@ export const getEventsList = async (req: Request, res: Response): Promise<void> 
     res.json({ success: true, data: EVENTS_CATALOG });
   }
 };
+
+export const getTeamByChest = async (req: Request, res: Response): Promise<void> => {
+  const { chestNumber } = req.params;
+  try {
+    const teamRes = await dbQuery(
+      `SELECT t.*, i.name as institution_name, e.name as event_name, e.category as event_category
+       FROM teams t
+       JOIN institutions i ON t.institution_id = i.id
+       JOIN events e ON t.event_id = e.id
+       WHERE t.chest_number = $1`,
+      [chestNumber]
+    );
+    const team = teamRes.rows[0];
+    if (!team) {
+      res.status(404).json({ success: false, message: `No team found with chest number ${chestNumber}` });
+      return;
+    }
+
+    const participantsRes = await dbQuery(
+      `SELECT id, name, class_name, gender, emergency_contact, verification_status
+       FROM participants
+       WHERE team_id = $1`,
+      [team.id]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        id: team.id,
+        registrationId: team.registration_id,
+        institutionId: team.institution_id,
+        eventId: team.event_id,
+        eventName: team.event_name,
+        category: team.event_category,
+        teamName: team.team_name,
+        coachName: team.coach_name,
+        mentorName: team.mentor_name,
+        status: team.status,
+        chestNumber: team.chest_number,
+        participants: participantsRes.rows.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          className: p.class_name,
+          gender: p.gender,
+          emergencyContact: p.emergency_contact,
+          verificationStatus: p.verification_status
+        }))
+      }
+    });
+  } catch (error: any) {
+    console.error('getTeamByChest error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to fetch team.' });
+  }
+};
+
+export const submitWinnerRunnerByChest = async (req: Request, res: Response): Promise<void> => {
+  const { eventId, winnerChest, runnerUpChest, secondRunnerUpChest, user } = req.body;
+  try {
+    // 1. Resolve winner team
+    const winnerRes = await dbQuery(
+      `SELECT t.id, t.team_name, i.name as inst_name 
+       FROM teams t 
+       JOIN institutions i ON t.institution_id = i.id 
+       WHERE t.chest_number = $1 AND t.event_id = $2`,
+      [winnerChest, eventId]
+    );
+    const winner = winnerRes.rows[0];
+    if (!winner) {
+      res.status(400).json({ success: false, message: `Winner chest number ${winnerChest} does not exist or belong to this event.` });
+      return;
+    }
+
+    // 2. Resolve runner up team
+    let runnerUpId = null;
+    let runnerUpName = null;
+    let runnerUpInst = null;
+    if (runnerUpChest) {
+      const runnerRes = await dbQuery(
+        `SELECT t.id, t.team_name, i.name as inst_name 
+         FROM teams t 
+         JOIN institutions i ON t.institution_id = i.id 
+         WHERE t.chest_number = $1 AND t.event_id = $2`,
+        [runnerUpChest, eventId]
+      );
+      const runner = runnerRes.rows[0];
+      if (!runner) {
+        res.status(400).json({ success: false, message: `Runner up chest number ${runnerUpChest} does not exist or belong to this event.` });
+        return;
+      }
+      runnerUpId = runner.id;
+      runnerUpName = runner.team_name;
+      runnerUpInst = runner.inst_name;
+    }
+
+    // 3. Resolve second runner up team
+    let secondRunnerUpId = null;
+    let secondRunnerUpName = null;
+    let secondRunnerUpInst = null;
+    if (secondRunnerUpChest) {
+      const secondRunnerRes = await dbQuery(
+        `SELECT t.id, t.team_name, i.name as inst_name 
+         FROM teams t 
+         JOIN institutions i ON t.institution_id = i.id 
+         WHERE t.chest_number = $1 AND t.event_id = $2`,
+        [secondRunnerUpChest, eventId]
+      );
+      const secondRunner = secondRunnerRes.rows[0];
+      if (!secondRunner) {
+        res.status(400).json({ success: false, message: `Second runner up chest number ${secondRunnerUpChest} does not exist or belong to this event.` });
+        return;
+      }
+      secondRunnerUpId = secondRunner.id;
+      secondRunnerUpName = secondRunner.team_name;
+      secondRunnerUpInst = secondRunner.inst_name;
+    }
+
+    // 4. Save to database
+    const checkRes = await dbQuery('SELECT * FROM results WHERE event_id = $1', [eventId]);
+    const nowStr = new Date().toISOString();
+
+    if (checkRes.rows.length === 0) {
+      const resId = `res_${Date.now()}`;
+      await dbQuery(
+        `INSERT INTO results (id, event_id, winner_team_id, winner_team_name, winner_institution_name, runner_up_team_id, runner_up_team_name, runner_up_institution_name, second_runner_up_team_id, second_runner_up_team_name, second_runner_up_institution_name, submitted_by, submitted_at, is_locked)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+        [
+          resId, eventId, winner.id, winner.team_name, winner.inst_name,
+          runnerUpId, runnerUpName, runnerUpInst,
+          secondRunnerUpId, secondRunnerUpName, secondRunnerUpInst,
+          user?.name || 'Event Coordinator', nowStr, true
+        ]
+      );
+    } else {
+      await dbQuery(
+        `UPDATE results 
+         SET winner_team_id = $1, winner_team_name = $2, winner_institution_name = $3,
+             runner_up_team_id = $4, runner_up_team_name = $5, runner_up_institution_name = $6,
+             second_runner_up_team_id = $7, second_runner_up_team_name = $8, second_runner_up_institution_name = $9,
+             submitted_by = $10, submitted_at = $11, is_locked = TRUE
+         WHERE event_id = $12`,
+        [
+          winner.id, winner.team_name, winner.inst_name,
+          runnerUpId, runnerUpName, runnerUpInst,
+          secondRunnerUpId, secondRunnerUpName, secondRunnerUpInst,
+          user?.name || 'Event Coordinator', nowStr, eventId
+        ]
+      );
+    }
+
+    res.json({ success: true, message: 'Winner/Runner details submitted successfully!' });
+  } catch (error: any) {
+    console.error('submitWinnerRunnerByChest error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to submit winner/runner details.' });
+  }
+};

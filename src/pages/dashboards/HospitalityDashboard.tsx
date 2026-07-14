@@ -63,10 +63,10 @@ export const HospitalityDashboard: React.FC = () => {
   );
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 font-sans">
       <Sidebar currentRole={user?.role || 'hospitality_team'} />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden pt-16 lg:pt-0">
         <Header title="Hospitality & Student Logistics Desk" subtitle="Monitor verified college delegations, accommodation halls, and meal preferences." />
 
         <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">

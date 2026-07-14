@@ -107,6 +107,7 @@ export interface Team {
   mentorName?: string;
   participantIds: string[];
   status: 'PENDING' | 'VERIFIED' | 'REJECTED';
+  chestNumber?: string;
 }
 
 export interface Payment {

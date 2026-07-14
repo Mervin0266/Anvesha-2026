@@ -104,10 +104,10 @@ export const VerificationDashboard: React.FC = () => {
   });
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 font-sans">
       <Sidebar currentRole={user?.role || 'registration_team'} />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden pt-16 lg:pt-0">
         <Header title="Registration & On-Site Verification Desk" subtitle="Verify institution registrations, student ID proofs, and auto-assign chest numbers." />
 
         <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
@@ -295,6 +295,42 @@ export const VerificationDashboard: React.FC = () => {
                       )}
                     </div>
 
+                    {/* Representative / POC ID Card Proof */}
+                    {selectedRecord.poc && (
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-xs">
+                        <h4 className="font-bold text-xs text-christ-navy uppercase tracking-wider font-serif border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                          <span>Representative ID Card Proof</span>
+                          <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-christ-navy/10 text-christ-navy uppercase">
+                            {selectedRecord.poc.designation || 'POC'}
+                          </span>
+                        </h4>
+                        <div className="space-y-1 font-medium text-slate-800">
+                          <p><strong>Name:</strong> {selectedRecord.poc.name}</p>
+                          <p><strong>Contact:</strong> {selectedRecord.poc.phone} | {selectedRecord.poc.email}</p>
+                        </div>
+                        {selectedRecord.poc.govtIdProof && (
+                          <div className="pt-2 border-t border-slate-200">
+                            <p className="text-[10px] text-slate-500 uppercase tracking-tight mb-1">Representative ID Card:</p>
+                            <a 
+                              href={selectedRecord.poc.govtIdProof} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="inline-block border border-slate-300 rounded-lg overflow-hidden max-w-full hover:border-christ-navy transition-all bg-white"
+                            >
+                              <img 
+                                src={selectedRecord.poc.govtIdProof} 
+                                alt="POC ID Proof" 
+                                className="w-full h-auto max-h-32 object-contain"
+                              />
+                              <span className="block text-[10px] bg-slate-100 text-center py-1 text-slate-600 hover:text-slate-900 font-semibold border-t border-slate-200">
+                                View full ID Proof ↗
+                              </span>
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Verification Checklist */}
                     <div className="border border-slate-200 rounded-xl p-4 space-y-3 bg-slate-50/50 text-xs">
                       <h4 className="font-bold text-xs text-christ-navy uppercase tracking-wider font-serif border-b border-slate-200 pb-1.5">
@@ -344,16 +380,26 @@ export const VerificationDashboard: React.FC = () => {
                   {/* Right Column: Participant ID proofs list */}
                   <div className="space-y-3">
                     <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wider font-serif">
-                      Participants & Assigned Chest Numbers ({selectedRecord.participants.length})
+                      Participants &amp; Assigned Chest Numbers ({selectedRecord.participants.length})
                     </h4>
                     <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl max-h-[420px] overflow-y-auto text-xs bg-slate-50">
                       {selectedRecord.participants.map((p: any) => (
                         <div key={p.id} className="p-3 flex items-center justify-between hover:bg-slate-100/50 transition-colors">
-                          <div>
-                            <strong className="text-slate-900">{p.name}</strong> ({p.className})
-                            <p className="text-[10px] text-slate-500">ID Proof: {p.govtIdProof}</p>
+                          <div className="min-w-0 flex-1 mr-2">
+                            <strong className="text-slate-900 block truncate">{p.name}</strong>
+                            <p className="text-[10px] text-slate-500 mt-0.5">{p.className} · ID: {p.govtIdProof}</p>
+                            {p.govtIdProof && (p.govtIdProof.startsWith('http') || p.govtIdProof.includes('/api/')) && (
+                              <a 
+                                href={p.govtIdProof} 
+                                target="_blank" 
+                                rel="noreferrer" 
+                                className="inline-flex items-center text-[10px] text-christ-navy hover:underline font-bold mt-1"
+                              >
+                                View ID Proof Card ↗
+                              </a>
+                            )}
                           </div>
-                          <span className="font-mono font-bold px-2 py-0.5 bg-christ-navy text-christ-gold rounded text-[10px]">
+                          <span className="font-mono font-bold px-2 py-0.5 bg-christ-navy text-christ-gold rounded text-[10px] shrink-0">
                             {p.chestNumber || 'Pending Auto-Assign'}
                           </span>
                         </div>

@@ -45688,6 +45688,15 @@ var initDb = async () => {
       );
     `);
     await dbQuery(`
+      CREATE TABLE IF NOT EXISTS institution_master (
+        id VARCHAR(100) PRIMARY KEY,
+        institution_name VARCHAR(255) UNIQUE NOT NULL,
+        poc_name VARCHAR(255),
+        poc_number VARCHAR(100),
+        poc_email_id VARCHAR(255)
+      );
+    `);
+    await dbQuery(`
       CREATE TABLE IF NOT EXISTS institutions (
         id VARCHAR(100) PRIMARY KEY,
         registration_id VARCHAR(100) UNIQUE NOT NULL,
@@ -45724,9 +45733,11 @@ var initDb = async () => {
         captain_id VARCHAR(100),
         coach_name VARCHAR(255),
         mentor_name VARCHAR(255),
-        status VARCHAR(50) NOT NULL
+        status VARCHAR(50) NOT NULL,
+        chest_number VARCHAR(100)
       );
     `);
+    await dbQuery(`ALTER TABLE teams ADD COLUMN IF NOT EXISTS chest_number VARCHAR(100)`);
     await dbQuery(`
       CREATE TABLE IF NOT EXISTS participants (
         id VARCHAR(100) PRIMARY KEY,
@@ -45972,29 +45983,21 @@ var getMe = (req, res) => {
 // server/src/controllers/registrationController.ts
 var getMasterInstitutions = async (req, res) => {
   try {
-    const rowsRes = await dbQuery("SELECT * FROM bank_payments WHERE status = 'PENDING'");
-    const bankPayments = rowsRes.rows;
-    const filteredMaster = bankPayments.map((p) => {
-      let place = "Bengaluru";
-      if (p.address) {
-        const parts = p.address.split(",");
-        if (parts.length > 0) {
-          place = parts[0].trim();
-        }
-      }
+    const rowsRes = await dbQuery("SELECT * FROM institution_master ORDER BY institution_name ASC");
+    const masterInstitutions = rowsRes.rows;
+    const filteredMaster = masterInstitutions.map((m) => {
       return {
-        id: p.id,
-        name: p.institution_name,
-        place,
-        address: p.address || "",
+        id: m.id,
+        name: m.institution_name,
+        pocName: m.poc_name || "",
+        pocNumber: m.poc_number || "",
+        pocEmailId: m.poc_email_id || "",
+        place: "",
+        address: "",
         pincode: "",
-        bankPaymentId: p.id,
-        transactionId: p.transaction_id,
-        amount: Number(p.amount),
-        email: p.email,
-        schoolContactNumber: p.phone || "",
-        principalName: p.principal_name || "",
-        eventName: p.event_name || ""
+        principalName: "",
+        schoolContactNumber: "",
+        schoolEmail: ""
       };
     });
     res.json({ success: true, data: filteredMaster });
@@ -46385,23 +46388,31 @@ var approveVerification = async (req, res) => {
         `UPDATE payments SET status = 'SUCCESS' WHERE institution_id = $1`,
         [institutionId]
       );
-      const partsRes = await client.query("SELECT * FROM participants WHERE institution_id = $1", [institutionId]);
-      const participants = partsRes.rows;
+      const teamsRes = await client.query("SELECT * FROM teams WHERE institution_id = $1", [institutionId]);
+      const teams = teamsRes.rows;
       let chestCounter = 100 + Math.floor(Math.random() * 50);
-      for (let idx = 0; idx < participants.length; idx++) {
-        const p = participants[idx];
-        let chestNumber = p.chest_number;
+      for (let idx = 0; idx < teams.length; idx++) {
+        const t = teams[idx];
+        let chestNumber = t.chest_number;
         if (!chestNumber) {
-          const prefix = p.event_id.includes("football") ? "FB" : p.event_id.includes("volleyball") ? "VB" : p.event_id.includes("basketball") ? "BB" : p.event_id.includes("tug_of_war") ? "TW" : p.event_id.includes("dance") ? "DN" : p.event_id.includes("music") ? "MU" : p.event_id.includes("debate") ? "DB" : p.event_id.includes("open_mic") ? "OM" : "TH";
+          const prefix = t.event_id.includes("football") ? "FB" : t.event_id.includes("volleyball") ? "VB" : t.event_id.includes("basketball") ? "BB" : t.event_id.includes("tug_of_war") ? "TW" : t.event_id.includes("dance") ? "DN" : t.event_id.includes("music") ? "MU" : t.event_id.includes("debate") ? "DB" : t.event_id.includes("open_mic") ? "OM" : "TH";
           chestNumber = `${prefix}-${chestCounter + idx}`;
         }
         await client.query(
+          `UPDATE teams 
+           SET status = 'VERIFIED', chest_number = $1
+           WHERE id = $2`,
+          [chestNumber, t.id]
+        );
+        await client.query(
           `UPDATE participants 
            SET verification_status = 'VERIFIED', chest_number = $1
-           WHERE id = $2`,
-          [chestNumber, p.id]
+           WHERE team_id = $2`,
+          [chestNumber, t.id]
         );
       }
+      const partsRes = await client.query("SELECT id FROM participants WHERE institution_id = $1", [institutionId]);
+      const participantCount = partsRes.rows.length;
       const logId = `log_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       await client.query(
         `INSERT INTO audit_logs (id, timestamp, user_name, role, action, details)
@@ -46412,10 +46423,10 @@ var approveVerification = async (req, res) => {
           verifierName || "Registration Team",
           "registration_team",
           "APPROVE_REGISTRATION",
-          `Verified institution ${inst.name} (${inst.registration_id}). Assigned chest numbers to ${participants.length} participants.`
+          `Verified institution ${inst.name} (${inst.registration_id}). Assigned chest numbers to ${participantCount} participants.`
         ]
       );
-      return participants.length;
+      return participantCount;
     });
     res.json({
       success: true,
@@ -48015,6 +48026,118 @@ var deleteBankPayment = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to delete transaction record." });
   }
 };
+var bulkAddInstitutionMaster = async (req, res) => {
+  const { institutions } = req.body;
+  if (!Array.isArray(institutions)) {
+    res.status(400).json({ success: false, message: "Invalid payload. institutions must be an array." });
+    return;
+  }
+  try {
+    const results = await withTransaction(async (client) => {
+      let addedCount = 0;
+      let updatedCount = 0;
+      for (const item of institutions) {
+        const { institutionName, pocName, pocNumber, pocEmailId } = item;
+        if (!institutionName || !institutionName.trim()) {
+          continue;
+        }
+        const nameTrimmed = institutionName.trim();
+        const checkRes = await client.query(
+          "SELECT id FROM institution_master WHERE LOWER(institution_name) = LOWER($1)",
+          [nameTrimmed]
+        );
+        if (checkRes.rows.length > 0) {
+          await client.query(
+            `UPDATE institution_master 
+             SET poc_name = $1, poc_number = $2, poc_email_id = $3
+             WHERE LOWER(institution_name) = LOWER($4)`,
+            [
+              pocName && pocName.trim() ? pocName.trim() : null,
+              pocNumber && pocNumber.trim() ? pocNumber.trim() : null,
+              pocEmailId && pocEmailId.trim() ? pocEmailId.trim() : null,
+              nameTrimmed
+            ]
+          );
+          updatedCount++;
+        } else {
+          const id = `inst_m_${Date.now()}_${Math.floor(Math.random() * 1e3)}`;
+          await client.query(
+            `INSERT INTO institution_master (id, institution_name, poc_name, poc_number, poc_email_id)
+             VALUES ($1, $2, $3, $4, $5)`,
+            [
+              id,
+              nameTrimmed,
+              pocName && pocName.trim() ? pocName.trim() : null,
+              pocNumber && pocNumber.trim() ? pocNumber.trim() : null,
+              pocEmailId && pocEmailId.trim() ? pocEmailId.trim() : null
+            ]
+          );
+          addedCount++;
+        }
+      }
+      await client.query(
+        `INSERT INTO audit_logs (id, timestamp, user_name, role, action, details)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          `log_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          (/* @__PURE__ */ new Date()).toISOString(),
+          "Chief Admin",
+          "admin",
+          "BULK_ADD_INSTITUTION_MASTER",
+          `Bulk uploaded master institutions: ${addedCount} added, ${updatedCount} updated.`
+        ]
+      );
+      return { addedCount, updatedCount };
+    });
+    res.json({
+      success: true,
+      message: `Bulk import completed successfully.`,
+      addedCount: results.addedCount,
+      updatedCount: results.updatedCount
+    });
+  } catch (error) {
+    console.error("bulkAddInstitutionMaster error:", error);
+    res.status(500).json({ success: false, message: "Failed to bulk import master institutions." });
+  }
+};
+var getInstitutionMastersList = async (req, res) => {
+  try {
+    const listRes = await dbQuery("SELECT * FROM institution_master ORDER BY institution_name ASC");
+    const mapped = listRes.rows.map((m) => ({
+      id: m.id,
+      institutionName: m.institution_name,
+      pocName: m.poc_name || "",
+      pocNumber: m.poc_number || "",
+      pocEmailId: m.poc_email_id || ""
+    }));
+    res.json({ success: true, institutions: mapped });
+  } catch (error) {
+    console.error("getInstitutionMastersList error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch master institutions list." });
+  }
+};
+var deleteInstitutionMaster = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const checkRes = await dbQuery("SELECT * FROM institution_master WHERE id = $1", [id]);
+    const inst = checkRes.rows[0];
+    if (!inst) {
+      res.status(404).json({ success: false, message: "Master record not found." });
+      return;
+    }
+    await dbQuery("DELETE FROM institution_master WHERE id = $1", [id]);
+    await addAuditLog(
+      "Chief Admin",
+      "admin",
+      "DELETE_INSTITUTION_MASTER",
+      `Deleted master institution: ${inst.institution_name}`
+    );
+    res.json({ success: true, message: "Master record deleted successfully." });
+  } catch (error) {
+    console.error("deleteInstitutionMaster error:", error);
+    res.status(500).json({ success: false, message: "Failed to delete master record." });
+  }
+};
 
 // server/src/controllers/analyticsController.ts
 var getAnalyticsData = async (req, res) => {
@@ -48236,6 +48359,9 @@ app.post("/api/admin/bank-payments/invite-bulk", bulkSendRegistrationInvitations
 app.post("/api/admin/bank-payments/update", updateBankPayment);
 app.delete("/api/admin/users/:userId", deleteCrewUser);
 app.delete("/api/admin/bank-payments/:paymentId", deleteBankPayment);
+app.get("/api/admin/institution-master", getInstitutionMastersList);
+app.post("/api/admin/institution-master/bulk", bulkAddInstitutionMaster);
+app.delete("/api/admin/institution-master/:id", deleteInstitutionMaster);
 app.get("/api/analytics", getAnalyticsData);
 initDb().then(() => {
   app.listen(PORT, () => {

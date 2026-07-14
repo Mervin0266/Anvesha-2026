@@ -79,11 +79,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       case 'officials':
         return '/dashboard/reports';
       default:
-        // Faculty roles
-        if (eventId) return `/dashboard/event/${eventId}`;
+        // Faculty / Coordinator roles
+        if (eventId) {
+          return eventId.startsWith('sports_') ? '/dashboard/sports' : '/dashboard/culturals';
+        }
         if (role.startsWith('faculty_')) {
           const evt = role.replace('faculty_', '');
-          return `/dashboard/event/${evt.includes('football') ? 'sports_football' : evt.includes('dance') ? 'cultural_dance' : 'sports_' + evt}`;
+          return evt.includes('football') || evt.includes('volleyball') || evt.includes('basketball') || evt.includes('tug')
+            ? '/dashboard/sports'
+            : '/dashboard/culturals';
         }
         return '/dashboard/admin';
     }

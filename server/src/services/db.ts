@@ -157,6 +157,16 @@ export const initDb = async (): Promise<void> => {
     `);
 
     await dbQuery(`
+      CREATE TABLE IF NOT EXISTS institution_master (
+        id VARCHAR(100) PRIMARY KEY,
+        institution_name VARCHAR(255) UNIQUE NOT NULL,
+        poc_name VARCHAR(255),
+        poc_number VARCHAR(100),
+        poc_email_id VARCHAR(255)
+      );
+    `);
+
+    await dbQuery(`
       CREATE TABLE IF NOT EXISTS institutions (
         id VARCHAR(100) PRIMARY KEY,
         registration_id VARCHAR(100) UNIQUE NOT NULL,
@@ -195,9 +205,12 @@ export const initDb = async (): Promise<void> => {
         captain_id VARCHAR(100),
         coach_name VARCHAR(255),
         mentor_name VARCHAR(255),
-        status VARCHAR(50) NOT NULL
+        status VARCHAR(50) NOT NULL,
+        chest_number VARCHAR(100)
       );
     `);
+
+    await dbQuery(`ALTER TABLE teams ADD COLUMN IF NOT EXISTS chest_number VARCHAR(100)`);
 
     await dbQuery(`
       CREATE TABLE IF NOT EXISTS participants (

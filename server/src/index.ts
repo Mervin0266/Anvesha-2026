@@ -24,13 +24,14 @@ if (!fs.existsSync(uploadsDir)) {
 import { login, getMe } from './controllers/authController';
 import { validateParticipant, submitRegistration, getMasterInstitutions, getBankPaymentDetails } from './controllers/registrationController';
 import { getPendingVerifications, approveVerification, rejectVerification } from './controllers/verificationController';
-import { getEventData, createOrUpdateFixture, submitEventResult, requestEdit, getEventsList, updateEventLiveStatus, updateRosterStatus } from './controllers/eventController';
+import { getEventData, createOrUpdateFixture, submitEventResult, requestEdit, getEventsList, updateEventLiveStatus, updateRosterStatus, getTeamByChest, submitWinnerRunnerByChest } from './controllers/eventController';
 import { getHospitalityData, updateHospitalityStatus } from './controllers/hospitalityController';
 import { getCertificateData } from './controllers/certificateController';
 import { 
   getAdminOverview, handleEditRequest, createCrewUser, getBankPayments, 
   addBankPayment, sendRegistrationInvitation, bulkAddBankPayments, 
-  bulkSendRegistrationInvitations, updateBankPayment, deleteCrewUser, deleteBankPayment 
+  bulkSendRegistrationInvitations, updateBankPayment, deleteCrewUser, deleteBankPayment,
+  bulkAddInstitutionMaster, getInstitutionMastersList, deleteInstitutionMaster
 } from './controllers/adminController';
 import { getAnalyticsData } from './controllers/analyticsController';
 import { initDb, dbQuery } from './services/db';
@@ -136,6 +137,8 @@ app.post('/api/events/submit-result', submitEventResult);
 app.post('/api/events/request-edit', requestEdit);
 app.post('/api/events/:eventId/live-status', updateEventLiveStatus);
 app.post('/api/events/:eventId/roster/verify', updateRosterStatus);
+app.get('/api/events/team-by-chest/:chestNumber', getTeamByChest);
+app.post('/api/events/results/chest', submitWinnerRunnerByChest);
 
 // Hospitality Routes
 app.get('/api/hospitality', getHospitalityData);
@@ -156,6 +159,9 @@ app.post('/api/admin/bank-payments/invite-bulk', bulkSendRegistrationInvitations
 app.post('/api/admin/bank-payments/update', updateBankPayment);
 app.delete('/api/admin/users/:userId', deleteCrewUser);
 app.delete('/api/admin/bank-payments/:paymentId', deleteBankPayment);
+app.get('/api/admin/institution-master', getInstitutionMastersList);
+app.post('/api/admin/institution-master/bulk', bulkAddInstitutionMaster);
+app.delete('/api/admin/institution-master/:id', deleteInstitutionMaster);
 
 // Officials Analytics Routes
 app.get('/api/analytics', getAnalyticsData);

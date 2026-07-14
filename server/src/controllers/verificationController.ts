@@ -179,46 +179,57 @@ export const approveVerification = async (req: Request, res: Response): Promise<
         [institutionId]
       );
 
-      // 4. Assign Chest Numbers to Participants & set VERIFIED
-      const partsRes = await client.query('SELECT * FROM participants WHERE institution_id = $1', [institutionId]);
-      const participants = partsRes.rows;
+      // 4. Assign Chest Numbers to Teams & set VERIFIED
+      const teamsRes = await client.query('SELECT * FROM teams WHERE institution_id = $1', [institutionId]);
+      const teams = teamsRes.rows;
 
       let chestCounter = 100 + Math.floor(Math.random() * 50);
-      for (let idx = 0; idx < participants.length; idx++) {
-        const p = participants[idx];
-        let chestNumber = p.chest_number;
+      for (let idx = 0; idx < teams.length; idx++) {
+        const t = teams[idx];
+        let chestNumber = t.chest_number;
         if (!chestNumber) {
-          const prefix = p.event_id.includes('football') ? 'FB' :
-                         p.event_id.includes('volleyball') ? 'VB' :
-                         p.event_id.includes('basketball') ? 'BB' :
-                         p.event_id.includes('tug_of_war') ? 'TW' :
-                         p.event_id.includes('dance') ? 'DN' :
-                         p.event_id.includes('music') ? 'MU' :
-                         p.event_id.includes('debate') ? 'DB' :
-                         p.event_id.includes('open_mic') ? 'OM' : 'TH';
+          const prefix = t.event_id.includes('football') ? 'FB' :
+                         t.event_id.includes('volleyball') ? 'VB' :
+                         t.event_id.includes('basketball') ? 'BB' :
+                         t.event_id.includes('tug_of_war') ? 'TW' :
+                         t.event_id.includes('dance') ? 'DN' :
+                         t.event_id.includes('music') ? 'MU' :
+                         t.event_id.includes('debate') ? 'DB' :
+                         t.event_id.includes('open_mic') ? 'OM' : 'TH';
           chestNumber = `${prefix}-${chestCounter + idx}`;
         }
 
         await client.query(
+          `UPDATE teams 
+           SET status = 'VERIFIED', chest_number = $1
+           WHERE id = $2`,
+          [chestNumber, t.id]
+        );
+
+        // Assign same chest number to all participants of this team
+        await client.query(
           `UPDATE participants 
            SET verification_status = 'VERIFIED', chest_number = $1
-           WHERE id = $2`,
-          [chestNumber, p.id]
+           WHERE team_id = $2`,
+          [chestNumber, t.id]
         );
       }
 
       // 5. Audit Log
+      const partsRes = await client.query('SELECT id FROM participants WHERE institution_id = $1', [institutionId]);
+      const participantCount = partsRes.rows.length;
+
       const logId = `log_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       await client.query(
         `INSERT INTO audit_logs (id, timestamp, user_name, role, action, details)
          VALUES ($1, $2, $3, $4, $5, $6)`,
         [
           logId, new Date().toISOString(), verifierName || 'Registration Team', 'registration_team', 'APPROVE_REGISTRATION',
-          `Verified institution ${inst.name} (${inst.registration_id}). Assigned chest numbers to ${participants.length} participants.`
+          `Verified institution ${inst.name} (${inst.registration_id}). Assigned chest numbers to ${participantCount} participants.`
         ]
       );
 
-      return participants.length;
+      return participantCount;
     });
 
     res.json({

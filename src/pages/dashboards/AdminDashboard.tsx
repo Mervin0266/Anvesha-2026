@@ -11,7 +11,13 @@ export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
   const [overview, setOverview] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'REQUESTS' | 'USERS' | 'LOGS' | 'BANK_PAYMENTS'>('REQUESTS');
+  const [activeTab, setActiveTab] = useState<'REQUESTS' | 'USERS' | 'LOGS' | 'BANK_PAYMENTS' | 'INSTITUTION_MASTER'>('REQUESTS');
+
+  // Master Institutions State
+  const [masterList, setMasterList] = useState<any[]>([]);
+  const [masterCsvFile, setMasterCsvFile] = useState<File | null>(null);
+  const [parsedMasterRows, setParsedMasterRows] = useState<any[]>([]);
+  const [masterSearchTerm, setMasterSearchTerm] = useState('');
 
   // New User Form
   const [newUsername, setNewUsername] = useState('');
@@ -352,6 +358,148 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const fetchMasterList = async () => {
+    try {
+      const res = await apiFetch<{ success: boolean; institutions: any[] }>('/admin/institution-master');
+      if (res.success) {
+        setMasterList(res.institutions);
+      }
+    } catch (err) {
+      console.error('Failed to fetch master list:', err);
+    }
+  };
+
+  const handleDownloadMasterTemplate = () => {
+    const headers = [
+      'Institution Name',
+      'POC Name',
+      'POC Number',
+      'POC Email'
+    ];
+    const sampleRows = [
+      ["St. Joseph's Pre-University College", "Prof. Mark D'Souza", '9845012345', 'mark.dsouza@sjpuc.edu.in'],
+      ['Mount Carmel PU College', 'Sister Mary Rose', '9741023456', 'm.rose@mountcarmelpu.edu.in'],
+      ['Christ Junior College', 'Fr. Biju K C', '080-40129200', 'office@cjc.christuniversity.in']
+    ];
+    
+    const csvContent = [
+      headers.join(','),
+      ...sampleRows.map(row => row.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'master_institution_template.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleMasterCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMasterCsvFile(file);
+
+    const reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = () => {
+      const csvData = reader.result as string;
+      const lines = parseCSV(csvData);
+      if (lines.length < 2) {
+        alert('CSV file must contain a header row and at least one data row.');
+        return;
+      }
+
+      const headers = lines[0];
+      const mapping: { [key: string]: number } = {};
+      headers.forEach((h, index) => {
+        const normalized = h.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+        if (normalized === 'institutionname' || normalized === 'institutename' || normalized === 'college' || normalized === 'school') {
+          mapping['institutionName'] = index;
+        } else if (normalized === 'pocname' || normalized === 'contactname' || normalized === 'pointofcontact') {
+          mapping['pocName'] = index;
+        } else if (normalized === 'pocnumber' || normalized === 'pocphone' || normalized === 'phone' || normalized === 'contactnumber' || normalized === 'pocmobile') {
+          mapping['pocNumber'] = index;
+        } else if (normalized === 'pocemail' || normalized === 'pocemailid' || normalized === 'email' || normalized === 'emailid') {
+          mapping['pocEmailId'] = index;
+        }
+      });
+
+      if (mapping['institutionName'] === undefined) {
+        alert('CSV is missing the required "Institution Name" column.');
+        return;
+      }
+
+      const rows = lines.slice(1).map((row, idx) => {
+        const getVal = (key: string) => {
+          const colIdx = mapping[key];
+          return colIdx !== undefined ? row[colIdx] || '' : '';
+        };
+
+        return {
+          id: `master-row-${idx}-${Date.now()}`,
+          institutionName: getVal('institutionName'),
+          pocName: getVal('pocName'),
+          pocNumber: getVal('pocNumber'),
+          pocEmailId: getVal('pocEmailId')
+        };
+      });
+
+      setParsedMasterRows(rows);
+    };
+  };
+
+  const handleImportBulkMaster = async () => {
+    if (parsedMasterRows.length === 0) {
+      alert('No records to import.');
+      return;
+    }
+
+    for (let i = 0; i < parsedMasterRows.length; i++) {
+      const row = parsedMasterRows[i];
+      if (!row.institutionName.trim()) {
+        alert(`Validation error on Row ${i + 1}: Institution Name is required.`);
+        return;
+      }
+    }
+
+    try {
+      const res = await apiFetch<{ success: boolean; addedCount: number; updatedCount: number }>('/admin/institution-master/bulk', {
+        method: 'POST',
+        body: JSON.stringify({ institutions: parsedMasterRows })
+      });
+
+      if (res.success) {
+        setActionMsg(`Successfully imported master list: ${res.addedCount} records added, ${res.updatedCount} records updated.`);
+        setParsedMasterRows([]);
+        setMasterCsvFile(null);
+        fetchMasterList();
+      }
+    } catch (err: any) {
+      alert(`Bulk import error: ${err.message}`);
+    }
+  };
+
+  const handleDeleteMasterRecord = async (id: string, name: string) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete the master record for '${name}'? This cannot be undone.`);
+    if (!confirmDelete) return;
+
+    try {
+      const res = await apiFetch<{ success: boolean; message: string }>(`/admin/institution-master/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.success) {
+        setActionMsg(`Deleted master record for '${name}' successfully.`);
+        fetchMasterList();
+      }
+    } catch (err: any) {
+      alert(`Deletion error: ${err.message}`);
+    }
+  };
+
   const handleImportBankPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!importTxnId || !importInstName || !importEmail || !importAmount || !importPhone) {
@@ -550,10 +698,10 @@ export const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 font-sans">
       <Sidebar currentRole="admin" />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden pt-16 lg:pt-0">
         <Header title="Chief Administrator Control Center" subtitle="Full system governance, result unlock approvals, user roles, and audit trail." />
 
         <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
@@ -644,13 +792,21 @@ export const AdminDashboard: React.FC = () => {
                 >
                   SIB Bank Payments ({bankPayments.filter(p => p.status === 'PENDING').length})
                 </button>
+                <button
+                  onClick={() => setActiveTab('INSTITUTION_MASTER')}
+                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
+                    activeTab === 'INSTITUTION_MASTER' ? 'bg-christ-navy text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  Institution Master List ({masterList.length})
+                </button>
               </div>
 
               <button
                 type="button"
                 onClick={async () => {
                   try {
-                    await Promise.all([fetchAdminOverview(), fetchBankPayments()]);
+                    await Promise.all([fetchAdminOverview(), fetchBankPayments(), fetchMasterList()]);
                     setActionMsg("Dashboard data and ledger records synced successfully.");
                   } catch (err) {
                     console.error("Refresh failed:", err);
@@ -1326,6 +1482,248 @@ export const AdminDashboard: React.FC = () => {
                       )}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 5: Institution Master List Management */}
+            {activeTab === 'INSTITUTION_MASTER' && (
+              <div className="p-6 space-y-6 text-xs text-slate-800">
+                {/* Bulk CSV Importer */}
+                <div className="p-5 bg-white rounded-xl border border-slate-200 space-y-4 shadow-sm">
+                  <div className="flex items-center space-x-2 border-b border-slate-200/85 pb-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-christ-navy text-christ-gold flex items-center justify-center font-bold">
+                      <FileSpreadsheet className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-christ-navy font-serif text-sm">Bulk Import Master Institutions (CSV Upload)</h4>
+                      <p className="text-slate-500 text-[10px]">Upload a CSV file containing predefined PU Institution names and default POC details.</p>
+                    </div>
+                  </div>
+
+                  <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 bg-slate-50 hover:bg-slate-100/50 transition-all flex flex-col items-center justify-center space-y-2.5">
+                    <FileSpreadsheet className="w-8 h-8 text-christ-navy" />
+                    <div className="text-center">
+                      <span className="font-bold text-slate-800 text-[11px] block">Drag and drop or select CSV Master file</span>
+                      <span className="text-slate-400 text-[9px] block">Required header: Institution Name. Optional: POC Name, POC Number, POC Email.</span>
+                    </div>
+                    <input 
+                      type="file" 
+                      accept=".csv" 
+                      onChange={handleMasterCSVUpload} 
+                      id="master-csv-file-input" 
+                      className="hidden" 
+                    />
+                    <div className="flex items-center space-x-2">
+                      <label 
+                        htmlFor="master-csv-file-input" 
+                        className="px-4 py-1.5 bg-christ-navy hover:bg-christ-darkNavy text-white font-bold rounded-lg cursor-pointer transition-all shadow-sm flex items-center space-x-1 text-[11px]"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>{masterCsvFile ? masterCsvFile.name : 'Choose CSV File'}</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleDownloadMasterTemplate}
+                        className="px-4 py-1.5 bg-white border border-slate-350 text-slate-700 hover:bg-slate-50 font-bold rounded-lg transition-all shadow-sm flex items-center space-x-1 text-[11px]"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Download Template CSV</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Interactive Preview Table */}
+                  {parsedMasterRows.length > 0 && (
+                    <div className="space-y-4 pt-2">
+                      <div className="flex items-center justify-between border-t pt-3 border-slate-100">
+                        <div>
+                          <h5 className="font-bold text-christ-navy text-xs font-serif">Parsed Records Preview ({parsedMasterRows.length} rows)</h5>
+                          <p className="text-slate-500 text-[10px]">Inspect and correct any cells directly before importing. Unique institution names will update existing entries.</p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setParsedMasterRows(prev => [
+                                ...prev,
+                                {
+                                  id: `master-row-added-${Date.now()}`,
+                                  institutionName: '',
+                                  pocName: '',
+                                  pocNumber: '',
+                                  pocEmailId: ''
+                                }
+                              ]);
+                            }}
+                            className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-md flex items-center space-x-1 text-[10px]"
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span>Add Row</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setParsedMasterRows([]);
+                              setMasterCsvFile(null);
+                            }}
+                            className="px-3 py-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 font-bold rounded-md text-[10px]"
+                          >
+                            Clear Preview
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-sm max-h-[300px]">
+                        <table className="min-w-full divide-y divide-slate-200 table-fixed">
+                          <thead className="bg-slate-50 text-[10px] font-bold text-slate-700 uppercase sticky top-0 z-10 shadow-sm">
+                            <tr>
+                              <th className="px-3 py-2 text-left w-48">Institution Name *</th>
+                              <th className="px-3 py-2 text-left w-36">POC Name</th>
+                              <th className="px-3 py-2 text-left w-32">POC Number</th>
+                              <th className="px-3 py-2 text-left w-44">POC Email</th>
+                              <th className="px-3 py-2 text-center w-16">Delete</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 text-slate-800 text-[10px]">
+                            {parsedMasterRows.map((row) => (
+                              <tr key={row.id} className="hover:bg-slate-50/50">
+                                <td className="p-1">
+                                  <input 
+                                    type="text" 
+                                    value={row.institutionName} 
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setParsedMasterRows(prev => prev.map(r => r.id === row.id ? { ...r, institutionName: val } : r));
+                                    }} 
+                                    className="w-full p-1.5 border border-slate-200 focus:ring-1 focus:ring-christ-navy rounded text-[10px] font-semibold" 
+                                  />
+                                </td>
+                                <td className="p-1">
+                                  <input 
+                                    type="text" 
+                                    value={row.pocName} 
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setParsedMasterRows(prev => prev.map(r => r.id === row.id ? { ...r, pocName: val } : r));
+                                    }} 
+                                    className="w-full p-1.5 border border-slate-200 focus:ring-1 focus:ring-christ-navy rounded text-[10px]" 
+                                  />
+                                </td>
+                                <td className="p-1">
+                                  <input 
+                                    type="text" 
+                                    value={row.pocNumber} 
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setParsedMasterRows(prev => prev.map(r => r.id === row.id ? { ...r, pocNumber: val } : r));
+                                    }} 
+                                    className="w-full p-1.5 border border-slate-200 focus:ring-1 focus:ring-christ-navy rounded text-[10px]" 
+                                  />
+                                </td>
+                                <td className="p-1">
+                                  <input 
+                                    type="email" 
+                                    value={row.pocEmailId} 
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setParsedMasterRows(prev => prev.map(r => r.id === row.id ? { ...r, pocEmailId: val } : r));
+                                    }} 
+                                    className="w-full p-1.5 border border-slate-200 focus:ring-1 focus:ring-christ-navy rounded text-[10px]" 
+                                  />
+                                </td>
+                                <td className="p-1 text-center">
+                                  <button 
+                                    type="button"
+                                    onClick={() => setParsedMasterRows(prev => prev.filter(r => r.id !== row.id))} 
+                                    className="p-1.5 hover:bg-rose-50 text-rose-600 rounded transition-all"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="button"
+                          onClick={handleImportBulkMaster}
+                          className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-md transition-all text-xs"
+                        >
+                          Import Master Records ({parsedMasterRows.length} rows)
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Ledger / Table display */}
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
+                    <div>
+                      <h4 className="font-bold text-christ-navy text-sm font-serif">Master Institutions Directory</h4>
+                      <p className="text-slate-500 text-[11px]">List of all colleges registered in the master list database for registration auto-fill.</p>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search master list..."
+                      value={masterSearchTerm}
+                      onChange={(e) => setMasterSearchTerm(e.target.value)}
+                      className="px-3 py-1.5 border border-slate-300 rounded-lg focus:ring-1 focus:ring-christ-navy w-full sm:w-64 bg-white text-[11px]"
+                    />
+                  </div>
+
+                  <div className="overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-sm">
+                    <table className="min-w-full divide-y divide-slate-200">
+                      <thead className="bg-slate-50 text-[11px] font-bold text-slate-700 uppercase">
+                        <tr>
+                          <th className="px-4 py-3 text-left">Institution Name</th>
+                          <th className="px-4 py-3 text-left">POC Name</th>
+                          <th className="px-4 py-3 text-left">POC Contact Number</th>
+                          <th className="px-4 py-3 text-left">POC Email ID</th>
+                          <th className="px-4 py-3 text-center">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-slate-800 text-[11px]">
+                        {masterList
+                          .filter(m => {
+                            const term = masterSearchTerm.toLowerCase();
+                            return (
+                              m.institutionName.toLowerCase().includes(term) ||
+                              m.pocName.toLowerCase().includes(term) ||
+                              m.pocNumber.toLowerCase().includes(term) ||
+                              m.pocEmailId.toLowerCase().includes(term)
+                            );
+                          })
+                          .map((m) => (
+                            <tr key={m.id} className="hover:bg-slate-50/50">
+                              <td className="px-4 py-3.5 font-bold text-slate-800">{m.institutionName}</td>
+                              <td className="px-4 py-3.5 font-medium">{m.pocName || <span className="text-slate-400 italic">Leave Blank</span>}</td>
+                              <td className="px-4 py-3.5">{m.pocNumber || <span className="text-slate-400 italic">Leave Blank</span>}</td>
+                              <td className="px-4 py-3.5">{m.pocEmailId || <span className="text-slate-400 italic">Leave Blank</span>}</td>
+                              <td className="px-4 py-3.5 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteMasterRecord(m.id, m.institutionName)}
+                                  className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition-all"
+                                  title="Delete Master Record"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        {masterList.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="text-center py-8 text-slate-500 italic">No master records found. Please upload a CSV sheet above.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}

@@ -3,33 +3,22 @@ import { dbQuery, withTransaction } from '../services/db';
 
 export const getMasterInstitutions = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rowsRes = await dbQuery("SELECT * FROM bank_payments WHERE status = 'PENDING'");
-    const bankPayments = rowsRes.rows;
+    const rowsRes = await dbQuery("SELECT * FROM institution_master ORDER BY institution_name ASC");
+    const masterInstitutions = rowsRes.rows;
 
-    // Load dropdown selections directly from BankPayments pending ledger
-    const filteredMaster = bankPayments.map((p: any) => {
-      // Fallback place resolution from address
-      let place = 'Bengaluru';
-      if (p.address) {
-        const parts = p.address.split(',');
-        if (parts.length > 0) {
-          place = parts[0].trim();
-        }
-      }
-
+    const filteredMaster = masterInstitutions.map((m: any) => {
       return {
-        id: p.id,
-        name: p.institution_name,
-        place: place,
-        address: p.address || '',
+        id: m.id,
+        name: m.institution_name,
+        pocName: m.poc_name || '',
+        pocNumber: m.poc_number || '',
+        pocEmailId: m.poc_email_id || '',
+        place: '',
+        address: '',
         pincode: '',
-        bankPaymentId: p.id,
-        transactionId: p.transaction_id,
-        amount: Number(p.amount),
-        email: p.email,
-        schoolContactNumber: p.phone || '',
-        principalName: p.principal_name || '',
-        eventName: p.event_name || ''
+        principalName: '',
+        schoolContactNumber: '',
+        schoolEmail: ''
       };
     });
 

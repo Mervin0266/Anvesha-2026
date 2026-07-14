@@ -60,3 +60,43 @@
     width: 100%;
   }
 }
+
+/* Premium form inputs */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+select,
+textarea {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+/* Shimmer animation for the login button hover effect */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* Fade-in animation for step panels */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.step-panel-enter {
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+/* Diagonal stripe overlay utility */
+.bg-diagonal-stripe {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(197, 160, 89, 0.06) 0px,
+    rgba(197, 160, 89, 0.06) 1px,
+    transparent 1px,
+    transparent 28px
+  );
+}
+
