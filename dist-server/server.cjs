@@ -45894,10 +45894,6 @@ var login = async (req, res) => {
   const { username, password } = req.body;
   const inputStr = (username || "").trim().toLowerCase();
   try {
-    if (!password || password !== "Anvesha@2026") {
-      res.status(401).json({ success: false, message: "Invalid password. Please check your credentials." });
-      return;
-    }
     const rowsRes = await dbQuery("SELECT * FROM users");
     const users = rowsRes.rows;
     const user = users.find(
@@ -45905,6 +45901,25 @@ var login = async (req, res) => {
     );
     if (!user) {
       res.status(401).json({ success: false, message: "Invalid credentials. User account not found." });
+      return;
+    }
+    let expectedPassword = "Anvesha@2026";
+    const r = user.role.toLowerCase();
+    if (r === "admin") {
+      expectedPassword = "Admin@Anvesha2026";
+    } else if (r === "registration_team") {
+      expectedPassword = "Reg@Anvesha2026";
+    } else if (r === "hospitality_team") {
+      expectedPassword = "Hosp@Anvesha2026";
+    } else if (r === "certificate_team") {
+      expectedPassword = "Cert@Anvesha2026";
+    } else if (r === "officials") {
+      expectedPassword = "Official@Anvesha2026";
+    } else if (r.startsWith("faculty_") || r.startsWith("faculty")) {
+      expectedPassword = "Faculty@Anvesha2026";
+    }
+    if (!password || password !== expectedPassword) {
+      res.status(401).json({ success: false, message: "Invalid password. Please check your credentials." });
       return;
     }
     const token = import_jsonwebtoken.default.sign(

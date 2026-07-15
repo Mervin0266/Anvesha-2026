@@ -9,11 +9,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const inputStr = (username || '').trim().toLowerCase();
 
   try {
-    if (!password || password !== 'Anvesha@2026') {
-      res.status(401).json({ success: false, message: 'Invalid password. Please check your credentials.' });
-      return;
-    }
-
     const rowsRes = await dbQuery('SELECT * FROM users');
     const users = rowsRes.rows;
 
@@ -33,6 +28,28 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     
     if (!user) {
       res.status(401).json({ success: false, message: 'Invalid credentials. User account not found.' });
+      return;
+    }
+
+    // Determine role-specific password
+    let expectedPassword = 'Anvesha@2026'; // Default fallback
+    const r = user.role.toLowerCase();
+    if (r === 'admin') {
+      expectedPassword = 'Admin@Anvesha2026';
+    } else if (r === 'registration_team') {
+      expectedPassword = 'Reg@Anvesha2026';
+    } else if (r === 'hospitality_team') {
+      expectedPassword = 'Hosp@Anvesha2026';
+    } else if (r === 'certificate_team') {
+      expectedPassword = 'Cert@Anvesha2026';
+    } else if (r === 'officials') {
+      expectedPassword = 'Official@Anvesha2026';
+    } else if (r.startsWith('faculty_') || r.startsWith('faculty')) {
+      expectedPassword = 'Faculty@Anvesha2026';
+    }
+
+    if (!password || password !== expectedPassword) {
+      res.status(401).json({ success: false, message: 'Invalid password. Please check your credentials.' });
       return;
     }
 
