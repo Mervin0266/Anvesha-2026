@@ -403,6 +403,7 @@ export const initDb = async (): Promise<void> => {
     await dbQuery("DELETE FROM events WHERE id = 'sports_basketball_girls'");
 
     // Remove old unsplit user first to free up the username
+    await dbQuery("DELETE FROM users WHERE id = 'usr_admin'");
     await dbQuery("DELETE FROM users WHERE id = 'usr_tugofwar'");
     await dbQuery("DELETE FROM users WHERE id = 'usr_football_girls'");
     await dbQuery("DELETE FROM users WHERE id = 'usr_basketball'");

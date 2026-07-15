@@ -7,7 +7,8 @@ export const PREDEFINED_INSTITUTIONS: MasterInstitution[] = [
 ];
 
 export const INITIAL_USERS: User[] = [
-  { id: 'usr_admin', username: 'admin@anvesha.in', name: 'Dr. Joseph K (Chief Admin)', role: 'admin', email: 'admin@anvesha.in' },
+  { id: 'usr_admin_1', username: 'admin@anvesha.in', name: 'Dr. Joseph K (Chief Admin)', role: 'admin', email: 'admin@anvesha.in' },
+  { id: 'usr_admin_2', username: 'arul.v@christuniversity.in', name: 'Dr. Arul V (Chief Admin)', role: 'admin', email: 'arul.v@christuniversity.in' },
   { id: 'usr_verify', username: 'registration@anvesha.in', name: 'Prof. Mary Thomas (Registration)', role: 'registration_team', email: 'registration@anvesha.in' },
   { id: 'usr_hospitality', username: 'hospitality@anvesha.in', name: 'Bro. Anthony S (Hospitality Desk)', role: 'hospitality_team', email: 'hospitality@anvesha.in' },
   { id: 'usr_football', username: 'football@anvesha.in', name: 'Coach Rajesh Kumar (Football Boys)', role: 'faculty_football', eventId: 'sports_football_boys', email: 'football@anvesha.in' },
