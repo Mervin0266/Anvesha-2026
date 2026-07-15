@@ -506,8 +506,8 @@ export const deleteCrewUser = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    if (userObj.role === 'admin') {
-      res.status(400).json({ success: false, message: 'Cannot delete the Chief Admin account.' });
+    if (userId === 'usr_admin_2') {
+      res.status(400).json({ success: false, message: 'Cannot delete the Main Chief Admin account.' });
       return;
     }
 
@@ -542,8 +542,8 @@ export const updateUserRole = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    if (targetUser.role === 'admin') {
-      res.status(400).json({ success: false, message: 'Cannot edit role of Admin user.' });
+    if (userId === 'usr_admin_2') {
+      res.status(400).json({ success: false, message: 'Cannot edit the role of the Main Chief Admin.' });
       return;
     }
 

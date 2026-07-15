@@ -179,6 +179,7 @@ export const CrewManagementDashboard: React.FC = () => {
                       onChange={(e) => setNewRole(e.target.value)} 
                       className="w-full p-2.5 border border-slate-200 rounded-xl focus:outline-none bg-slate-50 font-bold text-xs"
                     >
+                      <option value="admin">Chief Admin</option>
                       <option value="registration_team">Registration Team</option>
                       <option value="hospitality_team">Hospitality Team</option>
                       <option value="faculty_football_boys">Faculty Coordinator (Football Boys)</option>
@@ -268,13 +269,14 @@ export const CrewManagementDashboard: React.FC = () => {
                         </div>
                         
                         <div className="flex items-center space-x-3 shrink-0">
-                          {u.role !== 'admin' ? (
+                          {u.id !== 'usr_admin_2' ? (
                             <select
                               disabled={updatingUserId === u.id}
                               value={u.role}
                               onChange={(e) => handleRoleChange(u.id, e.target.value)}
                               className="px-2 py-1 border border-slate-200 rounded-lg text-[10px] font-bold uppercase text-christ-navy bg-slate-50 focus:outline-none focus:ring-1 focus:ring-christ-navy disabled:opacity-50"
                             >
+                              <option value="admin">Chief Admin</option>
                               <option value="registration_team">Registration Team</option>
                               <option value="hospitality_team">Hospitality Team</option>
                               <option value="faculty_football_boys">Faculty (Football Boys)</option>
@@ -291,11 +293,11 @@ export const CrewManagementDashboard: React.FC = () => {
                             </select>
                           ) : (
                             <span className="px-2.5 py-0.5 rounded bg-christ-navy/10 text-christ-navy font-bold uppercase text-[9px] tracking-wide">
-                              Admin
+                              Main Admin
                             </span>
                           )}
                           
-                          {u.role !== 'admin' && (
+                          {u.id !== 'usr_admin_2' && (
                             <button
                               type="button"
                               onClick={() => handleDeleteUser(u.id, u.name)}
