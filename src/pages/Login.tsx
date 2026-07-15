@@ -35,7 +35,7 @@ export const Login: React.FC = () => {
         {/* Background image with overlay */}
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/images/images/54803382962_a491a06135_o.jpg')" }}
+          style={{ backgroundImage: "url('/images/images/54804478864_83a7ab18a8_o.jpg')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-christ-navy/95 via-christ-navy/85 to-christ-darkNavy/90" />
         

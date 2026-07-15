@@ -206,11 +206,11 @@ export const Home: React.FC = () => {
       <section id="about" className="py-24 bg-white border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          <div className="max-w-2xl mx-auto text-center mb-16">
+          <div className="max-w-3xl mx-auto text-center mb-16">
             <Label>About ANVESHA</Label>
-            <h2 className="text-4xl font-bold text-christ-navy font-serif mb-4">Cultivating Excellence &amp; Sportsmanship</h2>
-            <p className="text-slate-500 text-sm leading-relaxed">
-              ANVESHA is Christ University's flagship Inter PU Festival designed to foster healthy competition, talent discovery, and cultural harmony among Pre-University students.
+            <h2 className="text-4xl font-bold text-christ-navy font-serif mb-4">Uniting Grit, Grace, and Harmony</h2>
+            <p className="text-slate-500 text-sm leading-relaxed max-w-2xl mx-auto">
+              ANVESHA stands as Christ University's grandest annual Pre-University showcase. Bridging the competitive intensity of athletic leagues with the creative brilliance of cultural stages, it is a crucible of leadership, teamwork, and artistic synergy where Karnataka’s finest colleges converge to compete and connect.
             </p>
           </div>
 
@@ -219,20 +219,20 @@ export const Home: React.FC = () => {
               {
                 icon: <Trophy className="w-6 h-6 text-christ-gold" />,
                 bg: 'bg-christ-navy',
-                title: 'State-of-the-Art Arenas',
-                body: 'FIFA-standard football turfs, synthetic basketball courts, and professional indoor auditoriums with official certified judges.',
+                title: 'Legacy of Sportsmanship',
+                body: 'From the high-octane battlegrounds of our football turf to the intense coordination of volleyball and tug of war, we celebrate the true spirit of athletic teamwork.',
               },
               {
-                icon: <ShieldCheck className="w-6 h-6 text-christ-navy" />,
+                icon: <Sparkles className="w-6 h-6 text-christ-navy" />,
                 bg: 'bg-christ-gold',
-                title: 'Transparent Real-Time Scoring',
-                body: 'Live result entry and locked scorecards guarantee zero tampering, ensuring absolute integrity for every competing college.',
+                title: 'Vibrant Cultural Expression',
+                body: 'Under the spotlight of group dance stages, group music showcases, and intellectual debate duels, students express their creative voices and articulate their vision.',
               },
               {
-                icon: <Award className="w-6 h-6 text-christ-gold" />,
+                icon: <ShieldCheck className="w-6 h-6 text-christ-gold" />,
                 bg: 'bg-christ-navy',
-                title: 'Digital Certificate Desk',
-                body: 'Instant digital certificate validation for all verified participants, winners, and overall championship trophies.',
+                title: 'Digital Innovation Desk',
+                body: 'With transparent real-time scoreboard calculations, on-ground spot registrations, and digital certificate validation desks, we deliver a seamless experience.',
               },
             ].map(({ icon, bg, title, body }) => (
               <div key={title} className="bg-slate-50 border border-slate-200 rounded-2xl p-7 hover:shadow-md transition-all group">
