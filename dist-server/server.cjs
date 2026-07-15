@@ -49268,6 +49268,16 @@ app.post("/api/admin/institution-master/bulk", bulkAddInstitutionMaster);
 app.delete("/api/admin/institution-master/:id", deleteInstitutionMaster);
 app.post("/api/admin/bulk-register", bulkRegisterInstitutions);
 app.get("/api/analytics", getAnalyticsData);
+var clientDistDir = import_path.default.join(getDirname(), "../../dist");
+if (import_fs.default.existsSync(clientDistDir)) {
+  app.use(import_express.default.static(clientDistDir));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) {
+      return next();
+    }
+    res.sendFile(import_path.default.join(clientDistDir, "index.html"));
+  });
+}
 initDb().then(() => {
   app.listen(PORT, () => {
     console.log(`====================================================`);

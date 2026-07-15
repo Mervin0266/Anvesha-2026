@@ -177,6 +177,20 @@ app.post('/api/admin/bulk-register', bulkRegisterInstitutions);
 // Officials Analytics Routes
 app.get('/api/analytics', getAnalyticsData);
 
+// Serve static assets from client dist
+const clientDistDir = path.join(getDirname(), '../../dist');
+if (fs.existsSync(clientDistDir)) {
+  app.use(express.static(clientDistDir));
+  
+  // Wildcard route to serve index.html for React Router (SPA fallback)
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDistDir, 'index.html'));
+  });
+}
+
 // Initialize DB and Start Server
 initDb()
   .then(() => {
