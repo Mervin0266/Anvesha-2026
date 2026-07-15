@@ -36,32 +36,30 @@ export const validateParticipant = async (req: Request, res: Response): Promise<
     const govtIdLower = (govtIdProof || '').toLowerCase().trim();
     const nameLower = (name || '').toLowerCase().trim();
 
-    // Rule 2: One participant can participate in ONLY ONE EVENT
+    // Fetch the new event's details
+    const eventRes = await dbQuery('SELECT category FROM events WHERE id = $1', [eventId]);
+    const newEventCategory = eventRes.rows[0]?.category;
+
+    // Check if the participant is registered in another event
     const queryRes = await dbQuery(
-      `SELECT * FROM participants 
-       WHERE LOWER(govt_id_proof) = $1 
-          OR (LOWER(name) = $2 AND dob = $3)
-       LIMIT 1`,
+      `SELECT p.*, e.category as existing_event_category FROM participants p
+       JOIN events e ON p.event_id = e.id
+       WHERE LOWER(p.govt_id_proof) = $1 
+          OR (LOWER(p.name) = $2 AND p.dob = $3)`,
       [govtIdLower, nameLower, dob]
     );
 
-    const existingInAnotherEvent = queryRes.rows[0];
+    const existingRegistrations = queryRes.rows;
 
-    if (existingInAnotherEvent) {
-      if (existingInAnotherEvent.event_id !== eventId) {
-        res.json({
-          valid: false,
-          error: `Participant '${name}' is ALREADY registered in another event (${existingInAnotherEvent.event_id}). Rule 2 violation: One participant can participate in ONLY ONE event.`
-        });
-        return;
-      } else {
+      // Check if they are trying to register for the exact same event
+      const sameEventReg = existingRegistrations.find((r: any) => r.event_id === eventId);
+      if (sameEventReg) {
         res.json({
           valid: false,
           error: `Participant '${name}' is ALREADY registered under this event. Duplicate entry detected.`
         });
         return;
       }
-    }
 
     res.json({ valid: true });
   } catch (error: any) {
@@ -74,9 +72,18 @@ export const submitRegistration = async (req: Request, res: Response): Promise<v
   try {
     const { institution, poc, teams, participants, payment, paymentId } = req.body;
 
+    // Fetch event categories for Rule 1 bypass
+    const eventIds = teams.map((t: any) => t.eventId);
+    const dbEvtsRes = await dbQuery('SELECT id, category FROM events WHERE id = ANY($1)', [eventIds]);
+    const dbEvts = dbEvtsRes.rows;
+
     // Verify Rule 1 in payload (no more than 2 teams per event in the submission itself)
     const eventCounts: Record<string, number> = {};
     for (const teamItem of teams) {
+      const dbEvt = dbEvts.find((e: any) => e.id === teamItem.eventId);
+      if (dbEvt && dbEvt.category === 'FUN_ACTIVITIES') {
+        continue;
+      }
       eventCounts[teamItem.eventId] = (eventCounts[teamItem.eventId] || 0) + 1;
       if (eventCounts[teamItem.eventId] > 2) {
         res.status(400).json({
@@ -260,5 +267,159 @@ export const getBankPaymentDetails = async (req: Request, res: Response): Promis
   } catch (error: any) {
     console.error('Error fetching bank payment details:', error);
     res.status(500).json({ success: false, message: 'Failed to retrieve SIB details.' });
+  }
+};
+
+export const spotRegisterInstitution = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name, address, pocName, pocNumber, pocEmail, participants } = req.body;
+
+    if (!name || !name.trim()) {
+      res.status(400).json({ success: false, message: 'Institution Name is required.' });
+      return;
+    }
+
+    const result = await withTransaction(async (client) => {
+      // 1. Fetch catalog events to resolve event registrations and fees
+      const dbEventsRes = await client.query('SELECT * FROM events');
+      const dbEvents = dbEventsRes.rows;
+
+      // 2. Generate Registration ID & Institution ID
+      const countRes = await client.query('SELECT COUNT(*) FROM institutions');
+      const regCount = parseInt(countRes.rows[0].count, 10) + 1001;
+      const registrationId = `ANV-2026-${regCount}`;
+      const instId = `inst_${Date.now()}_spot_${Math.floor(Math.random() * 1000)}`;
+
+      // 3. Create Institution Record
+      await client.query(
+        `INSERT INTO institutions (id, registration_id, name, principal_name, address, district, state, pincode, school_contact_number, school_email, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+        [
+          instId, registrationId, name.trim(), pocName ? pocName.trim() : 'Principal',
+          address ? address.trim() : 'Spot Registered', 'Bengaluru', 'Karnataka', '560001',
+          pocNumber ? pocNumber.trim() : '080-22222222', pocEmail ? pocEmail.trim() : 'poc@institution.edu',
+          new Date().toISOString()
+        ]
+      );
+
+      // 4. Save Contact / POC
+      const pocId = `poc_${Date.now()}_spot`;
+      await client.query(
+        `INSERT INTO contacts (id, institution_id, type, name, designation, phone, email, govt_id_proof)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          pocId, instId, 'POC', pocName ? pocName.trim() : 'Coordinator', 'Co-ordinator',
+          pocNumber ? pocNumber.trim() : '080-22222222', pocEmail ? pocEmail.trim() : 'poc@institution.edu',
+          'NIL'
+        ]
+      );
+
+      // 5. Group participants by (eventId + teamName)
+      const teamGroups: Record<string, any[]> = {};
+      for (const p of (participants || [])) {
+        const key = `${p.eventId}_${p.teamName || 'Team A'}`;
+        if (!teamGroups[key]) teamGroups[key] = [];
+        teamGroups[key].push(p);
+      }
+
+      let chestCounter = 100 + Math.floor(Math.random() * 50);
+      let totalFee = 0;
+
+      // 6. Loop through each team group
+      for (const key of Object.keys(teamGroups)) {
+        const group = teamGroups[key];
+        const firstP = group[0];
+        const eventId = firstP.eventId;
+        const teamName = firstP.teamName || 'Team A';
+
+        const resolvedEvt = dbEvents.find(e => e.id === eventId);
+        if (!resolvedEvt) {
+          throw new Error(`Invalid event ID: '${eventId}'`);
+        }
+
+        totalFee += Number(resolvedEvt.registration_fee || 0);
+        const teamId = `team_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+        // Generate official chest number prefix
+        const prefix = eventId.includes('football') ? 'FB' :
+                       eventId.includes('volleyball') ? 'VB' :
+                       eventId.includes('tug_of_war') ? 'TW' :
+                       eventId.includes('dance') ? 'DN' :
+                       eventId.includes('music') ? 'MU' :
+                       eventId.includes('debate') ? 'DB' :
+                       eventId.includes('open_mic') ? 'OM' : 'TH';
+
+        const chestNumber = `${prefix}-${chestCounter}`;
+        chestCounter += 1;
+
+        // Create verified team
+        await client.query(
+          `INSERT INTO teams (id, registration_id, institution_id, event_id, team_name, status, chest_number)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [teamId, registrationId, instId, eventId, teamName, 'VERIFIED', chestNumber]
+        );
+
+        // Save participants
+        for (let pIdx = 0; pIdx < group.length; pIdx++) {
+          const p = group[pIdx];
+          const partId = `part_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+          
+          await client.query(
+            `INSERT INTO participants (id, registration_id, institution_id, team_id, event_id, name, gender, dob, class_name, section, phone, email, govt_id_proof, emergency_contact, medical_info, chest_number, verification_status, student_register_number)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+            [
+              partId, registrationId, instId, teamId, eventId, p.name, p.gender, p.dob, p.className, 'A',
+              p.phone || '0000000000', p.email || 'student@spot.com', p.govtIdProof || `SPOT-${partId}`,
+              p.emergencyContact || '0000000000', '', chestNumber, 'VERIFIED', p.studentRegisterNumber || 'NIL'
+            ]
+          );
+
+          // Seed hospitality record
+          const hospId = `hosp_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+          await client.query(
+            `INSERT INTO hospitality (id, participant_id, registration_id, status)
+             VALUES ($1, $2, $3, $4)`,
+            [hospId, partId, registrationId, 'PENDING']
+          );
+        }
+      }
+
+      // 7. Log Spot Payment
+      const paymentId = `pay_${Date.now()}_spot`;
+      const receiptNumber = `RCP-SPOT-SIB-${Math.floor(1000 + Math.random() * 9000)}`;
+      await client.query(
+        `INSERT INTO payments (id, registration_id, institution_id, amount, transaction_id, receipt_number, payment_status, payment_date)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          paymentId, registrationId, instId, totalFee, `TXN-SPOT-${Date.now()}`, receiptNumber, 'PAID', new Date().toISOString()
+        ]
+      );
+
+      // 8. Create Verification record
+      const verId = `ver_${Date.now()}_spot`;
+      await client.query(
+        `INSERT INTO verification_records (id, registration_id, institution_id, verified_by, verified_at, status, remarks)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [verId, registrationId, instId, 'Registration Spot Desk', new Date().toISOString(), 'VERIFIED', 'Registered directly on the spot by Registration Crew.']
+      );
+
+      // 9. Create Audit log
+      const logId = `log_${Date.now()}_spot`;
+      await client.query(
+        `INSERT INTO audit_logs (id, timestamp, user_name, user_role, action, details)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          logId, new Date().toISOString(), 'Registration Desk', 'registration_team', 'SPOT_REGISTER_INSTITUTION',
+          `On-site spot registration for '${name}' completed. ${participants.length} students enrolled.`
+        ]
+      );
+
+      return { registrationId, name };
+    });
+
+    res.json({ success: true, message: 'Spot registration successful.', data: result });
+  } catch (error: any) {
+    console.error('Spot registration error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Spot registration failed.' });
   }
 };

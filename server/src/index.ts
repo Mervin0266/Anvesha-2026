@@ -22,16 +22,17 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 import { login, getMe } from './controllers/authController';
-import { validateParticipant, submitRegistration, getMasterInstitutions, getBankPaymentDetails } from './controllers/registrationController';
-import { getPendingVerifications, approveVerification, rejectVerification } from './controllers/verificationController';
-import { getEventData, createOrUpdateFixture, submitEventResult, requestEdit, getEventsList, updateEventLiveStatus, updateRosterStatus, getTeamByChest, submitWinnerRunnerByChest } from './controllers/eventController';
+import { validateParticipant, submitRegistration, getMasterInstitutions, getBankPaymentDetails, spotRegisterInstitution } from './controllers/registrationController';
+import { getPendingVerifications, approveVerification, rejectVerification, updateParticipantName } from './controllers/verificationController';
+import { getEventData, createOrUpdateFixture, submitEventResult, requestEdit, getEventsList, updateEventLiveStatus, updateRosterStatus, getTeamByChest, submitWinnerRunnerByChest, addMatchDetails, updateMatchDetailsByIndex, deleteMatchDetailsByIndex, finalizeMatchDetails } from './controllers/eventController';
 import { getHospitalityData, updateHospitalityStatus } from './controllers/hospitalityController';
 import { getCertificateData } from './controllers/certificateController';
 import { 
   getAdminOverview, handleEditRequest, createCrewUser, getBankPayments, 
   addBankPayment, sendRegistrationInvitation, bulkAddBankPayments, 
   bulkSendRegistrationInvitations, updateBankPayment, deleteCrewUser, deleteBankPayment,
-  bulkAddInstitutionMaster, getInstitutionMastersList, deleteInstitutionMaster
+  bulkAddInstitutionMaster, getInstitutionMastersList, deleteInstitutionMaster,
+  addInstitutionMaster, updateInstitutionMaster, bulkRegisterInstitutions, updateUserRole
 } from './controllers/adminController';
 import { getAnalyticsData } from './controllers/analyticsController';
 import { initDb, dbQuery } from './services/db';
@@ -123,11 +124,13 @@ app.get('/api/registration/master-institutions', getMasterInstitutions);
 app.post('/api/registration/validate-participant', validateParticipant);
 app.post('/api/registration/submit', submitRegistration);
 app.get('/api/registration/payment-details/:paymentId', getBankPaymentDetails);
+app.post('/api/registration/spot', spotRegisterInstitution);
 
 // Event Day Verification Routes (Registration Team)
 app.get('/api/verification/pending', getPendingVerifications);
 app.post('/api/verification/approve', approveVerification);
 app.post('/api/verification/reject', rejectVerification);
+app.post('/api/verification/participant/update-name', updateParticipantName);
 
 // Event Management Routes (Faculty per Event)
 app.get('/api/events', getEventsList);
@@ -139,6 +142,10 @@ app.post('/api/events/:eventId/live-status', updateEventLiveStatus);
 app.post('/api/events/:eventId/roster/verify', updateRosterStatus);
 app.get('/api/events/team-by-chest/:chestNumber', getTeamByChest);
 app.post('/api/events/results/chest', submitWinnerRunnerByChest);
+app.post('/api/events/:eventId/match', addMatchDetails);
+app.put('/api/events/:eventId/match/:index', updateMatchDetailsByIndex);
+app.delete('/api/events/:eventId/match/:index', deleteMatchDetailsByIndex);
+app.post('/api/events/:eventId/finalize-matches', finalizeMatchDetails);
 
 // Hospitality Routes
 app.get('/api/hospitality', getHospitalityData);
@@ -158,10 +165,14 @@ app.post('/api/admin/bank-payments/invite', sendRegistrationInvitation);
 app.post('/api/admin/bank-payments/invite-bulk', bulkSendRegistrationInvitations);
 app.post('/api/admin/bank-payments/update', updateBankPayment);
 app.delete('/api/admin/users/:userId', deleteCrewUser);
+app.post('/api/admin/users/update-role', updateUserRole);
 app.delete('/api/admin/bank-payments/:paymentId', deleteBankPayment);
 app.get('/api/admin/institution-master', getInstitutionMastersList);
+app.post('/api/admin/institution-master', addInstitutionMaster);
+app.put('/api/admin/institution-master/:id', updateInstitutionMaster);
 app.post('/api/admin/institution-master/bulk', bulkAddInstitutionMaster);
 app.delete('/api/admin/institution-master/:id', deleteInstitutionMaster);
+app.post('/api/admin/bulk-register', bulkRegisterInstitutions);
 
 // Officials Analytics Routes
 app.get('/api/analytics', getAnalyticsData);

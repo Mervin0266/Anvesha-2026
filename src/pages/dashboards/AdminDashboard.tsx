@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../../components/common/Sidebar';
 import { Header } from '../../components/common/Header';
-import { Shield, Users, Building2, Trophy, DollarSign, Lock, Unlock, CheckCircle2, XCircle, UserPlus, Activity, Clock, Upload, Trash2, Loader2, Plus, FileSpreadsheet, Download, RefreshCw } from 'lucide-react';
+import { Shield, Users, Building2, Trophy, DollarSign, Lock, Unlock, CheckCircle2, XCircle, UserPlus, Activity, Clock, Upload, Trash2, Loader2, Plus, FileSpreadsheet, Download, RefreshCw, Edit, Save, X } from 'lucide-react';
 import { apiFetch } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { INITIAL_USERS } from '../../data/initialData';
@@ -18,6 +18,20 @@ export const AdminDashboard: React.FC = () => {
   const [masterCsvFile, setMasterCsvFile] = useState<File | null>(null);
   const [parsedMasterRows, setParsedMasterRows] = useState<any[]>([]);
   const [masterSearchTerm, setMasterSearchTerm] = useState('');
+
+  // Single Add Master Record State
+  const [newMasterName, setNewMasterName] = useState('');
+  const [newMasterPocName, setNewMasterPocName] = useState('');
+  const [newMasterPocNumber, setNewMasterPocNumber] = useState('');
+  const [newMasterPocEmailId, setNewMasterPocEmailId] = useState('');
+  const [isAddingMaster, setIsAddingMaster] = useState(false);
+
+  // Single Edit Master Record State
+  const [editingMasterId, setEditingMasterId] = useState<string | null>(null);
+  const [editMasterName, setEditMasterName] = useState('');
+  const [editMasterPocName, setEditMasterPocName] = useState('');
+  const [editMasterPocNumber, setEditMasterPocNumber] = useState('');
+  const [editMasterPocEmailId, setEditMasterPocEmailId] = useState('');
 
   // New User Form
   const [newUsername, setNewUsername] = useState('');
@@ -500,6 +514,71 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleCreateMasterRecord = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMasterName.trim()) {
+      alert('Institution Name is required.');
+      return;
+    }
+
+    try {
+      const res = await apiFetch<{ success: boolean; message: string; institution: any }>('/admin/institution-master', {
+        method: 'POST',
+        body: JSON.stringify({
+          institutionName: newMasterName,
+          pocName: newMasterPocName,
+          pocNumber: newMasterPocNumber,
+          pocEmailId: newMasterPocEmailId
+        })
+      });
+      if (res.success) {
+        setActionMsg(`Successfully added master institution: ${newMasterName}`);
+        setNewMasterName('');
+        setNewMasterPocName('');
+        setNewMasterPocNumber('');
+        setNewMasterPocEmailId('');
+        setIsAddingMaster(false);
+        fetchMasterList();
+      }
+    } catch (err: any) {
+      alert(`Add error: ${err.message}`);
+    }
+  };
+
+  const handleUpdateMasterRecord = async (id: string) => {
+    if (!editMasterName.trim()) {
+      alert('Institution Name is required.');
+      return;
+    }
+
+    try {
+      const res = await apiFetch<{ success: boolean; message: string; institution: any }>(`/admin/institution-master/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          institutionName: editMasterName,
+          pocName: editMasterPocName,
+          pocNumber: editMasterPocNumber,
+          pocEmailId: editMasterPocEmailId
+        })
+      });
+      if (res.success) {
+        setActionMsg(`Successfully updated master record: ${editMasterName}`);
+        setEditingMasterId(null);
+        fetchMasterList();
+      }
+    } catch (err: any) {
+      alert(`Update error: ${err.message}`);
+    }
+  };
+
+  const startEditingMaster = (record: any) => {
+    setEditingMasterId(record.id);
+    setEditMasterName(record.institutionName);
+    setEditMasterPocName(record.pocName || '');
+    setEditMasterPocNumber(record.pocNumber || '');
+    setEditMasterPocEmailId(record.pocEmailId || '');
+  };
+
   const handleImportBankPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!importTxnId || !importInstName || !importEmail || !importAmount || !importPhone) {
@@ -615,6 +694,7 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     fetchAdminOverview();
     fetchBankPayments();
+    fetchMasterList();
   }, []);
 
   const handleEditRequestAction = async (requestId: string, status: 'APPROVED' | 'REJECTED') => {
@@ -768,14 +848,7 @@ export const AdminDashboard: React.FC = () => {
                 >
                   Result Edit Requests ({overview?.editRequests.filter((e: any) => e.status === 'PENDING').length || 0})
                 </button>
-                <button
-                  onClick={() => setActiveTab('USERS')}
-                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
-                    activeTab === 'USERS' ? 'bg-christ-navy text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  Crew & Users Management
-                </button>
+
                 <button
                   onClick={() => setActiveTab('LOGS')}
                   className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
@@ -866,68 +939,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* TAB 2: User Creation & List */}
-            {activeTab === 'USERS' && (
-              <div className="p-6 space-y-6">
-                <form onSubmit={handleCreateUser} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4 text-xs">
-                  <h4 className="font-bold text-christ-navy font-serif text-sm">Add New Crew Member Account</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Username *</label>
-                      <input type="text" required value={newUsername} onChange={(e) => setNewUsername(e.target.value)} className="w-full p-2 border rounded" placeholder="e.g. football_ref" />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Full Name *</label>
-                      <input type="text" required value={newName} onChange={(e) => setNewName(e.target.value)} className="w-full p-2 border rounded" placeholder="Prof. John Doe" />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Role *</label>
-                      <select value={newRole} onChange={(e) => setNewRole(e.target.value)} className="w-full p-2 border rounded">
-                        <option value="registration_team">Registration Team</option>
-                        <option value="hospitality_team">Hospitality Team</option>
-                        <option value="faculty_football">Faculty (Football)</option>
-                        <option value="faculty_dance">Faculty (Dance)</option>
-                        <option value="certificate_team">Certificate Team</option>
-                        <option value="officials">University Officials</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Email Address *</label>
-                      <input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full p-2 border rounded" placeholder="user@christ.edu.in" />
-                    </div>
-                  </div>
-                  <button type="submit" className="px-4 py-2 bg-christ-navy text-white font-bold rounded-lg hover:bg-christ-darkNavy">
-                    Create User Account
-                  </button>
-                </form>
 
-                <div className="divide-y divide-slate-100 text-xs">
-                  {overview?.users.map((u: any) => (
-                    <div key={u.id} className="py-3 flex items-center justify-between">
-                      <div>
-                        <strong className="text-slate-900 font-bold">{u.name}</strong> ({u.username})
-                        <p className="text-[10px] text-slate-500">{u.email}</p>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <span className="px-2.5 py-1 rounded bg-christ-navy/10 text-christ-navy font-bold uppercase text-[10px]">
-                          {u.role.replace(/_/g, ' ')}
-                        </span>
-                        {u.role !== 'admin' && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteUser(u.id, u.name)}
-                            className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition-colors"
-                            title="Delete User Account"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* TAB 3: Audit Logs Timeline */}
             {activeTab === 'LOGS' && (
@@ -1660,6 +1672,95 @@ export const AdminDashboard: React.FC = () => {
                   )}
                 </div>
 
+                {/* Quick actions for single record add */}
+                <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                  <div>
+                    <h5 className="font-bold text-christ-navy text-xs font-serif">Quick Actions</h5>
+                    <p className="text-slate-500 text-[10px]">Add individual institution records directly without uploading a CSV template.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingMaster(!isAddingMaster)}
+                    className="px-4 py-1.5 bg-christ-navy hover:bg-christ-darkNavy text-white font-bold rounded-lg transition-all shadow-sm flex items-center space-x-1 text-[11px]"
+                  >
+                    {isAddingMaster ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                    <span>{isAddingMaster ? 'Cancel' : 'Add Single Institution'}</span>
+                  </button>
+                </div>
+
+                {isAddingMaster && (
+                  <form onSubmit={handleCreateMasterRecord} className="p-5 bg-white rounded-xl border border-slate-200 space-y-4 shadow-sm text-xs">
+                    <div className="flex items-center space-x-2 border-b border-slate-200/85 pb-2">
+                      <Plus className="w-4 h-4 text-christ-navy" />
+                      <h4 className="font-bold text-christ-navy font-serif text-sm">Add Individual Master Institution</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="space-y-1">
+                        <label className="block font-bold text-slate-700">Institution Name *</label>
+                        <input
+                          type="text"
+                          required
+                          value={newMasterName}
+                          onChange={(e) => setNewMasterName(e.target.value)}
+                          placeholder="e.g. St. Joseph's College"
+                          className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-christ-navy text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block font-bold text-slate-700">POC Name</label>
+                        <input
+                          type="text"
+                          value={newMasterPocName}
+                          onChange={(e) => setNewMasterPocName(e.target.value)}
+                          placeholder="e.g. Prof. John Doe"
+                          className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-christ-navy text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block font-bold text-slate-700">POC Contact Number</label>
+                        <input
+                          type="text"
+                          value={newMasterPocNumber}
+                          onChange={(e) => setNewMasterPocNumber(e.target.value)}
+                          placeholder="e.g. 9876543210"
+                          className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-christ-navy text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block font-bold text-slate-700">POC Email ID</label>
+                        <input
+                          type="email"
+                          value={newMasterPocEmailId}
+                          onChange={(e) => setNewMasterPocEmailId(e.target.value)}
+                          placeholder="e.g. poc@college.edu"
+                          className="w-full p-2 border border-slate-300 rounded-lg focus:ring-1 focus:ring-christ-navy text-xs"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAddingMaster(false);
+                          setNewMasterName('');
+                          setNewMasterPocName('');
+                          setNewMasterPocNumber('');
+                          setNewMasterPocEmailId('');
+                        }}
+                        className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm text-xs"
+                      >
+                        Save Record
+                      </button>
+                    </div>
+                  </form>
+                )}
+
                 {/* Ledger / Table display */}
                 <div className="space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
@@ -1698,27 +1799,99 @@ export const AdminDashboard: React.FC = () => {
                               m.pocEmailId.toLowerCase().includes(term)
                             );
                           })
-                          .map((m) => (
-                            <tr key={m.id} className="hover:bg-slate-50/50">
-                              <td className="px-4 py-3.5 font-bold text-slate-800">{m.institutionName}</td>
-                              <td className="px-4 py-3.5 font-medium">{m.pocName || <span className="text-slate-400 italic">NIL</span>}</td>
-                              <td className="px-4 py-3.5">{m.pocNumber || <span className="text-slate-400 italic">NIL</span>}</td>
-                              <td className="px-4 py-3.5">{m.pocEmailId || <span className="text-slate-400 italic">NIL</span>}</td>
-                              <td className="px-4 py-3.5 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteMasterRecord(m.id, m.institutionName)}
-                                  className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition-all"
-                                  title="Delete Master Record"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                          .map((m) => {
+                            const isEditing = editingMasterId === m.id;
+                            if (isEditing) {
+                              return (
+                                <tr key={m.id} className="bg-slate-50/80">
+                                  <td className="p-2">
+                                    <input
+                                      type="text"
+                                      value={editMasterName}
+                                      onChange={(e) => setEditMasterName(e.target.value)}
+                                      className="w-full p-1.5 border border-slate-300 rounded-lg focus:ring-1 focus:ring-christ-navy font-bold text-slate-850 text-[11px] bg-white"
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <input
+                                      type="text"
+                                      value={editMasterPocName}
+                                      onChange={(e) => setEditMasterPocName(e.target.value)}
+                                      className="w-full p-1.5 border border-slate-300 rounded-lg focus:ring-1 focus:ring-christ-navy text-[11px] bg-white"
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <input
+                                      type="text"
+                                      value={editMasterPocNumber}
+                                      onChange={(e) => setEditMasterPocNumber(e.target.value)}
+                                      className="w-full p-1.5 border border-slate-300 rounded-lg focus:ring-1 focus:ring-christ-navy text-[11px] bg-white"
+                                    />
+                                  </td>
+                                  <td className="p-2">
+                                    <input
+                                      type="email"
+                                      value={editMasterPocEmailId}
+                                      onChange={(e) => setEditMasterPocEmailId(e.target.value)}
+                                      className="w-full p-1.5 border border-slate-300 rounded-lg focus:ring-1 focus:ring-christ-navy text-[11px] bg-white"
+                                    />
+                                  </td>
+                                  <td className="p-2 text-center">
+                                    <div className="flex items-center justify-center space-x-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleUpdateMasterRecord(m.id)}
+                                        className="p-1.5 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-lg transition-all"
+                                        title="Save Changes"
+                                      >
+                                        <Save className="w-4 h-4" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingMasterId(null)}
+                                        className="p-1.5 text-slate-500 hover:text-slate-750 hover:bg-slate-105 rounded-lg transition-all"
+                                        title="Cancel"
+                                      >
+                                        <X className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            }
+
+                            return (
+                              <tr key={m.id} className="hover:bg-slate-50/50">
+                                <td className="px-4 py-3.5 font-bold text-slate-800">{m.institutionName}</td>
+                                <td className="px-4 py-3.5 font-medium">{m.pocName || <span className="text-slate-400 italic text-[10px]">NIL</span>}</td>
+                                <td className="px-4 py-3.5">{m.pocNumber || <span className="text-slate-400 italic text-[10px]">NIL</span>}</td>
+                                <td className="px-4 py-3.5">{m.pocEmailId || <span className="text-slate-400 italic text-[10px]">NIL</span>}</td>
+                                <td className="px-4 py-3.5 text-center">
+                                  <div className="flex items-center justify-center space-x-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => startEditingMaster(m)}
+                                      className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all"
+                                      title="Edit Record"
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteMasterRecord(m.id, m.institutionName)}
+                                      className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition-all"
+                                      title="Delete Master Record"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         {masterList.length === 0 && (
                           <tr>
-                            <td colSpan={5} className="text-center py-8 text-slate-500 italic">No master records found. Please upload a CSV sheet above.</td>
+                            <td colSpan={5} className="text-center py-8 text-slate-500 italic">No master records found. Please upload a CSV sheet or add one above.</td>
                           </tr>
                         )}
                       </tbody>

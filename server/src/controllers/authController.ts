@@ -9,6 +9,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const inputStr = (username || '').trim().toLowerCase();
 
   try {
+    if (!password || password !== 'Anvesha@2026') {
+      res.status(401).json({ success: false, message: 'Invalid password. Please check your credentials.' });
+      return;
+    }
+
     const rowsRes = await dbQuery('SELECT * FROM users');
     const users = rowsRes.rows;
 

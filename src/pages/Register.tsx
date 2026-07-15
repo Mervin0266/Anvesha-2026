@@ -853,8 +853,11 @@ export const Register: React.FC = () => {
         return;
       }
       const sameEventTeams = teams.filter((t) => t.eventId === teams[i].eventId);
-      if (sameEventTeams.length > 2) {
-        const eventName = events.find(e => e.id === teams[i].eventId)?.name || teams[i].eventId;
+      const teamEvt = events.find(e => e.id === teams[i].eventId);
+      const isFun = teamEvt?.category === 'FUN_ACTIVITIES';
+
+      if (!isFun && sameEventTeams.length > 2) {
+        const eventName = teamEvt?.name || teams[i].eventId;
         setErrorMsg(`Rule 1 violation: You cannot register more than 2 teams for event '${eventName}'.`);
         setCurrentStep(3);
         return;
@@ -862,8 +865,8 @@ export const Register: React.FC = () => {
       const duplicateTeam = teams.find((t, index) => 
         index !== i && t.eventId === teams[i].eventId && t.teamName === teams[i].teamName
       );
-      if (duplicateTeam) {
-        const eventName = events.find(e => e.id === teams[i].eventId)?.name || teams[i].eventId;
+      if (!isFun && duplicateTeam) {
+        const eventName = teamEvt?.name || teams[i].eventId;
         setErrorMsg(`Duplicate team configuration: You have registered multiple '${teams[i].teamName}' for '${eventName}'.`);
         setCurrentStep(3);
         return;
@@ -920,17 +923,22 @@ export const Register: React.FC = () => {
       }
     }
 
-    const seenParticipants = new Set<string>();
+    const seenEventPairs = new Set<string>();
     for (let i = 0; i < participants.length; i++) {
       const p = participants[i];
       if (!p.name.trim() || !p.dob) continue;
-      const key = `${p.name.trim().toLowerCase()}_${p.dob}`;
-      if (seenParticipants.has(key)) {
-        setErrorMsg(`Duplicate student detected: '${p.name}' with Date of Birth '${p.dob}' is added multiple times. Under Rule 2, a participant can register for only ONE event.`);
+      const keyNameDob = `${p.name.trim().toLowerCase()}_${p.dob}`;
+      
+      const teamId = teams[p.teamIndex]?.eventId;
+      const teamEvt = events.find(e => e.id === teamId);
+      const keyEventPair = `${keyNameDob}_${teamId}`;
+
+      if (seenEventPairs.has(keyEventPair)) {
+        setErrorMsg(`Duplicate student detected: '${p.name}' is already added to '${teamEvt?.name || teamId}'.`);
         setCurrentStep(4);
         return;
       }
-      seenParticipants.add(key);
+      seenEventPairs.add(keyEventPair);
     }
 
     // Validate Step 5 (Payment)

@@ -23,7 +23,7 @@ export interface User {
   eventId?: string;
 }
 
-export type EventCategory = 'SPORTS' | 'CULTURAL';
+export type EventCategory = 'SPORTS' | 'CULTURALS' | 'FUN_ACTIVITIES';
 export type EventType = 'TEAM' | 'INDIVIDUAL';
 
 export interface FestEvent {
@@ -90,6 +90,7 @@ export interface Participant {
   medicalInfo?: string;
   chestNumber?: string;
   verificationStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
+  studentRegisterNumber?: string;
   // Event-day additions
   jerseyNumber?: string;
   rosterStatus?: 'ACTIVE' | 'SUBSTITUTE' | 'BENCH';

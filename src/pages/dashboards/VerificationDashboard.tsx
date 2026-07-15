@@ -15,6 +15,11 @@ export const VerificationDashboard: React.FC = () => {
   const [remarks, setRemarks] = useState('');
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
+  // Participant Name Editing States
+  const [editingParticipantId, setEditingParticipantId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState('');
+  const [isSavingName, setIsSavingName] = useState(false);
+
   // Verification Checklist States
   const [checkPayment, setCheckPayment] = useState(false);
   const [checkNames, setCheckNames] = useState(false);
@@ -28,9 +33,56 @@ export const VerificationDashboard: React.FC = () => {
     setCheckGovtId(false);
     setCheckEndorsement(false);
     setRemarks('');
+    setEditingParticipantId(null);
   }, [selectedRecord]);
 
   const canApprove = checkPayment && checkNames && checkGovtId && checkEndorsement;
+
+  const handleSaveParticipantName = async (partId: string) => {
+    if (!editingName.trim()) {
+      alert('Name cannot be empty.');
+      return;
+    }
+    setIsSavingName(true);
+    try {
+      const res = await apiFetch<{ success: boolean; message: string }>('/verification/participant/update-name', {
+        method: 'POST',
+        body: JSON.stringify({
+          participantId: partId,
+          newName: editingName.trim()
+        })
+      });
+      if (res.success) {
+        // Update local state directly so we don't have to re-fetch the entire pending list
+        setData(prev => prev.map(item => {
+          if (item.institution.id === selectedRecord.institution.id) {
+            return {
+              ...item,
+              participants: item.participants.map((p: any) => p.id === partId ? { ...p, name: editingName.trim() } : p)
+            };
+          }
+          return item;
+        }));
+        
+        // Also update selectedRecord state
+        setSelectedRecord((prev: any) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            participants: prev.participants.map((p: any) => p.id === partId ? { ...p, name: editingName.trim() } : p)
+          };
+        });
+
+        setEditingParticipantId(null);
+      } else {
+        alert(res.message || 'Failed to update name.');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Error updating name.');
+    } finally {
+      setIsSavingName(false);
+    }
+  };
 
   const fetchPendingData = async () => {
     setLoading(true);
@@ -386,17 +438,60 @@ export const VerificationDashboard: React.FC = () => {
                       {selectedRecord.participants.map((p: any) => (
                         <div key={p.id} className="p-3 flex items-center justify-between hover:bg-slate-100/50 transition-colors">
                           <div className="min-w-0 flex-1 mr-2">
-                            <strong className="text-slate-900 block truncate">{p.name}</strong>
-                            <p className="text-[10px] text-slate-500 mt-0.5">{p.className} · ID: {p.govtIdProof}</p>
-                            {p.govtIdProof && (p.govtIdProof.startsWith('http') || p.govtIdProof.includes('/api/')) && (
-                              <a 
-                                href={p.govtIdProof} 
-                                target="_blank" 
-                                rel="noreferrer" 
-                                className="inline-flex items-center text-[10px] text-christ-navy hover:underline font-bold mt-1"
-                              >
-                                View ID Proof Card ↗
-                              </a>
+                            {editingParticipantId === p.id ? (
+                              <div className="flex items-center space-x-2 mt-1">
+                                <input
+                                  type="text"
+                                  value={editingName}
+                                  onChange={(e) => setEditingName(e.target.value)}
+                                  className="px-2 py-1 text-xs border border-slate-300 rounded focus:ring-1 focus:ring-christ-navy focus:outline-none bg-white font-semibold text-slate-800"
+                                />
+                                <button
+                                  type="button"
+                                  disabled={isSavingName}
+                                  onClick={() => handleSaveParticipantName(p.id)}
+                                  className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-bold transition-all"
+                                >
+                                  {isSavingName ? '...' : 'Save'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingParticipantId(null)}
+                                  className="px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-[10px] font-semibold transition-all"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="flex items-center space-x-2">
+                                  <strong className="text-slate-900 block truncate">{p.name}</strong>
+                                  {selectedRecord.verificationStatus === 'PENDING' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setEditingParticipantId(p.id);
+                                        setEditingName(p.name);
+                                      }}
+                                      className="text-christ-navy hover:text-christ-gold transition-colors p-0.5 text-[10px] font-bold flex items-center space-x-0.5"
+                                      title="Edit participant name"
+                                    >
+                                      <span>✏️</span>
+                                    </button>
+                                  )}
+                                </div>
+                                <p className="text-[10px] text-slate-500 mt-0.5">{p.className} · ID: {p.govtIdProof}</p>
+                                {p.govtIdProof && (p.govtIdProof.startsWith('http') || p.govtIdProof.includes('/api/')) && (
+                                  <a 
+                                    href={p.govtIdProof} 
+                                    target="_blank" 
+                                    rel="noreferrer" 
+                                    className="inline-flex items-center text-[10px] text-christ-navy hover:underline font-bold mt-1"
+                                  >
+                                    View ID Proof Card ↗
+                                  </a>
+                                )}
+                              </>
                             )}
                           </div>
                           <span className="font-mono font-bold px-2 py-0.5 bg-christ-navy text-christ-gold rounded text-[10px] shrink-0">

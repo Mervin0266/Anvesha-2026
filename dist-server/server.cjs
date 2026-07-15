@@ -45331,24 +45331,7 @@ var EVENTS_CATALOG = [
     type: "TEAM",
     minTeamSize: 11,
     maxTeamSize: 16,
-    registrationFee: 2500,
-    description: "Inter PU 11-a-side Football Championship. Knockout tournament adhering to FIFA guidelines.",
-    rules: [
-      "Maximum 2 teams per institution (Team A and Team B).",
-      "Match duration: 25 mins half with 5 mins break.",
-      "Team must carry proper sports kit and football studs.",
-      "Referees decisions are final and binding."
-    ],
-    eligibility: "Open to registered 1st & 2nd Year PU Students only."
-  },
-  {
-    id: "sports_football_girls",
-    name: "Football (Girls)",
-    category: "SPORTS",
-    type: "TEAM",
-    minTeamSize: 11,
-    maxTeamSize: 16,
-    registrationFee: 2500,
+    registrationFee: 500,
     description: "Inter PU 11-a-side Football Championship. Knockout tournament adhering to FIFA guidelines.",
     rules: [
       "Maximum 2 teams per institution (Team A and Team B).",
@@ -45365,7 +45348,7 @@ var EVENTS_CATALOG = [
     type: "TEAM",
     minTeamSize: 6,
     maxTeamSize: 12,
-    registrationFee: 1800,
+    registrationFee: 500,
     description: "Fast-paced high-energy Volleyball Tournament under standard VFI rules.",
     rules: [
       "Maximum 2 teams per institution.",
@@ -45381,44 +45364,12 @@ var EVENTS_CATALOG = [
     type: "TEAM",
     minTeamSize: 6,
     maxTeamSize: 12,
-    registrationFee: 1800,
+    registrationFee: 500,
     description: "Fast-paced high-energy Volleyball Tournament under standard VFI rules.",
     rules: [
       "Maximum 2 teams per institution.",
       "Best of 3 sets (25 points per set).",
       "Proper team jersey with numbers mandatory."
-    ],
-    eligibility: "Open to registered 1st & 2nd Year PU Students."
-  },
-  {
-    id: "sports_basketball_boys",
-    name: "Basketball (Boys)",
-    category: "SPORTS",
-    type: "TEAM",
-    minTeamSize: 5,
-    maxTeamSize: 12,
-    registrationFee: 2e3,
-    description: "Full court Basketball tournament testing speed, strategy, and teamwork.",
-    rules: [
-      "Maximum 2 teams per institution.",
-      "Four quarters of 8 minutes stop-clock timing.",
-      "FIBA regulations apply."
-    ],
-    eligibility: "Open to registered 1st & 2nd Year PU Students."
-  },
-  {
-    id: "sports_basketball_girls",
-    name: "Basketball (Girls)",
-    category: "SPORTS",
-    type: "TEAM",
-    minTeamSize: 5,
-    maxTeamSize: 12,
-    registrationFee: 2e3,
-    description: "Full court Basketball tournament testing speed, strategy, and teamwork.",
-    rules: [
-      "Maximum 2 teams per institution.",
-      "Four quarters of 8 minutes stop-clock timing.",
-      "FIBA regulations apply."
     ],
     eligibility: "Open to registered 1st & 2nd Year PU Students."
   },
@@ -45429,7 +45380,7 @@ var EVENTS_CATALOG = [
     type: "TEAM",
     minTeamSize: 8,
     maxTeamSize: 10,
-    registrationFee: 1500,
+    registrationFee: 500,
     description: "Test of pure strength, coordination, and team endurance.",
     rules: [
       "Maximum 2 teams per institution.",
@@ -45445,7 +45396,7 @@ var EVENTS_CATALOG = [
     type: "TEAM",
     minTeamSize: 8,
     maxTeamSize: 10,
-    registrationFee: 1500,
+    registrationFee: 500,
     description: "Test of pure strength, coordination, and team endurance.",
     rules: [
       "Maximum 2 teams per institution.",
@@ -45454,15 +45405,15 @@ var EVENTS_CATALOG = [
     ],
     eligibility: "Open to registered 1st & 2nd Year PU Students."
   },
-  // CULTURAL
+  // CULTURALS
   {
     id: "cultural_dance",
     name: "Group Dance",
-    category: "CULTURAL",
+    category: "CULTURALS",
     type: "TEAM",
     minTeamSize: 6,
     maxTeamSize: 15,
-    registrationFee: 2200,
+    registrationFee: 500,
     description: "Vibrant stage dance showcase incorporating choreography, synchronization, and creative concepts.",
     rules: [
       "Maximum 2 teams per institution.",
@@ -45474,11 +45425,11 @@ var EVENTS_CATALOG = [
   {
     id: "cultural_music",
     name: "Group Music",
-    category: "CULTURAL",
+    category: "CULTURALS",
     type: "TEAM",
     minTeamSize: 4,
     maxTeamSize: 10,
-    registrationFee: 2e3,
+    registrationFee: 500,
     description: "Live musical ensemble featuring vocals, instruments, and harmonic arrangements.",
     rules: [
       "Maximum 2 teams per institution.",
@@ -45490,11 +45441,11 @@ var EVENTS_CATALOG = [
   {
     id: "cultural_debate",
     name: "Debate",
-    category: "CULTURAL",
+    category: "CULTURALS",
     type: "INDIVIDUAL",
     minTeamSize: 1,
     maxTeamSize: 1,
-    registrationFee: 500,
+    registrationFee: 200,
     description: "Intellectual arena for sharp arguments, rebuttals, and eloquent speaking.",
     rules: [
       "Maximum 2 participants per institution.",
@@ -45503,14 +45454,15 @@ var EVENTS_CATALOG = [
     ],
     eligibility: "Open to registered 1st & 2nd Year PU Students."
   },
+  // FUN ACTIVITIES
   {
     id: "cultural_open_mic",
     name: "Open Mic",
-    category: "CULTURAL",
+    category: "FUN_ACTIVITIES",
     type: "INDIVIDUAL",
     minTeamSize: 1,
     maxTeamSize: 1,
-    registrationFee: 400,
+    registrationFee: 0,
     description: "Solo performance stage for creative expression in spoken word or comedy.",
     rules: [
       "Maximum 2 participants per institution.",
@@ -45522,11 +45474,11 @@ var EVENTS_CATALOG = [
   {
     id: "cultural_treasure_hunt",
     name: "Treasure Hunt",
-    category: "CULTURAL",
+    category: "FUN_ACTIVITIES",
     type: "TEAM",
     minTeamSize: 4,
     maxTeamSize: 4,
-    registrationFee: 1200,
+    registrationFee: 0,
     description: "Campus-wide thrill race solving riddles, puzzles, and physical clues across Christ University campus.",
     rules: [
       "Maximum 2 teams per institution.",
@@ -45543,11 +45495,8 @@ var INITIAL_USERS = [
   { id: "usr_verify", username: "registration@anvesha.in", name: "Prof. Mary Thomas (Registration)", role: "registration_team", email: "registration@anvesha.in" },
   { id: "usr_hospitality", username: "hospitality@anvesha.in", name: "Bro. Anthony S (Hospitality Desk)", role: "hospitality_team", email: "hospitality@anvesha.in" },
   { id: "usr_football", username: "football@anvesha.in", name: "Coach Rajesh Kumar (Football Boys)", role: "faculty_football", eventId: "sports_football_boys", email: "football@anvesha.in" },
-  { id: "usr_football_girls", username: "football_girls@anvesha.in", name: "Coach Sarah Gomes (Football Girls)", role: "faculty_football", eventId: "sports_football_girls", email: "football_girls@anvesha.in" },
   { id: "usr_volleyball", username: "vball@anvesha.in", name: "Coach Priya Nair (Volleyball Boys)", role: "faculty_volleyball", eventId: "sports_volleyball_boys", email: "vball@anvesha.in" },
   { id: "usr_volleyball_girls", username: "vball_girls@anvesha.in", name: "Coach Anjali Sen (Volleyball Girls)", role: "faculty_volleyball", eventId: "sports_volleyball_girls", email: "vball_girls@anvesha.in" },
-  { id: "usr_basketball", username: "bball@anvesha.in", name: "Coach David D (Basketball Boys)", role: "faculty_basketball", eventId: "sports_basketball_boys", email: "bball@anvesha.in" },
-  { id: "usr_basketball_girls", username: "bball_girls@anvesha.in", name: "Coach Rita Abraham (Basketball Girls)", role: "faculty_basketball", eventId: "sports_basketball_girls", email: "bball_girls@anvesha.in" },
   { id: "usr_dance", username: "dance@anvesha.in", name: "Prof. Ananya Roy (Group Dance)", role: "faculty_dance", eventId: "cultural_dance", email: "dance@anvesha.in" },
   { id: "usr_music", username: "music@anvesha.in", name: "Prof. Samuel V (Group Music)", role: "faculty_music", eventId: "cultural_music", email: "music@anvesha.in" },
   { id: "usr_debate", username: "debate@anvesha.in", name: "Prof. Anita Sharma (Debate)", role: "faculty_debate", eventId: "cultural_debate", email: "debate@anvesha.in" },
@@ -45759,9 +45708,11 @@ var initDb = async () => {
         verification_status VARCHAR(50) NOT NULL,
         jersey_number VARCHAR(50),
         roster_status VARCHAR(50),
-        check_in_status VARCHAR(50)
+        check_in_status VARCHAR(50),
+        student_register_number VARCHAR(100) DEFAULT 'NIL'
       );
     `);
+    await dbQuery(`ALTER TABLE participants ADD COLUMN IF NOT EXISTS student_register_number VARCHAR(100) DEFAULT 'NIL'`);
     await dbQuery(`
       CREATE TABLE IF NOT EXISTS payments (
         id VARCHAR(100) PRIMARY KEY,
@@ -45840,6 +45791,8 @@ var initDb = async () => {
         is_locked BOOLEAN NOT NULL DEFAULT TRUE
       );
     `);
+    await dbQuery(`ALTER TABLE results ADD COLUMN IF NOT EXISTS total_matches INT DEFAULT 0`);
+    await dbQuery(`ALTER TABLE results ADD COLUMN IF NOT EXISTS match_details JSONB DEFAULT '[]'::jsonb`);
     await dbQuery(`
       CREATE TABLE IF NOT EXISTS edit_requests (
         id VARCHAR(100) PRIMARY KEY,
@@ -45905,7 +45858,13 @@ var initDb = async () => {
       );
     }
     await dbQuery("DELETE FROM events WHERE id = 'sports_tug_of_war'");
+    await dbQuery("DELETE FROM events WHERE id = 'sports_football_girls'");
+    await dbQuery("DELETE FROM events WHERE id = 'sports_basketball_boys'");
+    await dbQuery("DELETE FROM events WHERE id = 'sports_basketball_girls'");
     await dbQuery("DELETE FROM users WHERE id = 'usr_tugofwar'");
+    await dbQuery("DELETE FROM users WHERE id = 'usr_football_girls'");
+    await dbQuery("DELETE FROM users WHERE id = 'usr_basketball'");
+    await dbQuery("DELETE FROM users WHERE id = 'usr_basketball_girls'");
     console.log("Synchronizing user roles...");
     for (const u of INITIAL_USERS) {
       await dbQuery(
@@ -45933,6 +45892,10 @@ var login = async (req, res) => {
   const { username, password } = req.body;
   const inputStr = (username || "").trim().toLowerCase();
   try {
+    if (!password || password !== "Anvesha@2026") {
+      res.status(401).json({ success: false, message: "Invalid password. Please check your credentials." });
+      return;
+    }
     const rowsRes = await dbQuery("SELECT * FROM users");
     const users = rowsRes.rows;
     const user = users.find(
@@ -46011,28 +45974,23 @@ var validateParticipant = async (req, res) => {
     const { name, dob, govtIdProof, eventId } = req.body;
     const govtIdLower = (govtIdProof || "").toLowerCase().trim();
     const nameLower = (name || "").toLowerCase().trim();
+    const eventRes = await dbQuery("SELECT category FROM events WHERE id = $1", [eventId]);
+    const newEventCategory = eventRes.rows[0]?.category;
     const queryRes = await dbQuery(
-      `SELECT * FROM participants 
-       WHERE LOWER(govt_id_proof) = $1 
-          OR (LOWER(name) = $2 AND dob = $3)
-       LIMIT 1`,
+      `SELECT p.*, e.category as existing_event_category FROM participants p
+       JOIN events e ON p.event_id = e.id
+       WHERE LOWER(p.govt_id_proof) = $1 
+          OR (LOWER(p.name) = $2 AND p.dob = $3)`,
       [govtIdLower, nameLower, dob]
     );
-    const existingInAnotherEvent = queryRes.rows[0];
-    if (existingInAnotherEvent) {
-      if (existingInAnotherEvent.event_id !== eventId) {
-        res.json({
-          valid: false,
-          error: `Participant '${name}' is ALREADY registered in another event (${existingInAnotherEvent.event_id}). Rule 2 violation: One participant can participate in ONLY ONE event.`
-        });
-        return;
-      } else {
-        res.json({
-          valid: false,
-          error: `Participant '${name}' is ALREADY registered under this event. Duplicate entry detected.`
-        });
-        return;
-      }
+    const existingRegistrations = queryRes.rows;
+    const sameEventReg = existingRegistrations.find((r) => r.event_id === eventId);
+    if (sameEventReg) {
+      res.json({
+        valid: false,
+        error: `Participant '${name}' is ALREADY registered under this event. Duplicate entry detected.`
+      });
+      return;
     }
     res.json({ valid: true });
   } catch (error) {
@@ -46043,8 +46001,15 @@ var validateParticipant = async (req, res) => {
 var submitRegistration = async (req, res) => {
   try {
     const { institution, poc, teams, participants, payment, paymentId } = req.body;
+    const eventIds = teams.map((t) => t.eventId);
+    const dbEvtsRes = await dbQuery("SELECT id, category FROM events WHERE id = ANY($1)", [eventIds]);
+    const dbEvts = dbEvtsRes.rows;
     const eventCounts = {};
     for (const teamItem of teams) {
+      const dbEvt = dbEvts.find((e) => e.id === teamItem.eventId);
+      if (dbEvt && dbEvt.category === "FUN_ACTIVITIES") {
+        continue;
+      }
       eventCounts[teamItem.eventId] = (eventCounts[teamItem.eventId] || 0) + 1;
       if (eventCounts[teamItem.eventId] > 2) {
         res.status(400).json({
@@ -46232,6 +46197,157 @@ var getBankPaymentDetails = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to retrieve SIB details." });
   }
 };
+var spotRegisterInstitution = async (req, res) => {
+  try {
+    const { name, address, pocName, pocNumber, pocEmail, participants } = req.body;
+    if (!name || !name.trim()) {
+      res.status(400).json({ success: false, message: "Institution Name is required." });
+      return;
+    }
+    const result = await withTransaction(async (client) => {
+      const dbEventsRes = await client.query("SELECT * FROM events");
+      const dbEvents = dbEventsRes.rows;
+      const countRes = await client.query("SELECT COUNT(*) FROM institutions");
+      const regCount = parseInt(countRes.rows[0].count, 10) + 1001;
+      const registrationId = `ANV-2026-${regCount}`;
+      const instId = `inst_${Date.now()}_spot_${Math.floor(Math.random() * 1e3)}`;
+      await client.query(
+        `INSERT INTO institutions (id, registration_id, name, principal_name, address, district, state, pincode, school_contact_number, school_email, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+        [
+          instId,
+          registrationId,
+          name.trim(),
+          pocName ? pocName.trim() : "Principal",
+          address ? address.trim() : "Spot Registered",
+          "Bengaluru",
+          "Karnataka",
+          "560001",
+          pocNumber ? pocNumber.trim() : "080-22222222",
+          pocEmail ? pocEmail.trim() : "poc@institution.edu",
+          (/* @__PURE__ */ new Date()).toISOString()
+        ]
+      );
+      const pocId = `poc_${Date.now()}_spot`;
+      await client.query(
+        `INSERT INTO contacts (id, institution_id, type, name, designation, phone, email, govt_id_proof)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          pocId,
+          instId,
+          "POC",
+          pocName ? pocName.trim() : "Coordinator",
+          "Co-ordinator",
+          pocNumber ? pocNumber.trim() : "080-22222222",
+          pocEmail ? pocEmail.trim() : "poc@institution.edu",
+          "NIL"
+        ]
+      );
+      const teamGroups = {};
+      for (const p of participants || []) {
+        const key = `${p.eventId}_${p.teamName || "Team A"}`;
+        if (!teamGroups[key]) teamGroups[key] = [];
+        teamGroups[key].push(p);
+      }
+      let chestCounter = 100 + Math.floor(Math.random() * 50);
+      let totalFee = 0;
+      for (const key of Object.keys(teamGroups)) {
+        const group = teamGroups[key];
+        const firstP = group[0];
+        const eventId = firstP.eventId;
+        const teamName = firstP.teamName || "Team A";
+        const resolvedEvt = dbEvents.find((e) => e.id === eventId);
+        if (!resolvedEvt) {
+          throw new Error(`Invalid event ID: '${eventId}'`);
+        }
+        totalFee += Number(resolvedEvt.registration_fee || 0);
+        const teamId = `team_${Date.now()}_${Math.floor(Math.random() * 1e3)}`;
+        const prefix = eventId.includes("football") ? "FB" : eventId.includes("volleyball") ? "VB" : eventId.includes("tug_of_war") ? "TW" : eventId.includes("dance") ? "DN" : eventId.includes("music") ? "MU" : eventId.includes("debate") ? "DB" : eventId.includes("open_mic") ? "OM" : "TH";
+        const chestNumber = `${prefix}-${chestCounter}`;
+        chestCounter += 1;
+        await client.query(
+          `INSERT INTO teams (id, registration_id, institution_id, event_id, team_name, status, chest_number)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [teamId, registrationId, instId, eventId, teamName, "VERIFIED", chestNumber]
+        );
+        for (let pIdx = 0; pIdx < group.length; pIdx++) {
+          const p = group[pIdx];
+          const partId = `part_${Date.now()}_${Math.floor(Math.random() * 1e3)}`;
+          await client.query(
+            `INSERT INTO participants (id, registration_id, institution_id, team_id, event_id, name, gender, dob, class_name, section, phone, email, govt_id_proof, emergency_contact, medical_info, chest_number, verification_status, student_register_number)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+            [
+              partId,
+              registrationId,
+              instId,
+              teamId,
+              eventId,
+              p.name,
+              p.gender,
+              p.dob,
+              p.className,
+              "A",
+              p.phone || "0000000000",
+              p.email || "student@spot.com",
+              p.govtIdProof || `SPOT-${partId}`,
+              p.emergencyContact || "0000000000",
+              "",
+              chestNumber,
+              "VERIFIED",
+              p.studentRegisterNumber || "NIL"
+            ]
+          );
+          const hospId = `hosp_${Date.now()}_${Math.floor(Math.random() * 1e3)}`;
+          await client.query(
+            `INSERT INTO hospitality (id, participant_id, registration_id, status)
+             VALUES ($1, $2, $3, $4)`,
+            [hospId, partId, registrationId, "PENDING"]
+          );
+        }
+      }
+      const paymentId = `pay_${Date.now()}_spot`;
+      const receiptNumber = `RCP-SPOT-SIB-${Math.floor(1e3 + Math.random() * 9e3)}`;
+      await client.query(
+        `INSERT INTO payments (id, registration_id, institution_id, amount, transaction_id, receipt_number, payment_status, payment_date)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          paymentId,
+          registrationId,
+          instId,
+          totalFee,
+          `TXN-SPOT-${Date.now()}`,
+          receiptNumber,
+          "PAID",
+          (/* @__PURE__ */ new Date()).toISOString()
+        ]
+      );
+      const verId = `ver_${Date.now()}_spot`;
+      await client.query(
+        `INSERT INTO verification_records (id, registration_id, institution_id, verified_by, verified_at, status, remarks)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [verId, registrationId, instId, "Registration Spot Desk", (/* @__PURE__ */ new Date()).toISOString(), "VERIFIED", "Registered directly on the spot by Registration Crew."]
+      );
+      const logId = `log_${Date.now()}_spot`;
+      await client.query(
+        `INSERT INTO audit_logs (id, timestamp, user_name, user_role, action, details)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          logId,
+          (/* @__PURE__ */ new Date()).toISOString(),
+          "Registration Desk",
+          "registration_team",
+          "SPOT_REGISTER_INSTITUTION",
+          `On-site spot registration for '${name}' completed. ${participants.length} students enrolled.`
+        ]
+      );
+      return { registrationId, name };
+    });
+    res.json({ success: true, message: "Spot registration successful.", data: result });
+  } catch (error) {
+    console.error("Spot registration error:", error);
+    res.status(500).json({ success: false, message: error.message || "Spot registration failed." });
+  }
+};
 
 // server/src/controllers/verificationController.ts
 var getPendingVerifications = async (req, res) => {
@@ -46395,7 +46511,7 @@ var approveVerification = async (req, res) => {
         const t = teams[idx];
         let chestNumber = t.chest_number;
         if (!chestNumber) {
-          const prefix = t.event_id.includes("football") ? "FB" : t.event_id.includes("volleyball") ? "VB" : t.event_id.includes("basketball") ? "BB" : t.event_id.includes("tug_of_war") ? "TW" : t.event_id.includes("dance") ? "DN" : t.event_id.includes("music") ? "MU" : t.event_id.includes("debate") ? "DB" : t.event_id.includes("open_mic") ? "OM" : "TH";
+          const prefix = t.event_id.includes("football") ? "FB" : t.event_id.includes("volleyball") ? "VB" : t.event_id.includes("tug_of_war") ? "TW" : t.event_id.includes("dance") ? "DN" : t.event_id.includes("music") ? "MU" : t.event_id.includes("debate") ? "DB" : t.event_id.includes("open_mic") ? "OM" : "TH";
           chestNumber = `${prefix}-${chestCounter + idx}`;
         }
         await client.query(
@@ -46490,6 +46606,48 @@ var rejectVerification = async (req, res) => {
     res.status(500).json({ success: false, message: error.message || "Failed to reject verification." });
   }
 };
+var updateParticipantName = async (req, res) => {
+  const { participantId, newName } = req.body;
+  if (!participantId || !newName || !newName.trim()) {
+    res.status(400).json({ success: false, message: "Participant ID and new name are required." });
+    return;
+  }
+  try {
+    const checkRes = await dbQuery(
+      `SELECT vr.status FROM participants p
+       LEFT JOIN verification_records vr ON p.institution_id = vr.institution_id
+       WHERE p.id = $1`,
+      [participantId]
+    );
+    if (checkRes.rows.length === 0) {
+      res.status(404).json({ success: false, message: "Participant not found." });
+      return;
+    }
+    const status = checkRes.rows[0].status;
+    if (status && status !== "PENDING") {
+      res.status(400).json({ success: false, message: "Cannot edit name after verification process is complete." });
+      return;
+    }
+    await dbQuery("UPDATE participants SET name = $1 WHERE id = $2", [newName.trim(), participantId]);
+    const logId = `log_${Date.now()}_edit_name`;
+    await dbQuery(
+      `INSERT INTO audit_logs (id, timestamp, user_name, role, action, details)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        logId,
+        (/* @__PURE__ */ new Date()).toISOString(),
+        "Registration Desk",
+        "registration_team",
+        "EDIT_PARTICIPANT_NAME",
+        `Participant ID '${participantId}' name updated to '${newName.trim()}'.`
+      ]
+    );
+    res.json({ success: true, message: "Participant name updated successfully." });
+  } catch (error) {
+    console.error("Error updating participant name:", error);
+    res.status(500).json({ success: false, message: "Failed to update name." });
+  }
+};
 
 // server/src/controllers/eventController.ts
 var getEventData = async (req, res) => {
@@ -46533,7 +46691,9 @@ var getEventData = async (req, res) => {
       secondRunnerUpInstitutionName: result.second_runner_up_institution_name,
       submittedBy: result.submitted_by,
       submittedAt: result.submitted_at,
-      isLocked: result.is_locked
+      isLocked: result.is_locked,
+      totalMatches: result.total_matches || 0,
+      matchDetails: typeof result.match_details === "string" ? JSON.parse(result.match_details) : result.match_details || []
     } : null;
     const editsRes = await dbQuery("SELECT * FROM edit_requests WHERE event_id = $1 AND status = 'PENDING' LIMIT 1", [eventId]);
     const pendingEditRequest = editsRes.rows[0] ? {
@@ -47125,6 +47285,361 @@ var getEventsList = async (req, res) => {
     res.json({ success: true, data: EVENTS_CATALOG });
   }
 };
+var getTeamByChest = async (req, res) => {
+  const { chestNumber } = req.params;
+  try {
+    const teamRes = await dbQuery(
+      `SELECT t.*, i.name as institution_name, e.name as event_name, e.category as event_category
+       FROM teams t
+       JOIN institutions i ON t.institution_id = i.id
+       JOIN events e ON t.event_id = e.id
+       WHERE t.chest_number = $1`,
+      [chestNumber]
+    );
+    const team = teamRes.rows[0];
+    if (!team) {
+      res.status(404).json({ success: false, message: `No team found with chest number ${chestNumber}` });
+      return;
+    }
+    const participantsRes = await dbQuery(
+      `SELECT id, name, class_name, gender, emergency_contact, verification_status
+       FROM participants
+       WHERE team_id = $1`,
+      [team.id]
+    );
+    res.json({
+      success: true,
+      data: {
+        id: team.id,
+        registrationId: team.registration_id,
+        institutionId: team.institution_id,
+        eventId: team.event_id,
+        eventName: team.event_name,
+        category: team.event_category,
+        teamName: team.team_name,
+        coachName: team.coach_name,
+        mentorName: team.mentor_name,
+        status: team.status,
+        chestNumber: team.chest_number,
+        participants: participantsRes.rows.map((p) => ({
+          id: p.id,
+          name: p.name,
+          className: p.class_name,
+          gender: p.gender,
+          emergencyContact: p.emergency_contact,
+          verificationStatus: p.verification_status
+        }))
+      }
+    });
+  } catch (error) {
+    console.error("getTeamByChest error:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to fetch team." });
+  }
+};
+var submitWinnerRunnerByChest = async (req, res) => {
+  const { eventId, winnerChest, runnerUpChest, secondRunnerUpChest, user, totalMatches, matchDetails } = req.body;
+  try {
+    const winnerRes = await dbQuery(
+      `SELECT t.id, t.team_name, i.name as inst_name 
+       FROM teams t 
+       JOIN institutions i ON t.institution_id = i.id 
+       WHERE t.chest_number = $1 AND t.event_id = $2`,
+      [winnerChest, eventId]
+    );
+    const winner = winnerRes.rows[0];
+    if (!winner) {
+      res.status(400).json({ success: false, message: `Winner chest number ${winnerChest} does not exist or belong to this event.` });
+      return;
+    }
+    let runnerUpId = null;
+    let runnerUpName = null;
+    let runnerUpInst = null;
+    if (runnerUpChest) {
+      const runnerRes = await dbQuery(
+        `SELECT t.id, t.team_name, i.name as inst_name 
+         FROM teams t 
+         JOIN institutions i ON t.institution_id = i.id 
+         WHERE t.chest_number = $1 AND t.event_id = $2`,
+        [runnerUpChest, eventId]
+      );
+      const runner = runnerRes.rows[0];
+      if (!runner) {
+        res.status(400).json({ success: false, message: `Runner up chest number ${runnerUpChest} does not exist or belong to this event.` });
+        return;
+      }
+      runnerUpId = runner.id;
+      runnerUpName = runner.team_name;
+      runnerUpInst = runner.inst_name;
+    }
+    let secondRunnerUpId = null;
+    let secondRunnerUpName = null;
+    let secondRunnerUpInst = null;
+    if (secondRunnerUpChest) {
+      const secondRunnerRes = await dbQuery(
+        `SELECT t.id, t.team_name, i.name as inst_name 
+         FROM teams t 
+         JOIN institutions i ON t.institution_id = i.id 
+         WHERE t.chest_number = $1 AND t.event_id = $2`,
+        [secondRunnerUpChest, eventId]
+      );
+      const secondRunner = secondRunnerRes.rows[0];
+      if (!secondRunner) {
+        res.status(400).json({ success: false, message: `Second runner up chest number ${secondRunnerUpChest} does not exist or belong to this event.` });
+        return;
+      }
+      secondRunnerUpId = secondRunner.id;
+      secondRunnerUpName = secondRunner.team_name;
+      secondRunnerUpInst = secondRunner.inst_name;
+    }
+    const checkRes = await dbQuery("SELECT * FROM results WHERE event_id = $1", [eventId]);
+    const nowStr = (/* @__PURE__ */ new Date()).toISOString();
+    if (checkRes.rows.length === 0) {
+      const resId = `res_${Date.now()}`;
+      await dbQuery(
+        `INSERT INTO results (id, event_id, winner_team_id, winner_team_name, winner_institution_name, runner_up_team_id, runner_up_team_name, runner_up_institution_name, second_runner_up_team_id, second_runner_up_team_name, second_runner_up_institution_name, submitted_by, submitted_at, is_locked, total_matches, match_details)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+        [
+          resId,
+          eventId,
+          winner.id,
+          winner.team_name,
+          winner.inst_name,
+          runnerUpId,
+          runnerUpName,
+          runnerUpInst,
+          secondRunnerUpId,
+          secondRunnerUpName,
+          secondRunnerUpInst,
+          user?.name || "Event Coordinator",
+          nowStr,
+          true,
+          totalMatches || 0,
+          JSON.stringify(matchDetails || [])
+        ]
+      );
+    } else {
+      await dbQuery(
+        `UPDATE results 
+         SET winner_team_id = $1, winner_team_name = $2, winner_institution_name = $3,
+             runner_up_team_id = $4, runner_up_team_name = $5, runner_up_institution_name = $6,
+             second_runner_up_team_id = $7, second_runner_up_team_name = $8, second_runner_up_institution_name = $9,
+             submitted_by = $10, submitted_at = $11, is_locked = TRUE,
+             total_matches = $12, match_details = $13
+         WHERE event_id = $14`,
+        [
+          winner.id,
+          winner.team_name,
+          winner.inst_name,
+          runnerUpId,
+          runnerUpName,
+          runnerUpInst,
+          secondRunnerUpId,
+          secondRunnerUpName,
+          secondRunnerUpInst,
+          user?.name || "Event Coordinator",
+          nowStr,
+          totalMatches || 0,
+          JSON.stringify(matchDetails || []),
+          eventId
+        ]
+      );
+    }
+    res.json({ success: true, message: "Winner/Runner details submitted successfully!" });
+  } catch (error) {
+    console.error("submitWinnerRunnerByChest error:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to submit winner/runner details." });
+  }
+};
+var addMatchDetails = async (req, res) => {
+  const { eventId } = req.params;
+  const { round, team1, team2, score1, score2, winner, user } = req.body;
+  if (!round || !team1 || !team2 || score1 === void 0 || score2 === void 0 || !winner) {
+    res.status(400).json({ success: false, message: "All match fields (Round, Team 1, Team 2, Score 1, Score 2, Winner) are required." });
+    return;
+  }
+  try {
+    const checkRes = await dbQuery("SELECT * FROM results WHERE event_id = $1", [eventId]);
+    const nowStr = (/* @__PURE__ */ new Date()).toISOString();
+    let currentDetails = [];
+    let currentTotal = 0;
+    if (checkRes.rows.length > 0) {
+      const row = checkRes.rows[0];
+      currentTotal = row.total_matches || 0;
+      currentDetails = typeof row.match_details === "string" ? JSON.parse(row.match_details) : row.match_details || [];
+    }
+    currentDetails.push({
+      round: round.trim(),
+      team1: team1.trim(),
+      team2: team2.trim(),
+      score1: score1.trim(),
+      score2: score2.trim(),
+      winner: winner.trim()
+    });
+    currentTotal = currentDetails.length;
+    if (checkRes.rows.length === 0) {
+      const resId = `res_${Date.now()}`;
+      await dbQuery(
+        `INSERT INTO results (id, event_id, winner_team_id, winner_team_name, winner_institution_name, runner_up_team_id, runner_up_team_name, runner_up_institution_name, second_runner_up_team_id, second_runner_up_team_name, second_runner_up_institution_name, submitted_by, submitted_at, is_locked, total_matches, match_details)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+        [
+          resId,
+          eventId,
+          null,
+          "Winner TBD",
+          "Institution TBD",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          user?.name || "Event Coordinator",
+          nowStr,
+          false,
+          currentTotal,
+          JSON.stringify(currentDetails)
+        ]
+      );
+    } else {
+      await dbQuery(
+        `UPDATE results 
+         SET total_matches = $1, match_details = $2, submitted_by = $3, submitted_at = $4
+         WHERE event_id = $5`,
+        [currentTotal, JSON.stringify(currentDetails), user?.name || "Event Coordinator", nowStr, eventId]
+      );
+    }
+    await addAuditLog(
+      user?.name || "Event Coordinator",
+      user?.role || "faculty",
+      "ADD_MATCH_DETAILS",
+      `Logged match: ${team1} vs ${team2} (Winner: ${winner}, Score: ${score1}-${score2}) for event ${eventId}`
+    );
+    res.status(201).json({ success: true, message: "Match details added successfully!" });
+  } catch (error) {
+    console.error("addMatchDetails error:", error);
+    res.status(500).json({ success: false, message: "Failed to save match details." });
+  }
+};
+var updateMatchDetailsByIndex = async (req, res) => {
+  const { eventId, index } = req.params;
+  const { round, team1, team2, score1, score2, winner, user } = req.body;
+  const matchIdx = parseInt(index, 10);
+  try {
+    const checkRes = await dbQuery("SELECT * FROM results WHERE event_id = $1", [eventId]);
+    if (checkRes.rows.length === 0) {
+      res.status(404).json({ success: false, message: "No result record found for this event." });
+      return;
+    }
+    const row = checkRes.rows[0];
+    if (row.is_locked) {
+      res.status(403).json({ success: false, message: "Result is locked. Cannot edit match details." });
+      return;
+    }
+    let currentDetails = typeof row.match_details === "string" ? JSON.parse(row.match_details) : row.match_details || [];
+    if (matchIdx < 0 || matchIdx >= currentDetails.length) {
+      res.status(400).json({ success: false, message: "Invalid match index." });
+      return;
+    }
+    currentDetails[matchIdx] = {
+      round: round.trim(),
+      team1: team1.trim(),
+      team2: team2.trim(),
+      score1: score1.trim(),
+      score2: score2.trim(),
+      winner: winner.trim()
+    };
+    const nowStr = (/* @__PURE__ */ new Date()).toISOString();
+    await dbQuery(
+      `UPDATE results 
+       SET total_matches = $1, match_details = $2, submitted_by = $3, submitted_at = $4
+       WHERE event_id = $5`,
+      [currentDetails.length, JSON.stringify(currentDetails), user?.name || "Event Coordinator", nowStr, eventId]
+    );
+    await addAuditLog(
+      user?.name || "Event Coordinator",
+      user?.role || "faculty",
+      "UPDATE_MATCH_DETAILS",
+      `Updated match at index ${matchIdx} for event ${eventId}`
+    );
+    res.json({ success: true, message: "Match details updated successfully!" });
+  } catch (error) {
+    console.error("updateMatchDetailsByIndex error:", error);
+    res.status(500).json({ success: false, message: "Failed to update match details." });
+  }
+};
+var deleteMatchDetailsByIndex = async (req, res) => {
+  const { eventId, index } = req.params;
+  const { user } = req.body;
+  const matchIdx = parseInt(index, 10);
+  try {
+    const checkRes = await dbQuery("SELECT * FROM results WHERE event_id = $1", [eventId]);
+    if (checkRes.rows.length === 0) {
+      res.status(404).json({ success: false, message: "No result record found for this event." });
+      return;
+    }
+    const row = checkRes.rows[0];
+    if (row.is_locked) {
+      res.status(403).json({ success: false, message: "Result is locked. Cannot delete match details." });
+      return;
+    }
+    let currentDetails = typeof row.match_details === "string" ? JSON.parse(row.match_details) : row.match_details || [];
+    if (matchIdx < 0 || matchIdx >= currentDetails.length) {
+      res.status(400).json({ success: false, message: "Invalid match index." });
+      return;
+    }
+    currentDetails.splice(matchIdx, 1);
+    const nowStr = (/* @__PURE__ */ new Date()).toISOString();
+    await dbQuery(
+      `UPDATE results 
+       SET total_matches = $1, match_details = $2, submitted_by = $3, submitted_at = $4
+       WHERE event_id = $5`,
+      [currentDetails.length, JSON.stringify(currentDetails), user?.name || "Event Coordinator", nowStr, eventId]
+    );
+    await addAuditLog(
+      user?.name || "Event Coordinator",
+      user?.role || "faculty",
+      "DELETE_MATCH_DETAILS",
+      `Deleted match at index ${matchIdx} for event ${eventId}`
+    );
+    res.json({ success: true, message: "Match details deleted successfully!" });
+  } catch (error) {
+    console.error("deleteMatchDetailsByIndex error:", error);
+    res.status(500).json({ success: false, message: "Failed to delete match details." });
+  }
+};
+var finalizeMatchDetails = async (req, res) => {
+  const { eventId } = req.params;
+  const { user } = req.body;
+  try {
+    const checkRes = await dbQuery("SELECT * FROM results WHERE event_id = $1", [eventId]);
+    if (checkRes.rows.length === 0) {
+      res.status(404).json({ success: false, message: "No match details found to finalize." });
+      return;
+    }
+    const row = checkRes.rows[0];
+    const currentDetails = typeof row.match_details === "string" ? JSON.parse(row.match_details) : row.match_details || [];
+    if (currentDetails.length === 0) {
+      res.status(400).json({ success: false, message: "Cannot finalize with zero matches logged." });
+      return;
+    }
+    await dbQuery(
+      `UPDATE results 
+       SET is_locked = TRUE, submitted_by = $1, submitted_at = $2
+       WHERE event_id = $3`,
+      [user?.name || "Event Coordinator", (/* @__PURE__ */ new Date()).toISOString(), eventId]
+    );
+    await addAuditLog(
+      user?.name || "Event Coordinator",
+      user?.role || "faculty",
+      "FINALIZE_MATCH_DETAILS",
+      `Finalized and locked results/match details for event ${eventId}`
+    );
+    res.json({ success: true, message: "Match details finalized and locked successfully!" });
+  } catch (error) {
+    console.error("finalizeMatchDetails error:", error);
+    res.status(500).json({ success: false, message: "Failed to finalize match details." });
+  }
+};
 
 // server/src/controllers/hospitalityController.ts
 var getHospitalityData = async (req, res) => {
@@ -47142,6 +47657,8 @@ var getHospitalityData = async (req, res) => {
     const hospitality = hospitalityRes.rows;
     const contactsRes = await dbQuery("SELECT * FROM contacts");
     const contacts = contactsRes.rows;
+    const teamsRes = await dbQuery("SELECT * FROM teams");
+    const teams = teamsRes.rows;
     const list = verifiedInstitutions.map((inst) => {
       const verifiedParts = participants.filter((p) => p.institution_id === inst.id).map((p) => ({
         id: p.id,
@@ -47168,6 +47685,8 @@ var getHospitalityData = async (req, res) => {
       const hosp = hospitality.find((h) => h.institution_id === inst.id);
       const poc = contacts.find((c) => c.institution_id === inst.id && c.type === "POC");
       const mentor = contacts.find((c) => c.institution_id === inst.id && c.type === "MENTOR");
+      const instTeams = teams.filter((t) => t.institution_id === inst.id);
+      const chestNumbers = Array.from(new Set(instTeams.map((t) => t.chest_number).filter(Boolean)));
       const mappedInst = {
         id: inst.id,
         registrationId: inst.registration_id,
@@ -47223,7 +47742,8 @@ var getHospitalityData = async (req, res) => {
         mentor: mappedMentor,
         participantsCount: verifiedParts.length,
         participants: verifiedParts,
-        hospitality: mappedHosp
+        hospitality: mappedHosp,
+        chestNumbers
       };
     });
     res.json({ success: true, data: list });
@@ -48000,6 +48520,50 @@ var deleteCrewUser = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to delete user account." });
   }
 };
+var updateUserRole = async (req, res) => {
+  const { userId, role } = req.body;
+  if (!userId || !role) {
+    res.status(400).json({ success: false, message: "User ID and Role are required." });
+    return;
+  }
+  try {
+    const checkRes = await dbQuery("SELECT * FROM users WHERE id = $1", [userId]);
+    const targetUser = checkRes.rows[0];
+    if (!targetUser) {
+      res.status(404).json({ success: false, message: "User not found." });
+      return;
+    }
+    if (targetUser.role === "admin") {
+      res.status(400).json({ success: false, message: "Cannot edit role of Admin user." });
+      return;
+    }
+    let eventId = null;
+    if (role.startsWith("faculty_")) {
+      if (role === "faculty_football_boys") eventId = "sports_football_boys";
+      else if (role === "faculty_volleyball_boys") eventId = "sports_volleyball_boys";
+      else if (role === "faculty_volleyball_girls") eventId = "sports_volleyball_girls";
+      else if (role === "faculty_tug_of_war_boys") eventId = "sports_tug_of_war_boys";
+      else if (role === "faculty_tug_of_war_girls") eventId = "sports_tug_of_war_girls";
+      else if (role === "faculty_dance") eventId = "cultural_group_dance";
+      else if (role === "faculty_music") eventId = "cultural_group_music";
+      else if (role === "faculty_debate") eventId = "cultural_debate";
+    }
+    await dbQuery(
+      "UPDATE users SET role = $1, event_id = $2 WHERE id = $3",
+      [role, eventId, userId]
+    );
+    await addAuditLog(
+      "Chief Admin",
+      "admin",
+      "UPDATE_USER_ROLE",
+      `Updated role for crew member '${targetUser.name}' (${targetUser.username}) to '${role}'.`
+    );
+    res.json({ success: true, message: "User role updated successfully." });
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    res.status(500).json({ success: false, message: "Failed to update user role." });
+  }
+};
 var deleteBankPayment = async (req, res) => {
   const { paymentId } = req.params;
   try {
@@ -48136,6 +48700,335 @@ var deleteInstitutionMaster = async (req, res) => {
   } catch (error) {
     console.error("deleteInstitutionMaster error:", error);
     res.status(500).json({ success: false, message: "Failed to delete master record." });
+  }
+};
+var addInstitutionMaster = async (req, res) => {
+  const { institutionName, pocName, pocNumber, pocEmailId } = req.body;
+  if (!institutionName || !institutionName.trim()) {
+    res.status(400).json({ success: false, message: "Institution Name is required." });
+    return;
+  }
+  try {
+    const nameTrimmed = institutionName.trim();
+    const checkRes = await dbQuery(
+      "SELECT id FROM institution_master WHERE LOWER(institution_name) = LOWER($1)",
+      [nameTrimmed]
+    );
+    if (checkRes.rows.length > 0) {
+      res.status(400).json({ success: false, message: "An institution with this name already exists." });
+      return;
+    }
+    const id = `inst_m_${Date.now()}_${Math.floor(Math.random() * 1e3)}`;
+    await dbQuery(
+      `INSERT INTO institution_master (id, institution_name, poc_name, poc_number, poc_email_id)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [
+        id,
+        nameTrimmed,
+        pocName && pocName.trim() ? pocName.trim() : null,
+        pocNumber && pocNumber.trim() ? pocNumber.trim() : null,
+        pocEmailId && pocEmailId.trim() ? pocEmailId.trim() : null
+      ]
+    );
+    await addAuditLog(
+      "Chief Admin",
+      "admin",
+      "ADD_INSTITUTION_MASTER",
+      `Added master institution: ${nameTrimmed}`
+    );
+    res.status(201).json({
+      success: true,
+      message: "Master record added successfully.",
+      institution: {
+        id,
+        institutionName: nameTrimmed,
+        pocName: pocName || "",
+        pocNumber: pocNumber || "",
+        pocEmailId: pocEmailId || ""
+      }
+    });
+  } catch (error) {
+    console.error("addInstitutionMaster error:", error);
+    res.status(500).json({ success: false, message: "Failed to add master record." });
+  }
+};
+var updateInstitutionMaster = async (req, res) => {
+  const { id } = req.params;
+  const { institutionName, pocName, pocNumber, pocEmailId } = req.body;
+  if (!institutionName || !institutionName.trim()) {
+    res.status(400).json({ success: false, message: "Institution Name is required." });
+    return;
+  }
+  try {
+    const nameTrimmed = institutionName.trim();
+    const checkExist = await dbQuery("SELECT * FROM institution_master WHERE id = $1", [id]);
+    if (checkExist.rows.length === 0) {
+      res.status(404).json({ success: false, message: "Master record not found." });
+      return;
+    }
+    const checkName = await dbQuery(
+      "SELECT id FROM institution_master WHERE LOWER(institution_name) = LOWER($1) AND id <> $2",
+      [nameTrimmed, id]
+    );
+    if (checkName.rows.length > 0) {
+      res.status(400).json({ success: false, message: "An institution with this name already exists." });
+      return;
+    }
+    await dbQuery(
+      `UPDATE institution_master 
+       SET institution_name = $1, poc_name = $2, poc_number = $3, poc_email_id = $4
+       WHERE id = $5`,
+      [
+        nameTrimmed,
+        pocName && pocName.trim() ? pocName.trim() : null,
+        pocNumber && pocNumber.trim() ? pocNumber.trim() : null,
+        pocEmailId && pocEmailId.trim() ? pocEmailId.trim() : null,
+        id
+      ]
+    );
+    await addAuditLog(
+      "Chief Admin",
+      "admin",
+      "UPDATE_INSTITUTION_MASTER",
+      `Updated master institution: ${nameTrimmed}`
+    );
+    res.json({
+      success: true,
+      message: "Master record updated successfully.",
+      institution: {
+        id,
+        institutionName: nameTrimmed,
+        pocName: pocName || "",
+        pocNumber: pocNumber || "",
+        pocEmailId: pocEmailId || ""
+      }
+    });
+  } catch (error) {
+    console.error("updateInstitutionMaster error:", error);
+    res.status(500).json({ success: false, message: "Failed to update master record." });
+  }
+};
+var bulkRegisterInstitutions = async (req, res) => {
+  const { institutions } = req.body;
+  if (!Array.isArray(institutions) || institutions.length === 0) {
+    res.status(400).json({ success: false, message: "Invalid payload. institutions must be a non-empty array." });
+    return;
+  }
+  try {
+    const results = await withTransaction(async (client) => {
+      const eventsRes = await client.query("SELECT * FROM events");
+      const dbEvents = eventsRes.rows;
+      const resolveEvent = (eventName) => {
+        const norm = (eventName || "").trim().toLowerCase();
+        if (!norm) return null;
+        let matched = dbEvents.find((e) => e.id.toLowerCase() === norm || e.name.toLowerCase() === norm);
+        if (matched) return matched;
+        if (norm.includes("football") && (norm.includes("boy") || norm.includes("men"))) {
+          return dbEvents.find((e) => e.id === "sports_football_boys");
+        }
+        if (norm.includes("volleyball") && norm.includes("girl")) {
+          return dbEvents.find((e) => e.id === "sports_volleyball_girls");
+        }
+        if (norm.includes("volleyball") && (norm.includes("boy") || norm.includes("men"))) {
+          return dbEvents.find((e) => e.id === "sports_volleyball_boys");
+        }
+        if (norm.includes("tug") && norm.includes("war") && norm.includes("girl")) {
+          return dbEvents.find((e) => e.id === "sports_tug_of_war_girls");
+        }
+        if (norm.includes("tug") && norm.includes("war") && (norm.includes("boy") || norm.includes("men"))) {
+          return dbEvents.find((e) => e.id === "sports_tug_of_war_boys");
+        }
+        if (norm.includes("dance")) {
+          return dbEvents.find((e) => e.id === "cultural_dance");
+        }
+        if (norm.includes("music") || norm.includes("song")) {
+          return dbEvents.find((e) => e.id === "cultural_music");
+        }
+        if (norm.includes("debate")) {
+          return dbEvents.find((e) => e.id === "cultural_debate");
+        }
+        if (norm.includes("open") || norm.includes("mic") || norm.includes("stand")) {
+          return dbEvents.find((e) => e.id === "cultural_open_mic");
+        }
+        if (norm.includes("treasure") || norm.includes("hunt")) {
+          return dbEvents.find((e) => e.id === "cultural_treasure_hunt");
+        }
+        return dbEvents.find(
+          (e) => norm.includes(e.name.toLowerCase()) || e.name.toLowerCase().includes(norm)
+        );
+      };
+      const importedInstitutions = [];
+      for (let i = 0; i < institutions.length; i++) {
+        const inst = institutions[i];
+        const { name, pocName, pocNumber, pocEmail, participants } = inst;
+        if (!name || !name.trim()) {
+          throw new Error(`Row ${i + 1}: Institution Name is required.`);
+        }
+        const countRes = await client.query("SELECT COUNT(*) FROM institutions");
+        const regCount = parseInt(countRes.rows[0].count, 10) + 1001;
+        const registrationId = `ANV-2026-${regCount}`;
+        const instId = `inst_${Date.now()}_${i}_${Math.floor(Math.random() * 1e3)}`;
+        await client.query(
+          `INSERT INTO institutions (id, registration_id, name, principal_name, address, district, state, pincode, school_contact_number, school_email, created_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+          [
+            instId,
+            registrationId,
+            name.trim(),
+            pocName ? pocName.trim() : "Principal",
+            "Main Campus",
+            "Bengaluru",
+            "Karnataka",
+            "560001",
+            pocNumber ? pocNumber.trim() : "080-22222222",
+            pocEmail ? pocEmail.trim() : "poc@institution.edu",
+            (/* @__PURE__ */ new Date()).toISOString()
+          ]
+        );
+        const pocId = `poc_${Date.now()}_${i}`;
+        await client.query(
+          `INSERT INTO contacts (id, institution_id, type, name, designation, phone, email, govt_id_proof)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          [
+            pocId,
+            instId,
+            "POC",
+            pocName ? pocName.trim() : "Coordinator",
+            "Co-ordinator",
+            pocNumber ? pocNumber.trim() : "080-22222222",
+            pocEmail ? pocEmail.trim() : "poc@institution.edu",
+            "NIL"
+          ]
+        );
+        const teamGroups = {};
+        let totalFee = 0;
+        for (let pIdx = 0; pIdx < (participants || []).length; pIdx++) {
+          const p = participants[pIdx];
+          const resolvedEvt = resolveEvent(p.eventName);
+          if (!resolvedEvt) {
+            throw new Error(`Institution '${name}': Could not map event name '${p.eventName}' to any catalog event.`);
+          }
+          let teamLetter = (p.team || "").trim().toUpperCase();
+          if (teamLetter !== "A" && teamLetter !== "B") {
+            teamLetter = "A";
+          }
+          const teamName = `Team ${teamLetter}`;
+          const groupKey = `${resolvedEvt.id}::${teamName}`;
+          if (!teamGroups[groupKey]) {
+            teamGroups[groupKey] = [];
+            totalFee += Number(resolvedEvt.registration_fee);
+          }
+          teamGroups[groupKey].push({ ...p, resolvedEvt, teamName });
+        }
+        let totalParticipantsCount = 0;
+        let chestCounter = 200 + Math.floor(Math.random() * 50);
+        for (const [groupKey, groupParts] of Object.entries(teamGroups)) {
+          const [eventId, teamName] = groupKey.split("::");
+          const teamId = `team_${Date.now()}_${i}_${Math.floor(Math.random() * 1e4)}`;
+          const prefix = eventId.includes("football") ? "FB" : eventId.includes("volleyball") ? "VB" : eventId.includes("tug_of_war") ? "TW" : eventId.includes("dance") ? "DN" : eventId.includes("music") ? "MU" : eventId.includes("debate") ? "DB" : eventId.includes("open_mic") ? "OM" : "TH";
+          const chestNumber = `${prefix}-${chestCounter}`;
+          chestCounter += 1;
+          await client.query(
+            `INSERT INTO teams (id, registration_id, institution_id, event_id, team_name, status, chest_number)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [teamId, registrationId, instId, eventId, teamName, "VERIFIED", chestNumber]
+          );
+          for (let k = 0; k < groupParts.length; k++) {
+            const p = groupParts[k];
+            const partId = `part_${Date.now()}_${i}_${Math.floor(Math.random() * 1e4)}`;
+            totalParticipantsCount++;
+            let gender = (p.gender || "").trim();
+            if (!["Male", "Female", "Other"].includes(gender)) {
+              gender = gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
+              if (!["Male", "Female", "Other"].includes(gender)) {
+                gender = "Male";
+              }
+            }
+            await client.query(
+              `INSERT INTO participants (id, registration_id, institution_id, team_id, event_id, name, gender, dob, class_name, section, phone, email, govt_id_proof, emergency_contact, verification_status, chest_number, student_register_number)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+              [
+                partId,
+                registrationId,
+                instId,
+                teamId,
+                eventId,
+                p.name.trim(),
+                gender,
+                p.dob || "2008-01-01",
+                p.className || "1st PU",
+                "A",
+                null,
+                null,
+                "NIL",
+                p.emergencyContact || (pocNumber ? pocNumber.trim() : "080-22222222"),
+                "VERIFIED",
+                chestNumber,
+                p.studentRegisterNumber || "NIL"
+              ]
+            );
+          }
+        }
+        const paymentId = `pay_${Date.now()}_${i}`;
+        const receiptNumber = `RCP-BULK-SIB-${Math.floor(1e3 + Math.random() * 9e3)}`;
+        await client.query(
+          `INSERT INTO payments (id, registration_id, institution_id, amount, transaction_id, receipt_number, payment_proof_url, status, date)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          [
+            paymentId,
+            registrationId,
+            instId,
+            totalFee,
+            `TXN-BULK-${Date.now()}-${i}`,
+            receiptNumber,
+            "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop",
+            "SUCCESS",
+            (/* @__PURE__ */ new Date()).toISOString()
+          ]
+        );
+        const verId = `ver_${Date.now()}_${i}`;
+        await client.query(
+          `INSERT INTO verifications (id, registration_id, institution_id, verified_by, verified_at, status, remarks)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [verId, registrationId, instId, "Admin Bulk Import", (/* @__PURE__ */ new Date()).toISOString(), "VERIFIED", "Imported directly via Admin Bulk Institution Import tool."]
+        );
+        const hospId = `hosp_${Date.now()}_${i}`;
+        await client.query(
+          `INSERT INTO hospitality (id, institution_id, arrival_status, food_preference, updated_at)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [hospId, instId, "NOT_ARRIVED", "Veg", (/* @__PURE__ */ new Date()).toISOString()]
+        );
+        importedInstitutions.push({
+          registrationId,
+          name: name.trim(),
+          teamsCount: Object.keys(teamGroups).length,
+          participantsCount: totalParticipantsCount,
+          totalFee
+        });
+      }
+      const logId = `log_${Date.now()}_bulk`;
+      await client.query(
+        `INSERT INTO audit_logs (id, timestamp, user_name, role, action, details)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          logId,
+          (/* @__PURE__ */ new Date()).toISOString(),
+          "Chief Admin",
+          "admin",
+          "BULK_REGISTER_INSTITUTIONS",
+          `Imported ${importedInstitutions.length} institutions directly into database.`
+        ]
+      );
+      return importedInstitutions;
+    });
+    res.json({
+      success: true,
+      message: `Successfully imported ${results.length} institutions and student rosters.`,
+      data: results
+    });
+  } catch (error) {
+    console.error("bulkRegisterInstitutions error:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to bulk import institutions." });
   }
 };
 
@@ -48335,9 +49228,11 @@ app.get("/api/registration/master-institutions", getMasterInstitutions);
 app.post("/api/registration/validate-participant", validateParticipant);
 app.post("/api/registration/submit", submitRegistration);
 app.get("/api/registration/payment-details/:paymentId", getBankPaymentDetails);
+app.post("/api/registration/spot", spotRegisterInstitution);
 app.get("/api/verification/pending", getPendingVerifications);
 app.post("/api/verification/approve", approveVerification);
 app.post("/api/verification/reject", rejectVerification);
+app.post("/api/verification/participant/update-name", updateParticipantName);
 app.get("/api/events", getEventsList);
 app.get("/api/events/:eventId", getEventData);
 app.post("/api/events/fixture", createOrUpdateFixture);
@@ -48345,6 +49240,12 @@ app.post("/api/events/submit-result", submitEventResult);
 app.post("/api/events/request-edit", requestEdit);
 app.post("/api/events/:eventId/live-status", updateEventLiveStatus);
 app.post("/api/events/:eventId/roster/verify", updateRosterStatus);
+app.get("/api/events/team-by-chest/:chestNumber", getTeamByChest);
+app.post("/api/events/results/chest", submitWinnerRunnerByChest);
+app.post("/api/events/:eventId/match", addMatchDetails);
+app.put("/api/events/:eventId/match/:index", updateMatchDetailsByIndex);
+app.delete("/api/events/:eventId/match/:index", deleteMatchDetailsByIndex);
+app.post("/api/events/:eventId/finalize-matches", finalizeMatchDetails);
 app.get("/api/hospitality", getHospitalityData);
 app.post("/api/hospitality/update", updateHospitalityStatus);
 app.get("/api/certificates", getCertificateData);
@@ -48358,10 +49259,14 @@ app.post("/api/admin/bank-payments/invite", sendRegistrationInvitation);
 app.post("/api/admin/bank-payments/invite-bulk", bulkSendRegistrationInvitations);
 app.post("/api/admin/bank-payments/update", updateBankPayment);
 app.delete("/api/admin/users/:userId", deleteCrewUser);
+app.post("/api/admin/users/update-role", updateUserRole);
 app.delete("/api/admin/bank-payments/:paymentId", deleteBankPayment);
 app.get("/api/admin/institution-master", getInstitutionMastersList);
+app.post("/api/admin/institution-master", addInstitutionMaster);
+app.put("/api/admin/institution-master/:id", updateInstitutionMaster);
 app.post("/api/admin/institution-master/bulk", bulkAddInstitutionMaster);
 app.delete("/api/admin/institution-master/:id", deleteInstitutionMaster);
+app.post("/api/admin/bulk-register", bulkRegisterInstitutions);
 app.get("/api/analytics", getAnalyticsData);
 initDb().then(() => {
   app.listen(PORT, () => {

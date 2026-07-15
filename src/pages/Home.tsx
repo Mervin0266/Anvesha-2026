@@ -56,31 +56,38 @@ export const Home: React.FC = () => {
     return () => clearInterval(t);
   }, []);
 
-  /* Merge Boys/Girls sports into one catalog card */
+  /* Merge Boys/Girls sports into one catalog card if both divisions exist */
   const displayEvents = React.useMemo(() => {
     const filtered = events.filter(e => e.category === activeTab);
-    if (activeTab === 'CULTURAL') return filtered;
-    const map = new Map<string, typeof filtered[0]>();
+    if (activeTab === 'CULTURALS' || activeTab === 'FUN_ACTIVITIES') return filtered;
+    
+    const groups: Record<string, typeof filtered> = {};
     filtered.forEach(e => {
       const base = e.name.replace(/\s*\((Boys|Girls)\)/i, '').trim();
-      if (!map.has(base)) map.set(base, { ...e, name: `${base} (Boys & Girls)` });
+      if (!groups[base]) groups[base] = [];
+      groups[base].push(e);
     });
-    return Array.from(map.values());
+    
+    return Object.keys(groups).map(base => {
+      const group = groups[base];
+      if (group.length > 1) {
+        return { ...group[0], name: `${base} (Boys & Girls)` };
+      } else {
+        return group[0];
+      }
+    });
   }, [events, activeTab]);
 
   const timelineSteps = [
-    { date: 'June 01, 2026', title: 'Online Registration Opens',            desc: 'PU Colleges initiate registration on the official ANVESHA portal.' },
-    { date: 'June 25, 2026', title: 'Registration & Document Deadline',      desc: 'All participant records and ID proofs must be finalized.' },
-    { date: 'June 28, 2026', title: 'Payment Verification',                  desc: 'Bank transaction receipts and college fee proofs verified.' },
-    { date: 'July 04, 2026', title: 'Event Day & On-Site Verification',      desc: 'Physical check-in, chest number allocation, and live matches.' },
-    { date: 'July 05, 2026', title: 'Results Declaration & Award Ceremony',  desc: 'Official score locking, trophy presentation, and certificate distribution.' },
+    { date: 'July 18, 2026', title: 'Registration & Document Deadline',      desc: 'Final submission of participant registrations, ID cards, and required documents.' },
+    { date: 'July 18, 2026', title: 'Payment Verification',                  desc: 'Verification of registration fees and confirmation of successful payments.' },
+    { date: 'July 22, 2026', title: 'Day 1 - Sports Events',      desc: 'Team reporting, registration verification, inauguration ceremony, and commencement of sports competitions.' },
+    { date: 'July 23, 2026', title: 'Day 2 - Cultural Events',  desc: 'Cultural competitions, award ceremony, and remaining sports finals (if applicable).' },
   ];
 
   const rules = [
-    { accent: 'navy', icon: '01', title: 'Maximum 2 Teams Per Event',           body: 'A PU Institution can enter at most TWO teams (Team A and Team B) per event. Registration of a third team (Team C) is strictly blocked by the system.' },
-    { accent: 'gold', icon: '02', title: 'One Participant = One Event Only',     body: 'A student can participate in ONLY ONE EVENT. Combining Sports + Cultural or two Sports events is invalid. Cross-validation runs on Name, DOB, and Govt ID.' },
-    { accent: 'navy', icon: '03', title: 'Duplicate Prevention',                 body: 'System enforces uniqueness on Name, DOB, Govt ID proof, Email, and Phone number to eliminate duplicate participant submissions.' },
-    { accent: 'gold', icon: '04', title: 'Event Day Verification & Chest Numbers', body: 'Only participants verified by the Registration Team receive official Chest Numbers and populate Hospitality, Scoreboards, and Certificates.' },
+    { accent: 'navy', icon: '01', title: 'Maximum 2 Teams Per Event',           body: 'A PU Institution can enter at most TWO teams (Team A and Team B) per event. Registration of a third team (Team C) is strictly blocked for SPORTS & CULTURALS (bypassed for FUN ACTIVITIES).' },
+    { accent: 'navy', icon: '02', title: 'Event Day Verification & Chest Numbers', body: 'Only participants verified by the Registration Team receive official Chest Numbers and populate Hospitality, Scoreboards, and Certificates.' },
   ];
 
   return (
@@ -152,7 +159,7 @@ export const Home: React.FC = () => {
                 </div>
                 <div className="inline-flex items-center space-x-2 text-sm text-slate-600 bg-white border border-slate-200 px-4 py-2.5 rounded-xl shadow-sm">
                   <Calendar className="w-4 h-4 text-christ-navy shrink-0" />
-                  <span className="font-medium">July 04 – 05, 2026</span>
+                  <span className="font-medium">July 22 – 23, 2026</span>
                 </div>
               </div>
 
@@ -251,19 +258,22 @@ export const Home: React.FC = () => {
             </div>
             {/* Filter tabs */}
             <div className="flex space-x-1.5 bg-white border border-slate-200 p-1.5 rounded-xl shadow-sm">
-              {(['SPORTS', 'CULTURAL'] as const).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${
-                    activeTab === tab
-                      ? 'bg-christ-navy text-white shadow'
-                      : 'text-slate-500 hover:text-christ-navy'
-                  }`}
-                >
-                  {tab === 'SPORTS' ? 'SPORTS (4)' : 'CULTURAL (5)'}
-                </button>
-              ))}
+              {(['SPORTS', 'CULTURALS', 'FUN_ACTIVITIES'] as const).map(tab => {
+                const count = events.filter(e => e.category === tab).length;
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${
+                      activeTab === tab
+                        ? 'bg-christ-navy text-white shadow'
+                        : 'text-slate-500 hover:text-christ-navy'
+                    }`}
+                  >
+                    {tab === 'SPORTS' ? 'SPORTS' : tab === 'CULTURALS' ? 'CULTURALS' : 'FUN ACTIVITIES'} ({count})
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -282,11 +292,13 @@ export const Home: React.FC = () => {
                   {/* Minimal gradient only at bottom for badge readability */}
                   <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
                   <div className="absolute top-3 left-3 flex gap-1.5">
-                    <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-christ-navy text-white shadow">
-                      {evt.type}
-                    </span>
+                    {evt.category !== 'FUN_ACTIVITIES' && (
+                      <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-christ-navy text-white shadow">
+                        {evt.type}
+                      </span>
+                    )}
                     <span className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-christ-gold text-christ-navy shadow">
-                      ₹{evt.registrationFee}
+                      {evt.category === 'FUN_ACTIVITIES' ? 'Free Entry' : `₹${evt.registrationFee}`}
                     </span>
                   </div>
                 </div>

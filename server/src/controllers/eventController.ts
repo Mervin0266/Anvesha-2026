@@ -47,7 +47,9 @@ export const getEventData = async (req: Request, res: Response): Promise<void> =
       secondRunnerUpInstitutionName: result.second_runner_up_institution_name,
       submittedBy: result.submitted_by,
       submittedAt: result.submitted_at,
-      isLocked: result.is_locked
+      isLocked: result.is_locked,
+      totalMatches: result.total_matches || 0,
+      matchDetails: typeof result.match_details === 'string' ? JSON.parse(result.match_details) : (result.match_details || [])
     } : null;
 
     // 3. Get pending edit requests
@@ -675,7 +677,7 @@ export const getTeamByChest = async (req: Request, res: Response): Promise<void>
 };
 
 export const submitWinnerRunnerByChest = async (req: Request, res: Response): Promise<void> => {
-  const { eventId, winnerChest, runnerUpChest, secondRunnerUpChest, user } = req.body;
+  const { eventId, winnerChest, runnerUpChest, secondRunnerUpChest, user, totalMatches, matchDetails } = req.body;
   try {
     // 1. Resolve winner team
     const winnerRes = await dbQuery(
@@ -742,13 +744,14 @@ export const submitWinnerRunnerByChest = async (req: Request, res: Response): Pr
     if (checkRes.rows.length === 0) {
       const resId = `res_${Date.now()}`;
       await dbQuery(
-        `INSERT INTO results (id, event_id, winner_team_id, winner_team_name, winner_institution_name, runner_up_team_id, runner_up_team_name, runner_up_institution_name, second_runner_up_team_id, second_runner_up_team_name, second_runner_up_institution_name, submitted_by, submitted_at, is_locked)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+        `INSERT INTO results (id, event_id, winner_team_id, winner_team_name, winner_institution_name, runner_up_team_id, runner_up_team_name, runner_up_institution_name, second_runner_up_team_id, second_runner_up_team_name, second_runner_up_institution_name, submitted_by, submitted_at, is_locked, total_matches, match_details)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
         [
           resId, eventId, winner.id, winner.team_name, winner.inst_name,
           runnerUpId, runnerUpName, runnerUpInst,
           secondRunnerUpId, secondRunnerUpName, secondRunnerUpInst,
-          user?.name || 'Event Coordinator', nowStr, true
+          user?.name || 'Event Coordinator', nowStr, true,
+          totalMatches || 0, JSON.stringify(matchDetails || [])
         ]
       );
     } else {
@@ -757,13 +760,16 @@ export const submitWinnerRunnerByChest = async (req: Request, res: Response): Pr
          SET winner_team_id = $1, winner_team_name = $2, winner_institution_name = $3,
              runner_up_team_id = $4, runner_up_team_name = $5, runner_up_institution_name = $6,
              second_runner_up_team_id = $7, second_runner_up_team_name = $8, second_runner_up_institution_name = $9,
-             submitted_by = $10, submitted_at = $11, is_locked = TRUE
-         WHERE event_id = $12`,
+             submitted_by = $10, submitted_at = $11, is_locked = TRUE,
+             total_matches = $12, match_details = $13
+         WHERE event_id = $14`,
         [
           winner.id, winner.team_name, winner.inst_name,
           runnerUpId, runnerUpName, runnerUpInst,
           secondRunnerUpId, secondRunnerUpName, secondRunnerUpInst,
-          user?.name || 'Event Coordinator', nowStr, eventId
+          user?.name || 'Event Coordinator', nowStr,
+          totalMatches || 0, JSON.stringify(matchDetails || []),
+          eventId
         ]
       );
     }
@@ -772,5 +778,214 @@ export const submitWinnerRunnerByChest = async (req: Request, res: Response): Pr
   } catch (error: any) {
     console.error('submitWinnerRunnerByChest error:', error);
     res.status(500).json({ success: false, message: error.message || 'Failed to submit winner/runner details.' });
+  }
+};
+
+export const addMatchDetails = async (req: Request, res: Response): Promise<void> => {
+  const { eventId } = req.params;
+  const { round, team1, team2, score1, score2, winner, user } = req.body;
+
+  if (!round || !team1 || !team2 || score1 === undefined || score2 === undefined || !winner) {
+    res.status(400).json({ success: false, message: 'All match fields (Round, Team 1, Team 2, Score 1, Score 2, Winner) are required.' });
+    return;
+  }
+
+  try {
+    const checkRes = await dbQuery('SELECT * FROM results WHERE event_id = $1', [eventId]);
+    const nowStr = new Date().toISOString();
+    let currentDetails: any[] = [];
+    let currentTotal = 0;
+
+    if (checkRes.rows.length > 0) {
+      const row = checkRes.rows[0];
+      currentTotal = row.total_matches || 0;
+      currentDetails = typeof row.match_details === 'string' ? JSON.parse(row.match_details) : (row.match_details || []);
+    }
+
+    currentDetails.push({
+      round: round.trim(),
+      team1: team1.trim(),
+      team2: team2.trim(),
+      score1: score1.trim(),
+      score2: score2.trim(),
+      winner: winner.trim()
+    });
+    currentTotal = currentDetails.length;
+
+    if (checkRes.rows.length === 0) {
+      const resId = `res_${Date.now()}`;
+      await dbQuery(
+        `INSERT INTO results (id, event_id, winner_team_id, winner_team_name, winner_institution_name, runner_up_team_id, runner_up_team_name, runner_up_institution_name, second_runner_up_team_id, second_runner_up_team_name, second_runner_up_institution_name, submitted_by, submitted_at, is_locked, total_matches, match_details)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+        [
+          resId, eventId, null, 'Winner TBD', 'Institution TBD',
+          null, null, null,
+          null, null, null,
+          user?.name || 'Event Coordinator', nowStr, false,
+          currentTotal, JSON.stringify(currentDetails)
+        ]
+      );
+    } else {
+      await dbQuery(
+        `UPDATE results 
+         SET total_matches = $1, match_details = $2, submitted_by = $3, submitted_at = $4
+         WHERE event_id = $5`,
+        [currentTotal, JSON.stringify(currentDetails), user?.name || 'Event Coordinator', nowStr, eventId]
+      );
+    }
+
+    await addAuditLog(
+      user?.name || 'Event Coordinator',
+      user?.role || 'faculty',
+      'ADD_MATCH_DETAILS',
+      `Logged match: ${team1} vs ${team2} (Winner: ${winner}, Score: ${score1}-${score2}) for event ${eventId}`
+    );
+
+    res.status(201).json({ success: true, message: 'Match details added successfully!' });
+  } catch (error: any) {
+    console.error('addMatchDetails error:', error);
+    res.status(500).json({ success: false, message: 'Failed to save match details.' });
+  }
+};
+
+export const updateMatchDetailsByIndex = async (req: Request, res: Response): Promise<void> => {
+  const { eventId, index } = req.params;
+  const { round, team1, team2, score1, score2, winner, user } = req.body;
+  const matchIdx = parseInt(index as string, 10);
+
+  try {
+    const checkRes = await dbQuery('SELECT * FROM results WHERE event_id = $1', [eventId]);
+    if (checkRes.rows.length === 0) {
+      res.status(404).json({ success: false, message: 'No result record found for this event.' });
+      return;
+    }
+
+    const row = checkRes.rows[0];
+    if (row.is_locked) {
+      res.status(403).json({ success: false, message: 'Result is locked. Cannot edit match details.' });
+      return;
+    }
+
+    let currentDetails = typeof row.match_details === 'string' ? JSON.parse(row.match_details) : (row.match_details || []);
+    if (matchIdx < 0 || matchIdx >= currentDetails.length) {
+      res.status(400).json({ success: false, message: 'Invalid match index.' });
+      return;
+    }
+
+    currentDetails[matchIdx] = {
+      round: round.trim(),
+      team1: team1.trim(),
+      team2: team2.trim(),
+      score1: score1.trim(),
+      score2: score2.trim(),
+      winner: winner.trim()
+    };
+
+    const nowStr = new Date().toISOString();
+    await dbQuery(
+      `UPDATE results 
+       SET total_matches = $1, match_details = $2, submitted_by = $3, submitted_at = $4
+       WHERE event_id = $5`,
+      [currentDetails.length, JSON.stringify(currentDetails), user?.name || 'Event Coordinator', nowStr, eventId]
+    );
+
+    await addAuditLog(
+      user?.name || 'Event Coordinator',
+      user?.role || 'faculty',
+      'UPDATE_MATCH_DETAILS',
+      `Updated match at index ${matchIdx} for event ${eventId}`
+    );
+
+    res.json({ success: true, message: 'Match details updated successfully!' });
+  } catch (error: any) {
+    console.error('updateMatchDetailsByIndex error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update match details.' });
+  }
+};
+
+export const deleteMatchDetailsByIndex = async (req: Request, res: Response): Promise<void> => {
+  const { eventId, index } = req.params;
+  const { user } = req.body;
+  const matchIdx = parseInt(index as string, 10);
+
+  try {
+    const checkRes = await dbQuery('SELECT * FROM results WHERE event_id = $1', [eventId]);
+    if (checkRes.rows.length === 0) {
+      res.status(404).json({ success: false, message: 'No result record found for this event.' });
+      return;
+    }
+
+    const row = checkRes.rows[0];
+    if (row.is_locked) {
+      res.status(403).json({ success: false, message: 'Result is locked. Cannot delete match details.' });
+      return;
+    }
+
+    let currentDetails = typeof row.match_details === 'string' ? JSON.parse(row.match_details) : (row.match_details || []);
+    if (matchIdx < 0 || matchIdx >= currentDetails.length) {
+      res.status(400).json({ success: false, message: 'Invalid match index.' });
+      return;
+    }
+
+    currentDetails.splice(matchIdx, 1);
+
+    const nowStr = new Date().toISOString();
+    await dbQuery(
+      `UPDATE results 
+       SET total_matches = $1, match_details = $2, submitted_by = $3, submitted_at = $4
+       WHERE event_id = $5`,
+      [currentDetails.length, JSON.stringify(currentDetails), user?.name || 'Event Coordinator', nowStr, eventId]
+    );
+
+    await addAuditLog(
+      user?.name || 'Event Coordinator',
+      user?.role || 'faculty',
+      'DELETE_MATCH_DETAILS',
+      `Deleted match at index ${matchIdx} for event ${eventId}`
+    );
+
+    res.json({ success: true, message: 'Match details deleted successfully!' });
+  } catch (error: any) {
+    console.error('deleteMatchDetailsByIndex error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete match details.' });
+  }
+};
+
+export const finalizeMatchDetails = async (req: Request, res: Response): Promise<void> => {
+  const { eventId } = req.params;
+  const { user } = req.body;
+
+  try {
+    const checkRes = await dbQuery('SELECT * FROM results WHERE event_id = $1', [eventId]);
+    if (checkRes.rows.length === 0) {
+      res.status(404).json({ success: false, message: 'No match details found to finalize.' });
+      return;
+    }
+
+    const row = checkRes.rows[0];
+    const currentDetails = typeof row.match_details === 'string' ? JSON.parse(row.match_details) : (row.match_details || []);
+    if (currentDetails.length === 0) {
+      res.status(400).json({ success: false, message: 'Cannot finalize with zero matches logged.' });
+      return;
+    }
+
+    await dbQuery(
+      `UPDATE results 
+       SET is_locked = TRUE, submitted_by = $1, submitted_at = $2
+       WHERE event_id = $3`,
+      [user?.name || 'Event Coordinator', new Date().toISOString(), eventId]
+    );
+
+    await addAuditLog(
+      user?.name || 'Event Coordinator',
+      user?.role || 'faculty',
+      'FINALIZE_MATCH_DETAILS',
+      `Finalized and locked results/match details for event ${eventId}`
+    );
+
+    res.json({ success: true, message: 'Match details finalized and locked successfully!' });
+  } catch (error: any) {
+    console.error('finalizeMatchDetails error:', error);
+    res.status(500).json({ success: false, message: 'Failed to finalize match details.' });
   }
 };

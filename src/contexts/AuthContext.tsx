@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (username: string, role?: UserRole) => Promise<User>;
+  login: (username: string, password?: string) => Promise<User>;
   logout: () => void;
   getRoleDashboardPath: (role: UserRole, eventId?: string) => string;
 }
@@ -41,12 +41,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuth();
   }, [token]);
 
-  const login = async (username: string): Promise<User> => {
+  const login = async (username: string, password?: string): Promise<User> => {
     setIsLoading(true);
     try {
       const res = await apiFetch<{ success: boolean; token: string; user: User }>('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({ username, password }),
       });
       
       localStorage.setItem('anvesha_token', res.token);
@@ -81,13 +81,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       default:
         // Faculty / Coordinator roles
         if (eventId) {
-          return eventId.startsWith('sports_') ? '/dashboard/sports' : '/dashboard/culturals';
+          if (eventId.startsWith('sports_')) return '/dashboard/sports';
+          if (eventId === 'cultural_open_mic' || eventId === 'cultural_treasure_hunt') return '/dashboard/fun-activities';
+          return '/dashboard/culturals';
         }
         if (role.startsWith('faculty_')) {
           const evt = role.replace('faculty_', '');
-          return evt.includes('football') || evt.includes('volleyball') || evt.includes('basketball') || evt.includes('tug')
-            ? '/dashboard/sports'
-            : '/dashboard/culturals';
+          if (evt.includes('football') || evt.includes('volleyball') || evt.includes('tug')) {
+            return '/dashboard/sports';
+          }
+          if (evt.includes('open_mic') || evt.includes('treasure_hunt')) {
+            return '/dashboard/fun-activities';
+          }
+          return '/dashboard/culturals';
         }
         return '/dashboard/admin';
     }

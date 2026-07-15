@@ -17,7 +17,7 @@ export const Login: React.FC = () => {
     setIsLoggingIn(true);
     setError(null);
     try {
-      const loggedInUser = await login(inputCredential);
+      const loggedInUser = await login(inputCredential, password);
       const targetPath = getRoleDashboardPath(loggedInUser.role, loggedInUser.eventId);
       navigate(targetPath);
     } catch (err: any) {

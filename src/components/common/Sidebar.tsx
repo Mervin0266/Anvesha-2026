@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   UserCheck, Hotel, Trophy, Award, BarChart3, Shield, LogOut,
-  Home, Menu, X, ChevronRight
+  Home, Menu, X, ChevronRight, Upload, UserPlus, Users
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserRole } from '../../types';
@@ -37,15 +37,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole }) => {
     if (currentRole === 'admin') {
       items.push(
         { label: 'Admin Control Center',     path: '/dashboard/admin',          icon: Shield },
+        { label: 'Bulk Institution Import',  path: '/dashboard/admin/import',   icon: Upload },
+        { label: 'Crew & Users Management',  path: '/dashboard/admin/users',    icon: Users },
+        { label: 'Spot Registration',        path: '/dashboard/registration/spot', icon: UserPlus },
         { label: 'Registration Verification',path: '/dashboard/verification',   icon: UserCheck },
         { label: 'Hospitality Management',   path: '/dashboard/hospitality',    icon: Hotel },
         { label: 'Sports Dashboard',         path: '/dashboard/sports',         icon: Trophy },
         { label: 'Culturals Dashboard',      path: '/dashboard/culturals',      icon: Trophy },
+        { label: 'Fun Activities Dashboard', path: '/dashboard/fun-activities', icon: Trophy },
         { label: 'Certificate Desk',         path: '/dashboard/certificates',   icon: Award },
         { label: 'Reports & Analytics',      path: '/dashboard/reports',        icon: BarChart3 }
       );
     } else if (currentRole === 'registration_team') {
-      items.push({ label: 'Verification Desk', path: '/dashboard/verification', icon: UserCheck });
+      items.push(
+        { label: 'Verification Desk', path: '/dashboard/verification', icon: UserCheck },
+        { label: 'Spot Registration', path: '/dashboard/registration/spot', icon: UserPlus }
+      );
     } else if (currentRole === 'hospitality_team') {
       items.push({ label: 'Hospitality Desk', path: '/dashboard/hospitality', icon: Hotel });
     } else if (currentRole === 'certificate_team') {
@@ -53,13 +60,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole }) => {
     } else if (currentRole === 'officials') {
       items.push({ label: 'Reports & Analytics', path: '/dashboard/reports', icon: BarChart3 });
     } else {
-      const evtId = user?.eventId || 'sports_football_boys';
+      const evtId = user?.eventId || '';
       const isSports = evtId.startsWith('sports_');
-      items.push({ 
-        label: isSports ? 'Sports Dashboard' : 'Culturals Dashboard', 
-        path: isSports ? '/dashboard/sports' : '/dashboard/culturals', 
-        icon: Trophy 
-      });
+      const isFun = evtId === 'cultural_open_mic' || evtId === 'cultural_treasure_hunt';
+      
+      if (isSports) {
+        items.push({ label: 'Sports Dashboard', path: '/dashboard/sports', icon: Trophy });
+      } else if (isFun) {
+        items.push({ label: 'Fun Activities Dashboard', path: '/dashboard/fun-activities', icon: Trophy });
+      } else {
+        items.push({ label: 'Culturals Dashboard', path: '/dashboard/culturals', icon: Trophy });
+      }
     }
 
     return items;

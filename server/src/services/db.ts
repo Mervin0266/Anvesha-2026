@@ -233,9 +233,12 @@ export const initDb = async (): Promise<void> => {
         verification_status VARCHAR(50) NOT NULL,
         jersey_number VARCHAR(50),
         roster_status VARCHAR(50),
-        check_in_status VARCHAR(50)
+        check_in_status VARCHAR(50),
+        student_register_number VARCHAR(100) DEFAULT 'NIL'
       );
     `);
+
+    await dbQuery(`ALTER TABLE participants ADD COLUMN IF NOT EXISTS student_register_number VARCHAR(100) DEFAULT 'NIL'`);
 
     await dbQuery(`
       CREATE TABLE IF NOT EXISTS payments (
@@ -321,6 +324,9 @@ export const initDb = async (): Promise<void> => {
       );
     `);
 
+    await dbQuery(`ALTER TABLE results ADD COLUMN IF NOT EXISTS total_matches INT DEFAULT 0`);
+    await dbQuery(`ALTER TABLE results ADD COLUMN IF NOT EXISTS match_details JSONB DEFAULT '[]'::jsonb`);
+
     await dbQuery(`
       CREATE TABLE IF NOT EXISTS edit_requests (
         id VARCHAR(100) PRIMARY KEY,
@@ -392,9 +398,15 @@ export const initDb = async (): Promise<void> => {
     }
     // Remove old unsplit event
     await dbQuery("DELETE FROM events WHERE id = 'sports_tug_of_war'");
+    await dbQuery("DELETE FROM events WHERE id = 'sports_football_girls'");
+    await dbQuery("DELETE FROM events WHERE id = 'sports_basketball_boys'");
+    await dbQuery("DELETE FROM events WHERE id = 'sports_basketball_girls'");
 
     // Remove old unsplit user first to free up the username
     await dbQuery("DELETE FROM users WHERE id = 'usr_tugofwar'");
+    await dbQuery("DELETE FROM users WHERE id = 'usr_football_girls'");
+    await dbQuery("DELETE FROM users WHERE id = 'usr_basketball'");
+    await dbQuery("DELETE FROM users WHERE id = 'usr_basketball_girls'");
 
     // Seed users with UPSERT
     console.log('Synchronizing user roles...');

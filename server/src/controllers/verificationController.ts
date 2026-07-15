@@ -190,7 +190,6 @@ export const approveVerification = async (req: Request, res: Response): Promise<
         if (!chestNumber) {
           const prefix = t.event_id.includes('football') ? 'FB' :
                          t.event_id.includes('volleyball') ? 'VB' :
-                         t.event_id.includes('basketball') ? 'BB' :
                          t.event_id.includes('tug_of_war') ? 'TW' :
                          t.event_id.includes('dance') ? 'DN' :
                          t.event_id.includes('music') ? 'MU' :
@@ -299,5 +298,54 @@ export const rejectVerification = async (req: Request, res: Response): Promise<v
   } catch (error: any) {
     console.error('Reject verification error:', error);
     res.status(500).json({ success: false, message: error.message || 'Failed to reject verification.' });
+  }
+};
+
+export const updateParticipantName = async (req: any, res: any): Promise<void> => {
+  const { participantId, newName } = req.body;
+  if (!participantId || !newName || !newName.trim()) {
+    res.status(400).json({ success: false, message: 'Participant ID and new name are required.' });
+    return;
+  }
+
+  try {
+    // Check verification status
+    const checkRes = await dbQuery(
+      `SELECT vr.status FROM participants p
+       LEFT JOIN verification_records vr ON p.institution_id = vr.institution_id
+       WHERE p.id = $1`,
+      [participantId]
+    );
+
+    if (checkRes.rows.length === 0) {
+      res.status(404).json({ success: false, message: 'Participant not found.' });
+      return;
+    }
+
+    const status = checkRes.rows[0].status;
+    // If status is present and is not PENDING, it means verification is completed
+    if (status && status !== 'PENDING') {
+      res.status(400).json({ success: false, message: 'Cannot edit name after verification process is complete.' });
+      return;
+    }
+
+    // Update participant name
+    await dbQuery('UPDATE participants SET name = $1 WHERE id = $2', [newName.trim(), participantId]);
+
+    // Create audit log
+    const logId = `log_${Date.now()}_edit_name`;
+    await dbQuery(
+      `INSERT INTO audit_logs (id, timestamp, user_name, role, action, details)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        logId, new Date().toISOString(), 'Registration Desk', 'registration_team', 'EDIT_PARTICIPANT_NAME',
+        `Participant ID '${participantId}' name updated to '${newName.trim()}'.`
+      ]
+    );
+
+    res.json({ success: true, message: 'Participant name updated successfully.' });
+  } catch (error: any) {
+    console.error('Error updating participant name:', error);
+    res.status(500).json({ success: false, message: 'Failed to update name.' });
   }
 };

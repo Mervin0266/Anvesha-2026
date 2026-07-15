@@ -21,6 +21,9 @@ export const getHospitalityData = async (req: Request, res: Response): Promise<v
     const contactsRes = await dbQuery('SELECT * FROM contacts');
     const contacts = contactsRes.rows;
 
+    const teamsRes = await dbQuery('SELECT * FROM teams');
+    const teams = teamsRes.rows;
+
     const list = verifiedInstitutions.map((inst: any) => {
       const verifiedParts = participants
         .filter((p: any) => p.institution_id === inst.id)
@@ -50,6 +53,8 @@ export const getHospitalityData = async (req: Request, res: Response): Promise<v
       const hosp = hospitality.find((h: any) => h.institution_id === inst.id);
       const poc = contacts.find((c: any) => c.institution_id === inst.id && c.type === 'POC');
       const mentor = contacts.find((c: any) => c.institution_id === inst.id && c.type === 'MENTOR');
+      const instTeams = teams.filter((t: any) => t.institution_id === inst.id);
+      const chestNumbers = Array.from(new Set(instTeams.map((t: any) => t.chest_number).filter(Boolean)));
 
       const mappedInst = {
         id: inst.id,
@@ -110,7 +115,8 @@ export const getHospitalityData = async (req: Request, res: Response): Promise<v
         mentor: mappedMentor,
         participantsCount: verifiedParts.length,
         participants: verifiedParts,
-        hospitality: mappedHosp
+        hospitality: mappedHosp,
+        chestNumbers
       };
     });
 

@@ -11,6 +11,9 @@ import { EventCoordinatorDashboard } from './pages/dashboards/EventCoordinatorDa
 import { CertificateDashboard } from './pages/dashboards/CertificateDashboard';
 import { AdminDashboard } from './pages/dashboards/AdminDashboard';
 import { AnalyticsDashboard } from './pages/dashboards/AnalyticsDashboard';
+import { BulkImportDashboard } from './pages/dashboards/BulkImportDashboard';
+import { SpotRegistrationDashboard } from './pages/dashboards/SpotRegistrationDashboard';
+import { CrewManagementDashboard } from './pages/dashboards/CrewManagementDashboard';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, isLoading } = useAuth();
@@ -59,7 +62,15 @@ export const App: React.FC = () => {
               path="/dashboard/culturals"
               element={
                 <ProtectedRoute>
-                  <EventCoordinatorDashboard category="CULTURAL" />
+                  <EventCoordinatorDashboard category="CULTURALS" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/fun-activities"
+              element={
+                <ProtectedRoute>
+                  <EventCoordinatorDashboard category="FUN_ACTIVITIES" />
                 </ProtectedRoute>
               }
             />
@@ -76,6 +87,30 @@ export const App: React.FC = () => {
               element={
                 <ProtectedRoute>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/admin/import"
+              element={
+                <ProtectedRoute>
+                  <BulkImportDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/admin/users"
+              element={
+                <ProtectedRoute>
+                  <CrewManagementDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/registration/spot"
+              element={
+                <ProtectedRoute>
+                  <SpotRegistrationDashboard />
                 </ProtectedRoute>
               }
             />
