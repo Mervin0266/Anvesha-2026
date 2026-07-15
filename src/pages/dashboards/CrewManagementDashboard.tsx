@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../../components/common/Sidebar';
 import { Header } from '../../components/common/Header';
-import { Users, Trash2, Shield, Plus, Mail, User, AlertCircle, RefreshCw } from 'lucide-react';
+import { Users, Trash2, Shield, Plus, Mail, User, AlertCircle, RefreshCw, Key, Eye, EyeOff, Check, X, Edit } from 'lucide-react';
 import { apiFetch } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -12,6 +12,13 @@ export const CrewManagementDashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   
+  // Password states
+  const [passwordsList, setPasswordsList] = useState<any[]>([]);
+  const [editingRole, setEditingRole] = useState<string | null>(null);
+  const [editingPasswordVal, setEditingPasswordVal] = useState('');
+  const [visibleRoles, setVisibleRoles] = useState<Record<string, boolean>>({});
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; role: string; password: string } | null>(null);
+
   // Form states
   const [newUsername, setNewUsername] = useState('');
   const [newName, setNewName] = useState('');
@@ -32,6 +39,37 @@ export const CrewManagementDashboard: React.FC = () => {
       setErrorMsg(err.message || 'Failed to fetch crew accounts.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPasswords = async () => {
+    try {
+      const res = await apiFetch<{ success: boolean; passwords: any[] }>('/admin/passwords');
+      if (res.success) {
+        setPasswordsList(res.passwords);
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch passwords:', err);
+    }
+  };
+
+  const handleSavePassword = async (role: string, password: string) => {
+    setErrorMsg(null);
+    setActionMsg(null);
+    try {
+      const res = await apiFetch<{ success: boolean; message: string }>('/admin/passwords/update', {
+        method: 'POST',
+        body: JSON.stringify({ role, password })
+      });
+      if (res.success) {
+        setActionMsg(`Password for role '${role}' updated successfully.`);
+        setPasswordsList(prev => prev.map(p => p.role === role ? { ...p, password } : p));
+        setEditingRole(null);
+      } else {
+        setErrorMsg(res.message || 'Failed to update password.');
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Error updating password.');
     }
   };
 
@@ -59,6 +97,7 @@ export const CrewManagementDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchPasswords();
   }, []);
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -139,8 +178,10 @@ export const CrewManagementDashboard: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            {/* User account creation form card */}
-            <div className="lg:col-span-1">
+            {/* Left column configuration cards */}
+            <div className="lg:col-span-1 space-y-6">
+              
+              {/* User account creation form card */}
               <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-3">
                   <Shield className="w-5 h-5 text-christ-navy" />
@@ -216,6 +257,93 @@ export const CrewManagementDashboard: React.FC = () => {
                   </button>
                 </form>
               </div>
+
+              {/* Team Login Passwords Card */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+                <div className="flex items-center space-x-2 border-b border-slate-100 pb-3">
+                  <Key className="w-5 h-5 text-christ-navy" />
+                  <h3 className="font-bold text-sm text-slate-800 font-serif">Team Login Passwords</h3>
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                  Set a single common password for all users under each role. Updating a password takes effect immediately.
+                </p>
+
+                <div className="space-y-3 pt-1">
+                  {passwordsList.map((p) => {
+                    const isEditing = editingRole === p.role;
+                    const isVisible = visibleRoles[p.role];
+
+                    return (
+                      <div key={p.role} className="p-3 border border-slate-100 rounded-xl bg-slate-50/50 space-y-1.5 font-sans">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] uppercase font-bold text-slate-400 font-mono tracking-wider">
+                            {p.role.replace(/_/g, ' ')}
+                          </span>
+                          
+                          {!isEditing && (
+                            <div className="flex items-center space-x-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setVisibleRoles(prev => ({ ...prev, [p.role]: !prev[p.role] }))}
+                                className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors"
+                                title={isVisible ? "Hide Password" : "Show Password"}
+                              >
+                                {isVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingRole(p.role);
+                                  setEditingPasswordVal(p.password);
+                                }}
+                                className="p-1 hover:bg-slate-200 rounded text-christ-navy transition-colors"
+                                title="Edit Password"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {isEditing ? (
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="text"
+                              value={editingPasswordVal}
+                              onChange={(e) => setEditingPasswordVal(e.target.value)}
+                              className="flex-1 px-2.5 py-1 border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-christ-navy focus:outline-none bg-white font-medium"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!editingPasswordVal.trim()) return;
+                                setConfirmDialog({ isOpen: true, role: p.role, password: editingPasswordVal });
+                              }}
+                              className="p-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+                              title="Save"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingRole(null)}
+                              className="p-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg transition-colors"
+                              title="Cancel"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="text-xs font-mono font-bold text-slate-700">
+                            {isVisible ? p.password : '••••••••••••'}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
             </div>
 
             {/* Crew Accounts List Card */}
@@ -319,6 +447,48 @@ export const CrewManagementDashboard: React.FC = () => {
 
         </main>
       </div>
+
+      {/* ── Confirmation Modal ── */}
+      {confirmDialog && confirmDialog.isOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 border border-slate-200 shadow-xl space-y-4 animate-in fade-in zoom-in-95 duration-150 font-sans">
+            <div className="w-12 h-12 rounded-full bg-christ-gold/10 flex items-center justify-center mx-auto text-christ-gold">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            
+            <div className="text-center space-y-2">
+              <h3 className="font-bold text-slate-900 text-sm font-serif">Confirm Password Change</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to change the password for the <strong className="text-slate-800 uppercase font-mono">{confirmDialog.role.replace(/_/g, ' ')}</strong> team to:
+              </p>
+              <div className="py-2 px-3 bg-slate-50 border border-slate-100 rounded-xl font-mono text-xs font-bold text-christ-navy select-all">
+                {confirmDialog.password}
+              </div>
+              <p className="text-[10px] text-rose-500 font-semibold leading-relaxed">
+                ⚠️ This will immediately affect all user logins under this role. Active sessions will require the new password.
+              </p>
+            </div>
+
+            <div className="flex space-x-3 pt-2">
+              <button
+                onClick={() => {
+                  handleSavePassword(confirmDialog.role, confirmDialog.password);
+                  setConfirmDialog(null);
+                }}
+                className="flex-1 py-2 bg-christ-navy hover:bg-christ-darkNavy text-white font-bold rounded-xl text-xs transition-colors shadow-sm"
+              >
+                Confirm Update
+              </button>
+              <button
+                onClick={() => setConfirmDialog(null)}
+                className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-xs transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -377,6 +377,29 @@ export const initDb = async (): Promise<void> => {
       );
     `);
 
+    await dbQuery(`
+      CREATE TABLE IF NOT EXISTS system_passwords (
+        role VARCHAR(100) PRIMARY KEY,
+        password VARCHAR(255) NOT NULL
+      );
+    `);
+
+    const defaultPasswords = [
+      { role: 'admin', password: 'Admin@Anvesha2026' },
+      { role: 'registration_team', password: 'Reg@Anvesha2026' },
+      { role: 'hospitality_team', password: 'Hosp@Anvesha2026' },
+      { role: 'faculty', password: 'Faculty@Anvesha2026' },
+      { role: 'certificate_team', password: 'Cert@Anvesha2026' },
+      { role: 'officials', password: 'Official@Anvesha2026' }
+    ];
+
+    for (const dp of defaultPasswords) {
+      await dbQuery(
+        'INSERT INTO system_passwords (role, password) VALUES ($1, $2) ON CONFLICT (role) DO NOTHING',
+        [dp.role, dp.password]
+      );
+    }
+
     // 3. SEEDING logic with UPSERT for catalog events
     console.log('Synchronizing events catalog...');
     for (const e of EVENTS_CATALOG) {

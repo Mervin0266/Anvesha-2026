@@ -32,20 +32,26 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Determine role-specific password
+    const pwRes = await dbQuery('SELECT * FROM system_passwords');
+    const pwMap: Record<string, string> = {};
+    pwRes.rows.forEach((row: any) => {
+      pwMap[row.role] = row.password;
+    });
+
     let expectedPassword = 'Anvesha@2026'; // Default fallback
     const r = user.role.toLowerCase();
     if (r === 'admin') {
-      expectedPassword = 'Admin@Anvesha2026';
+      expectedPassword = pwMap['admin'] || 'Admin@Anvesha2026';
     } else if (r === 'registration_team') {
-      expectedPassword = 'Reg@Anvesha2026';
+      expectedPassword = pwMap['registration_team'] || 'Reg@Anvesha2026';
     } else if (r === 'hospitality_team') {
-      expectedPassword = 'Hosp@Anvesha2026';
+      expectedPassword = pwMap['hospitality_team'] || 'Hosp@Anvesha2026';
     } else if (r === 'certificate_team') {
-      expectedPassword = 'Cert@Anvesha2026';
+      expectedPassword = pwMap['certificate_team'] || 'Cert@Anvesha2026';
     } else if (r === 'officials') {
-      expectedPassword = 'Official@Anvesha2026';
+      expectedPassword = pwMap['officials'] || 'Official@Anvesha2026';
     } else if (r.startsWith('faculty_') || r.startsWith('faculty')) {
-      expectedPassword = 'Faculty@Anvesha2026';
+      expectedPassword = pwMap['faculty'] || 'Faculty@Anvesha2026';
     }
 
     if (!password || password !== expectedPassword) {

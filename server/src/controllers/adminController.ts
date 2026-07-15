@@ -1107,4 +1107,39 @@ export const bulkRegisterInstitutions = async (req: Request, res: Response): Pro
   }
 };
 
+export const getSystemPasswords = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const rowsRes = await dbQuery('SELECT * FROM system_passwords ORDER BY role');
+    res.json({ success: true, passwords: rowsRes.rows });
+  } catch (error: any) {
+    console.error('getSystemPasswords error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch passwords.' });
+  }
+};
 
+export const updateSystemPassword = async (req: Request, res: Response): Promise<void> => {
+  const { role, password } = req.body;
+  if (!role || !password) {
+    res.status(400).json({ success: false, message: 'Role and Password are required.' });
+    return;
+  }
+
+  try {
+    await dbQuery(
+      'INSERT INTO system_passwords (role, password) VALUES ($1, $2) ON CONFLICT (role) DO UPDATE SET password = EXCLUDED.password',
+      [role, password]
+    );
+
+    await addAuditLog(
+      'Chief Admin',
+      'admin',
+      'UPDATE_SYSTEM_PASSWORD',
+      `Updated login password for role '${role}'.`
+    );
+
+    res.json({ success: true, message: `Password for role ${role} updated successfully.` });
+  } catch (error: any) {
+    console.error('updateSystemPassword error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update system password.' });
+  }
+};

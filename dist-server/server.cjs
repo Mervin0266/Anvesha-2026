@@ -45840,6 +45840,26 @@ var initDb = async () => {
         officials JSONB NOT NULL DEFAULT '[]'::jsonb
       );
     `);
+    await dbQuery(`
+      CREATE TABLE IF NOT EXISTS system_passwords (
+        role VARCHAR(100) PRIMARY KEY,
+        password VARCHAR(255) NOT NULL
+      );
+    `);
+    const defaultPasswords = [
+      { role: "admin", password: "Admin@Anvesha2026" },
+      { role: "registration_team", password: "Reg@Anvesha2026" },
+      { role: "hospitality_team", password: "Hosp@Anvesha2026" },
+      { role: "faculty", password: "Faculty@Anvesha2026" },
+      { role: "certificate_team", password: "Cert@Anvesha2026" },
+      { role: "officials", password: "Official@Anvesha2026" }
+    ];
+    for (const dp of defaultPasswords) {
+      await dbQuery(
+        "INSERT INTO system_passwords (role, password) VALUES ($1, $2) ON CONFLICT (role) DO NOTHING",
+        [dp.role, dp.password]
+      );
+    }
     console.log("Synchronizing events catalog...");
     for (const e of EVENTS_CATALOG) {
       await dbQuery(
@@ -45903,20 +45923,25 @@ var login = async (req, res) => {
       res.status(401).json({ success: false, message: "Invalid credentials. User account not found." });
       return;
     }
+    const pwRes = await dbQuery("SELECT * FROM system_passwords");
+    const pwMap = {};
+    pwRes.rows.forEach((row) => {
+      pwMap[row.role] = row.password;
+    });
     let expectedPassword = "Anvesha@2026";
     const r = user.role.toLowerCase();
     if (r === "admin") {
-      expectedPassword = "Admin@Anvesha2026";
+      expectedPassword = pwMap["admin"] || "Admin@Anvesha2026";
     } else if (r === "registration_team") {
-      expectedPassword = "Reg@Anvesha2026";
+      expectedPassword = pwMap["registration_team"] || "Reg@Anvesha2026";
     } else if (r === "hospitality_team") {
-      expectedPassword = "Hosp@Anvesha2026";
+      expectedPassword = pwMap["hospitality_team"] || "Hosp@Anvesha2026";
     } else if (r === "certificate_team") {
-      expectedPassword = "Cert@Anvesha2026";
+      expectedPassword = pwMap["certificate_team"] || "Cert@Anvesha2026";
     } else if (r === "officials") {
-      expectedPassword = "Official@Anvesha2026";
+      expectedPassword = pwMap["officials"] || "Official@Anvesha2026";
     } else if (r.startsWith("faculty_") || r.startsWith("faculty")) {
-      expectedPassword = "Faculty@Anvesha2026";
+      expectedPassword = pwMap["faculty"] || "Faculty@Anvesha2026";
     }
     if (!password || password !== expectedPassword) {
       res.status(401).json({ success: false, message: "Invalid password. Please check your credentials." });
@@ -49048,6 +49073,38 @@ var bulkRegisterInstitutions = async (req, res) => {
     res.status(500).json({ success: false, message: error.message || "Failed to bulk import institutions." });
   }
 };
+var getSystemPasswords = async (req, res) => {
+  try {
+    const rowsRes = await dbQuery("SELECT * FROM system_passwords ORDER BY role");
+    res.json({ success: true, passwords: rowsRes.rows });
+  } catch (error) {
+    console.error("getSystemPasswords error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch passwords." });
+  }
+};
+var updateSystemPassword = async (req, res) => {
+  const { role, password } = req.body;
+  if (!role || !password) {
+    res.status(400).json({ success: false, message: "Role and Password are required." });
+    return;
+  }
+  try {
+    await dbQuery(
+      "INSERT INTO system_passwords (role, password) VALUES ($1, $2) ON CONFLICT (role) DO UPDATE SET password = EXCLUDED.password",
+      [role, password]
+    );
+    await addAuditLog(
+      "Chief Admin",
+      "admin",
+      "UPDATE_SYSTEM_PASSWORD",
+      `Updated login password for role '${role}'.`
+    );
+    res.json({ success: true, message: `Password for role ${role} updated successfully.` });
+  } catch (error) {
+    console.error("updateSystemPassword error:", error);
+    res.status(500).json({ success: false, message: "Failed to update system password." });
+  }
+};
 
 // server/src/controllers/analyticsController.ts
 var getAnalyticsData = async (req, res) => {
@@ -49284,6 +49341,8 @@ app.put("/api/admin/institution-master/:id", updateInstitutionMaster);
 app.post("/api/admin/institution-master/bulk", bulkAddInstitutionMaster);
 app.delete("/api/admin/institution-master/:id", deleteInstitutionMaster);
 app.post("/api/admin/bulk-register", bulkRegisterInstitutions);
+app.get("/api/admin/passwords", getSystemPasswords);
+app.post("/api/admin/passwords/update", updateSystemPassword);
 app.get("/api/analytics", getAnalyticsData);
 var clientDistDir = import_path.default.join(getDirname(), "../../dist");
 if (import_fs.default.existsSync(clientDistDir)) {
