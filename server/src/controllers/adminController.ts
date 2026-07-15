@@ -1092,7 +1092,6 @@ export const bulkRegisterInstitutions = async (req: Request, res: Response): Pro
           `Imported ${importedInstitutions.length} institutions directly into database.`
         ]
       );
-
       return importedInstitutions;
     });
 
@@ -1109,6 +1108,33 @@ export const bulkRegisterInstitutions = async (req: Request, res: Response): Pro
 
 export const getSystemPasswords = async (req: Request, res: Response): Promise<void> => {
   try {
+    // Auto-create table if missing
+    await dbQuery(`
+      CREATE TABLE IF NOT EXISTS system_passwords (
+        role VARCHAR(100) PRIMARY KEY,
+        password VARCHAR(255) NOT NULL
+      );
+    `);
+
+    // Auto-seed defaults if empty
+    const countRes = await dbQuery('SELECT COUNT(*) FROM system_passwords');
+    if (parseInt(countRes.rows[0].count, 10) === 0) {
+      const defaultPasswords = [
+        { role: 'admin', password: 'Admin@Anvesha2026' },
+        { role: 'registration_team', password: 'Reg@Anvesha2026' },
+        { role: 'hospitality_team', password: 'Hosp@Anvesha2026' },
+        { role: 'faculty', password: 'Faculty@Anvesha2026' },
+        { role: 'certificate_team', password: 'Cert@Anvesha2026' },
+        { role: 'officials', password: 'Official@Anvesha2026' }
+      ];
+      for (const dp of defaultPasswords) {
+        await dbQuery(
+          'INSERT INTO system_passwords (role, password) VALUES ($1, $2) ON CONFLICT (role) DO NOTHING',
+          [dp.role, dp.password]
+        );
+      }
+    }
+
     const rowsRes = await dbQuery('SELECT * FROM system_passwords ORDER BY role');
     res.json({ success: true, passwords: rowsRes.rows });
   } catch (error: any) {
