@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../../components/common/Sidebar';
 import { Header } from '../../components/common/Header';
-import { UserCheck, Search, CheckCircle2, XCircle, Clock, Eye, FileText, AlertCircle, Shield } from 'lucide-react';
+import { UserCheck, Search, CheckCircle2, XCircle, Clock, Eye, FileText, AlertCircle, Shield, RefreshCw } from 'lucide-react';
 import { apiFetch } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -207,7 +207,18 @@ export const VerificationDashboard: React.FC = () => {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
               <h3 className="font-bold text-christ-navy font-serif text-sm">Registrations Roster ({filteredData.length})</h3>
-              <span className="text-xs text-slate-500 font-medium">Real-time sync enabled</span>
+              <div className="flex items-center space-x-3">
+                <span className="text-xs text-slate-500 font-medium">Real-time sync enabled</span>
+                <button
+                  onClick={fetchPendingData}
+                  disabled={loading}
+                  className="p-1.5 hover:bg-slate-100 active:bg-slate-200 rounded-lg text-slate-500 hover:text-christ-navy transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1 border border-slate-200 bg-white hover:shadow-sm"
+                  title="Force Refresh Sync"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                  <span className="text-[10px] font-bold px-0.5">Refresh</span>
+                </button>
+              </div>
             </div>
 
             {loading ? (
