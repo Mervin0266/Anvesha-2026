@@ -9,6 +9,7 @@ import { apiFetch } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEvents } from '../../contexts/EventsContext';
 import { EventCategory } from '../../types';
+import * as XLSX from 'xlsx';
 
 interface EventCoordinatorDashboardProps {
   category: EventCategory;
@@ -200,13 +201,12 @@ export const EventCoordinatorDashboard: React.FC<EventCoordinatorDashboardProps>
     setBulkError(null);
     setBulkSuccess(null);
 
+    const isXlsx = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
     const reader = new FileReader();
-    reader.readAsText(file);
-    reader.onload = () => {
-      const text = reader.result as string;
-      const lines = text.split('\n').map(line => line.split(',').map(cell => cell.replace(/^"(.*)"$/, '$1').trim()));
+
+    const processLines = (lines: string[][]) => {
       if (lines.length < 2) {
-        setBulkError('CSV file is empty or missing content.');
+        setBulkError('Spreadsheet file is empty or missing content.');
         return;
       }
       
@@ -236,6 +236,33 @@ export const EventCoordinatorDashboard: React.FC<EventCoordinatorDashboardProps>
 
       setParsedRows(rows);
     };
+
+    if (isXlsx) {
+      reader.readAsArrayBuffer(file);
+      reader.onload = (evt) => {
+        try {
+          const data = new Uint8Array(evt.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const sheetData = XLSX.utils.sheet_to_json<any[]>(worksheet, { header: 1 });
+          
+          const lines = sheetData.map(row => 
+            (Array.isArray(row) ? row : []).map(val => val !== null && val !== undefined ? String(val).trim() : '')
+          );
+          processLines(lines);
+        } catch (err: any) {
+          setBulkError(`Error reading Excel file: ${err.message}`);
+        }
+      };
+    } else {
+      reader.readAsText(file);
+      reader.onload = () => {
+        const text = reader.result as string;
+        const lines = text.split('\n').map(line => line.split(',').map(cell => cell.replace(/^"(.*)"$/, '$1').trim()));
+        processLines(lines);
+      };
+    }
   };
 
   // Submit bulk upload results
@@ -704,7 +731,7 @@ export const EventCoordinatorDashboard: React.FC<EventCoordinatorDashboardProps>
                   <div className="border-2 border-dashed border-slate-200 hover:border-christ-navy bg-slate-50/50 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer relative">
                     <input
                       type="file"
-                      accept=".csv"
+                      accept=".csv,.xlsx,.xls"
                       onChange={handleCSVUploadChange}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />

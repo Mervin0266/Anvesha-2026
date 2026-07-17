@@ -46086,13 +46086,13 @@ var submitRegistration = async (req, res) => {
           instId,
           registrationId,
           institution.name,
-          institution.principalName,
+          institution.principalName || "N/A",
           institution.address,
           institution.district,
           institution.state,
-          institution.pincode,
-          institution.schoolContactNumber,
-          institution.schoolEmail,
+          institution.pincode || "N/A",
+          institution.schoolContactNumber || "N/A",
+          institution.schoolEmail || "N/A",
           (/* @__PURE__ */ new Date()).toISOString()
         ]
       );

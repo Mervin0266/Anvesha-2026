@@ -133,6 +133,22 @@ export const EVENTS_CATALOG: FestEvent[] = [
     ],
     eligibility: 'Open to registered 1st & 2nd Year PU Students.'
   },
+  {
+    id: 'cultural_project_exhibition',
+    name: 'Project Exhibition',
+    category: 'CULTURALS',
+    type: 'TEAM',
+    minTeamSize: 4,
+    maxTeamSize: 4,
+    registrationFee: 500,
+    description: 'Showcase innovative projects, scientific models, or technical exhibitions.',
+    rules: [
+      'Maximum 2 teams per institution (Team A and Team B).',
+      'Minimum team size of 4 members and maximum of 4 members.',
+      'Projects must be set up at the designated space before judging begins.'
+    ],
+    eligibility: 'Open to registered 1st & 2nd Year PU Students.'
+  },
 
   // FUN ACTIVITIES
   {

@@ -434,7 +434,7 @@ export const Home: React.FC = () => {
                 {[
                   { icon: <MapPin className="w-5 h-5 text-christ-navy" />, label: 'Christ University Kengeri Campus', value: 'Kanmanike, Kumbalgodu, Mysore Road, Bangalore, Karnataka - 560074, India.' },
                   { icon: <Phone className="w-5 h-5 text-christ-navy" />, label: 'Helpline Numbers',                  value: '080-40129100 / 080-40129200 (Extn: 981)' },
-                  { icon: <Mail className="w-5 h-5 text-christ-navy" />,  label: 'Official Inquiry Email',             value: 'anvesha@christuniversity.in' },
+                  { icon: <Mail className="w-5 h-5 text-christ-navy" />,  label: 'Official Inquiry Email',             value: 'anvesha@fest.christuniversity.in' },
                 ].map(({ icon, label, value }) => (
                   <div key={label} className="flex items-start space-x-4 bg-slate-50 border border-slate-200 rounded-2xl p-5 hover:shadow-sm transition-all">
                     <div className="w-10 h-10 rounded-xl bg-christ-navy/8 flex items-center justify-center shrink-0">{icon}</div>

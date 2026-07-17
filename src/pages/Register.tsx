@@ -777,11 +777,6 @@ export const Register: React.FC = () => {
       setCurrentStep(1);
       return;
     }
-    if (!String(institution.principalName || '').trim()) {
-      setErrorMsg('Please enter the Principal Name.');
-      setCurrentStep(1);
-      return;
-    }
     if (!String(institution.address || '').trim()) {
       setErrorMsg('Please enter the Campus Address.');
       setCurrentStep(1);
@@ -789,21 +784,6 @@ export const Register: React.FC = () => {
     }
     if (!String(institution.district || '').trim()) {
       setErrorMsg('Please select a District.');
-      setCurrentStep(1);
-      return;
-    }
-    if (!String(institution.pincode || '').trim()) {
-      setErrorMsg('Please enter the Pincode.');
-      setCurrentStep(1);
-      return;
-    }
-    if (!String(institution.schoolContactNumber || '').trim()) {
-      setErrorMsg('Please enter the School Office Contact Number.');
-      setCurrentStep(1);
-      return;
-    }
-    if (!String(institution.schoolEmail || '').trim()) {
-      setErrorMsg('Please enter the Official School Email.');
       setCurrentStep(1);
       return;
     }
@@ -998,12 +978,8 @@ export const Register: React.FC = () => {
       return !!(
         selectedMasterId &&
         String(institution.name || '').trim() &&
-        String(institution.principalName || '').trim() &&
         String(institution.address || '').trim() &&
-        String(institution.district || '').trim() &&
-        String(institution.pincode || '').trim() &&
-        String(institution.schoolContactNumber || '').trim() &&
-        String(institution.schoolEmail || '').trim()
+        String(institution.district || '').trim()
       );
     }
     if (stepNum === 2) {
@@ -1221,18 +1197,6 @@ export const Register: React.FC = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="block font-bold text-slate-800 mb-1">Principal Name *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Rev. Fr. Swebert D'Silva"
-                      value={institution.principalName}
-                      onChange={(e) => setInstitution({ ...institution, principalName: e.target.value })}
-                      className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-christ-navy focus:outline-none"
-                    />
-                  </div>
-
                   <div className="md:col-span-2">
                     <label className="block font-bold text-slate-800 mb-1">Campus Address *</label>
                     <input
@@ -1245,7 +1209,7 @@ export const Register: React.FC = () => {
                     />
                   </div>
 
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block font-bold text-slate-800 mb-1">District *</label>
                     <select
                       value={institution.district}
@@ -1259,42 +1223,6 @@ export const Register: React.FC = () => {
                       <option value="Tumakuru">Tumakuru</option>
                       <option value="Other District / State">Other District / State</option>
                     </select>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-800 mb-1">Pincode *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="560027"
-                      value={institution.pincode}
-                      onChange={(e) => setInstitution({ ...institution, pincode: e.target.value })}
-                      className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-christ-navy focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-800 mb-1">School Office Contact Number *</label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="080-22211429"
-                      value={institution.schoolContactNumber}
-                      onChange={(e) => setInstitution({ ...institution, schoolContactNumber: e.target.value })}
-                      className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-christ-navy focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-800 mb-1">Official School Email *</label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="office@institution.edu.in"
-                      value={institution.schoolEmail}
-                      onChange={(e) => setInstitution({ ...institution, schoolEmail: e.target.value })}
-                      className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-christ-navy focus:outline-none bg-white"
-                    />
                   </div>
                 </div>
                 </div>

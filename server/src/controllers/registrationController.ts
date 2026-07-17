@@ -121,9 +121,9 @@ export const submitRegistration = async (req: Request, res: Response): Promise<v
         `INSERT INTO institutions (id, registration_id, name, principal_name, address, district, state, pincode, school_contact_number, school_email, created_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
-          instId, registrationId, institution.name, institution.principalName, institution.address,
-          institution.district, institution.state, institution.pincode, institution.schoolContactNumber,
-          institution.schoolEmail, new Date().toISOString()
+          instId, registrationId, institution.name, institution.principalName || 'N/A', institution.address,
+          institution.district, institution.state, institution.pincode || 'N/A', institution.schoolContactNumber || 'N/A',
+          institution.schoolEmail || 'N/A', new Date().toISOString()
         ]
       );
 

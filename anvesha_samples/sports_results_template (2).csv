@@ -1,0 +1,3 @@
+Event ID,Winner Chest Number,Runner Up Chest Number,Second Runner Up Chest Number,Total Matches,Match 1 Teams Played (e.g. Team A vs Team B),Match 1 Winner,Match 1 Score (e.g. 2-1),Match 2 Teams Played,Match 2 Winner,Match 2 Score,Match 3 Teams Played,Match 3 Winner,Match 3 Score
+"sports_volleyball_girls","FB-101","FB-102","FB-103","2","Team A vs Team B","Team A","3-1","Team C vs Team D","Team C","1-0"
+"sports_basketball_boys","VB-201","VB-202","","1","Team X vs Team Y","Team X","2-0","","",""

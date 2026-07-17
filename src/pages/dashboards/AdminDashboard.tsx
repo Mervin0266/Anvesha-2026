@@ -5,6 +5,7 @@ import { Shield, Users, Building2, Trophy, DollarSign, Lock, Unlock, CheckCircle
 import { apiFetch } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { INITIAL_USERS } from '../../data/initialData';
+import * as XLSX from 'xlsx';
 import { EVENTS_CATALOG } from '../../data/eventsCatalog';
 
 export const AdminDashboard: React.FC = () => {
@@ -145,6 +146,44 @@ export const AdminDashboard: React.FC = () => {
     return lines.filter(l => l.length > 0 && l.some(val => val !== ''));
   };
 
+  const parseFileToLines = (file: File): Promise<string[][]> => {
+    return new Promise((resolve, reject) => {
+      const isXlsx = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+      const reader = new FileReader();
+
+      if (isXlsx) {
+        reader.readAsArrayBuffer(file);
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target?.result as ArrayBuffer);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const sheetData = XLSX.utils.sheet_to_json<any[]>(worksheet, { header: 1 });
+            
+            const lines = sheetData.map(row => 
+              (Array.isArray(row) ? row : []).map(val => val !== null && val !== undefined ? String(val).trim() : '')
+            );
+            resolve(lines);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read Excel file.'));
+      } else {
+        reader.readAsText(file);
+        reader.onload = () => {
+          try {
+            resolve(parseCSV(reader.result as string));
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read CSV file.'));
+      }
+    });
+  };
+
   const mapHeaders = (headers: string[]) => {
     const mapping: { [key: string]: number } = {};
     headers.forEach((h, index) => {
@@ -170,16 +209,13 @@ export const AdminDashboard: React.FC = () => {
     return mapping;
   };
 
-  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setCsvFile(file);
 
-    const reader = new FileReader();
-    reader.readAsText(file);
-    reader.onload = () => {
-      const csvData = reader.result as string;
-      const lines = parseCSV(csvData);
+    try {
+      const lines = await parseFileToLines(file);
       if (lines.length < 2) {
         alert('CSV file must contain a header row and at least one data row.');
         return;
@@ -213,7 +249,9 @@ export const AdminDashboard: React.FC = () => {
       });
 
       setParsedRows(rows);
-    };
+    } catch (err: any) {
+      alert(`Error parsing file: ${err.message}`);
+    }
   };
 
   const handlePreviewRowChange = (id: string, field: string, value: any) => {
@@ -412,16 +450,13 @@ export const AdminDashboard: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  const handleMasterCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMasterCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setMasterCsvFile(file);
 
-    const reader = new FileReader();
-    reader.readAsText(file);
-    reader.onload = () => {
-      const csvData = reader.result as string;
-      const lines = parseCSV(csvData);
+    try {
+      const lines = await parseFileToLines(file);
       if (lines.length < 2) {
         alert('CSV file must contain a header row and at least one data row.');
         return;
@@ -463,7 +498,9 @@ export const AdminDashboard: React.FC = () => {
       });
 
       setParsedMasterRows(rows);
-    };
+    } catch (err: any) {
+      alert(`Error parsing master file: ${err.message}`);
+    }
   };
 
   const handleImportBulkMaster = async () => {
@@ -988,7 +1025,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <input 
                       type="file" 
-                      accept=".csv" 
+                      accept=".csv,.xlsx,.xls" 
                       onChange={handleCSVUpload} 
                       id="csv-file-input" 
                       className="hidden" 
@@ -1521,7 +1558,7 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <input 
                       type="file" 
-                      accept=".csv" 
+                      accept=".csv,.xlsx,.xls" 
                       onChange={handleMasterCSVUpload} 
                       id="master-csv-file-input" 
                       className="hidden" 

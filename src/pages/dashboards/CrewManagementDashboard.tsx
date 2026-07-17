@@ -231,6 +231,7 @@ export const CrewManagementDashboard: React.FC = () => {
                       <option value="faculty_dance">Faculty Coordinator (Group Dance)</option>
                       <option value="faculty_music">Faculty Coordinator (Group Music)</option>
                       <option value="faculty_debate">Faculty Coordinator (Debate)</option>
+                      <option value="faculty_project_exhibition">Faculty Coordinator (Project Exhibition)</option>
                       <option value="faculty_fun_activities">Faculty Coordinator (Fun Activities)</option>
                       <option value="certificate_team">Certificate Team</option>
                       <option value="officials">University Officials</option>
@@ -415,6 +416,7 @@ export const CrewManagementDashboard: React.FC = () => {
                               <option value="faculty_dance">Faculty (Group Dance)</option>
                               <option value="faculty_music">Faculty (Group Music)</option>
                               <option value="faculty_debate">Faculty (Debate)</option>
+                              <option value="faculty_project_exhibition">Faculty (Project Exhibition)</option>
                               <option value="faculty_fun_activities">Faculty (Fun Activities)</option>
                               <option value="certificate_team">Certificate Team</option>
                               <option value="officials">University Officials</option>

@@ -37,6 +37,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole }) => {
     if (currentRole === 'admin') {
       items.push(
         { label: 'Admin Control Center',     path: '/dashboard/admin',          icon: Shield },
+        { label: 'Registration Details',     path: '/dashboard/admin/registrations', icon: UserCheck },
         { label: 'Bulk Institution Import',  path: '/dashboard/admin/import',   icon: Upload },
         { label: 'Crew & Users Management',  path: '/dashboard/admin/users',    icon: Users },
         { label: 'Spot Registration',        path: '/dashboard/registration/spot', icon: UserPlus },

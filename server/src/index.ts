@@ -33,7 +33,7 @@ import {
   bulkSendRegistrationInvitations, updateBankPayment, deleteCrewUser, deleteBankPayment,
   bulkAddInstitutionMaster, getInstitutionMastersList, deleteInstitutionMaster,
   addInstitutionMaster, updateInstitutionMaster, bulkRegisterInstitutions, updateUserRole,
-  getSystemPasswords, updateSystemPassword
+  getSystemPasswords, updateSystemPassword, getAllRegistrations
 } from './controllers/adminController';
 import { getAnalyticsData } from './controllers/analyticsController';
 import { initDb, dbQuery } from './services/db';
@@ -176,6 +176,7 @@ app.delete('/api/admin/institution-master/:id', deleteInstitutionMaster);
 app.post('/api/admin/bulk-register', bulkRegisterInstitutions);
 app.get('/api/admin/passwords', getSystemPasswords);
 app.post('/api/admin/passwords/update', updateSystemPassword);
+app.get('/api/admin/registrations', getAllRegistrations);
 
 // Officials Analytics Routes
 app.get('/api/analytics', getAnalyticsData);

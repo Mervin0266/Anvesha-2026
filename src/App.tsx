@@ -14,6 +14,7 @@ import { AnalyticsDashboard } from './pages/dashboards/AnalyticsDashboard';
 import { BulkImportDashboard } from './pages/dashboards/BulkImportDashboard';
 import { SpotRegistrationDashboard } from './pages/dashboards/SpotRegistrationDashboard';
 import { CrewManagementDashboard } from './pages/dashboards/CrewManagementDashboard';
+import { RegistrationDetailsDashboard } from './pages/dashboards/RegistrationDetailsDashboard';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, isLoading } = useAuth();
@@ -95,6 +96,14 @@ export const App: React.FC = () => {
               element={
                 <ProtectedRoute>
                   <BulkImportDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/admin/registrations"
+              element={
+                <ProtectedRoute>
+                  <RegistrationDetailsDashboard />
                 </ProtectedRoute>
               }
             />

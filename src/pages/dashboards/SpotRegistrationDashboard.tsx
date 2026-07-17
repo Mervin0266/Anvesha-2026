@@ -6,8 +6,9 @@ import { useEvents } from '../../contexts/EventsContext';
 import { apiFetch } from '../../services/api';
 import { 
   Building2, User, Phone, Mail, MapPin, Plus, Trash2, 
-  Upload, CheckCircle, AlertCircle, FileText, Download 
+  Upload, CheckCircle, AlertCircle, FileText, Download, Trophy
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 interface ParticipantRow {
   name: string;
@@ -108,25 +109,19 @@ export const SpotRegistrationDashboard: React.FC = () => {
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       if (lines.length <= 1) return;
 
+      if (!selectedEventId) {
+        alert('Please select a Target Event on the form before uploading the CSV.');
+        return;
+      }
+
       const parsedStudents: ParticipantRow[] = [];
       
       for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
-        if (cols.length < 8) continue;
+        if (cols.length < 7) continue;
 
-        const [sName, sGender, sDob, sClass, sReg, sEmerg, sEventName, sTeam] = cols;
+        const [sName, sGender, sDob, sClass, sReg, sEmerg, sTeam] = cols;
         if (!sName) continue;
-
-        // Resolve eventName fuzzy match against catalog events
-        const eventMatch = events.find(e => 
-          e.name.toLowerCase().includes(sEventName.toLowerCase()) || 
-          sEventName.toLowerCase().includes(e.name.toLowerCase()) ||
-          e.id.toLowerCase() === sEventName.toLowerCase()
-        );
-
-        if (!eventMatch) {
-          throw new Error(`CSV Line ${i + 1}: Could not find event matching '${sEventName}' in catalog.`);
-        }
 
         parsedStudents.push({
           name: sName,
@@ -135,13 +130,13 @@ export const SpotRegistrationDashboard: React.FC = () => {
           className: sClass || '1st PU',
           studentRegisterNumber: sReg || 'NIL',
           emergencyContact: sEmerg || '0000000000',
-          eventId: eventMatch.id,
+          eventId: selectedEventId,
           teamName: sTeam || 'Team A'
         });
       }
 
       setParticipants([...participants, ...parsedStudents]);
-      alert(`Parsed and added ${parsedStudents.length} students from roster file.`);
+      alert(`Parsed and added ${parsedStudents.length} students to the roster for the selected event.`);
     } catch (err: any) {
       alert(`Error parsing roster file: ${err.message}`);
     }
@@ -158,6 +153,64 @@ export const SpotRegistrationDashboard: React.FC = () => {
     }
   };
 
+  const processUploadedFile = (file: File) => {
+    const isXlsx = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+    const reader = new FileReader();
+
+    if (isXlsx) {
+      reader.readAsArrayBuffer(file);
+      reader.onload = (evt) => {
+        try {
+          const data = new Uint8Array(evt.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const sheetData = XLSX.utils.sheet_to_json<any[]>(worksheet, { header: 1 });
+          
+          if (!selectedEventId) {
+            alert('Please select a Target Event on the form before uploading the spreadsheet.');
+            return;
+          }
+
+          const parsedStudents: ParticipantRow[] = [];
+          for (let i = 1; i < sheetData.length; i++) {
+            const row = sheetData[i];
+            if (!row || row.length === 0) continue;
+            
+            const cols = row.map(val => val !== null && val !== undefined ? String(val).trim() : '');
+            if (cols.length < 7) continue;
+
+            const [sName, sGender, sDob, sClass, sReg, sEmerg, sTeam] = cols;
+            if (!sName) continue;
+
+            parsedStudents.push({
+              name: sName,
+              gender: sGender || 'Male',
+              dob: sDob || '2008-01-01',
+              className: sClass || '1st PU',
+              studentRegisterNumber: sReg || 'NIL',
+              emergencyContact: sEmerg || '0000000000',
+              eventId: selectedEventId,
+              teamName: sTeam || 'Team A'
+            });
+          }
+
+          setParticipants([...participants, ...parsedStudents]);
+          alert(`Parsed and added ${parsedStudents.length} students from Excel file.`);
+        } catch (err: any) {
+          alert(`Error parsing Excel file: ${err.message}`);
+        }
+      };
+    } else {
+      reader.readAsText(file);
+      reader.onload = (evt) => {
+        if (evt.target?.result) {
+          handleCSVParse(evt.target.result as string);
+        }
+      };
+    }
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -165,26 +218,14 @@ export const SpotRegistrationDashboard: React.FC = () => {
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        if (evt.target?.result) {
-          handleCSVParse(evt.target.result as string);
-        }
-      };
-      reader.readAsText(file);
+      processUploadedFile(file);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        if (evt.target?.result) {
-          handleCSVParse(evt.target.result as string);
-        }
-      };
-      reader.readAsText(file);
+      processUploadedFile(file);
     }
   };
 
@@ -250,9 +291,9 @@ export const SpotRegistrationDashboard: React.FC = () => {
 
   // CSV template generator
   const downloadSpotCSVTemplate = () => {
-    const headers = 'studentName,gender,dob,className,studentRegisterNumber,emergencyContact,eventName,teamName\n';
-    const row1 = 'Jane Doe,Female,2008-05-12,1st PU,REG-991,9876543210,Football (Boys),Team A\n';
-    const row2 = 'John Smith,Male,2007-11-20,2nd PU,NIL,9123456789,Volleyball (Boys),Team B\n';
+    const headers = 'Name,Gender,Date of Birth,PU Class,Student Register Number,Emergency Contact Number,Team\n';
+    const row1 = 'Jane Doe,Female,2008-05-12,1st PU,REG-991,9876543210,Team A\n';
+    const row2 = 'John Smith,Male,2007-11-20,2nd PU,NIL,9123456789,Team B\n';
     const blob = new Blob([headers + row1 + row2], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -384,6 +425,26 @@ export const SpotRegistrationDashboard: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
+                <div className="flex items-center space-x-2 border-b border-slate-100 pt-3 pb-2">
+                  <Trophy className="w-5 h-5 text-christ-navy" />
+                  <h3 className="font-bold text-sm text-slate-800 font-serif">Event Selection</h3>
+                </div>
+
+                <div className="space-y-3.5">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Target Event</label>
+                    <select
+                      value={selectedEventId}
+                      onChange={(e) => setSelectedEventId(e.target.value)}
+                      className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none bg-slate-50 font-semibold text-christ-navy"
+                    >
+                      {events.map(evt => (
+                        <option key={evt.id} value={evt.id}>{evt.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
 
               {/* Aggregated totals */}
@@ -506,19 +567,6 @@ export const SpotRegistrationDashboard: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Target Event</label>
-                    <select
-                      value={selectedEventId}
-                      onChange={(e) => setSelectedEventId(e.target.value)}
-                      className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none bg-slate-50 font-semibold text-christ-navy"
-                    >
-                      {events.map(evt => (
-                        <option key={evt.id} value={evt.id}>{evt.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Team ID</label>
                     <select
                       value={selectedTeamName}
@@ -561,7 +609,7 @@ export const SpotRegistrationDashboard: React.FC = () => {
                   <input
                     type="file"
                     id="csv-file-input"
-                    accept=".csv"
+                    accept=".csv,.xlsx,.xls"
                     onChange={handleFileChange}
                     className="hidden"
                   />

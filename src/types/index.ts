@@ -11,6 +11,7 @@ export type UserRole =
   | 'faculty_debate'
   | 'faculty_open_mic'
   | 'faculty_treasure_hunt'
+  | 'faculty_project_exhibition'
   | 'certificate_team'
   | 'officials';
 
