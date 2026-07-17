@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Trophy, ShieldCheck, Calendar, Award,
   ArrowRight, MapPin, Phone, Mail, CheckCircle2, Sparkles, Clock
@@ -50,11 +50,25 @@ export const Home: React.FC = () => {
   const { events } = useEvents();
   const [activeTab, setActiveTab] = useState<EventCategory>('SPORTS');
   const [bgIndex, setBgIndex]     = useState(0);
+  const location = useLocation();
 
   useEffect(() => {
     const t = setInterval(() => setBgIndex(p => (p + 1) % HERO_IMAGES.length), 4800);
     return () => clearInterval(t);
   }, []);
+
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.getElementById(location.hash.substring(1));
+      if (element) {
+        // Use a small timeout to allow the DOM to fully render/render content
+        const timer = setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [location.pathname, location.hash]);
 
   /* Merge Boys/Girls sports into one catalog card if both divisions exist */
   const displayEvents = React.useMemo(() => {

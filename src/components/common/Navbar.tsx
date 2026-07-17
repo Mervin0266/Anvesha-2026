@@ -46,11 +46,11 @@ export const Navbar: React.FC = () => {
 
           {/* Desktop Nav Links */}
           <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-700">
-            <a href="#about" className="hover:text-christ-navy transition-colors">About</a>
-            <a href="#events" className="hover:text-christ-navy transition-colors">Events</a>
-            <a href="#timeline" className="hover:text-christ-navy transition-colors">Timeline</a>
-            <a href="#rules" className="hover:text-christ-navy transition-colors">Rules</a>
-            <a href="#contact" className="hover:text-christ-navy transition-colors">Contact</a>
+            <Link to="/#about" className="hover:text-christ-navy transition-colors">About</Link>
+            <Link to="/#events" className="hover:text-christ-navy transition-colors">Events</Link>
+            <Link to="/#timeline" className="hover:text-christ-navy transition-colors">Timeline</Link>
+            <Link to="/#rules" className="hover:text-christ-navy transition-colors">Rules</Link>
+            <Link to="/#contact" className="hover:text-christ-navy transition-colors">Contact</Link>
           </div>
 
           {/* Action Buttons */}
@@ -100,11 +100,11 @@ export const Navbar: React.FC = () => {
       {/* Mobile Dropdown Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-6 space-y-3">
-          <a href="#about" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-slate-700 py-1">About</a>
-          <a href="#events" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-slate-700 py-1">Events</a>
-          <a href="#timeline" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-slate-700 py-1">Timeline</a>
-          <a href="#rules" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-slate-700 py-1">Rules</a>
-          <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-slate-700 py-1">Contact</a>
+          <Link to="/#about" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-slate-700 py-1">About</Link>
+          <Link to="/#events" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-slate-700 py-1">Events</Link>
+          <Link to="/#timeline" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-slate-700 py-1">Timeline</Link>
+          <Link to="/#rules" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-slate-700 py-1">Rules</Link>
+          <Link to="/#contact" onClick={() => setMobileMenuOpen(false)} className="block text-sm font-medium text-slate-700 py-1">Contact</Link>
           
           <div className="pt-3 border-t border-slate-100 flex flex-col space-y-2">
             {isHomePage && (
