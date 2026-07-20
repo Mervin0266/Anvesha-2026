@@ -83,6 +83,38 @@ export const EVENTS_CATALOG: FestEvent[] = [
     ],
     eligibility: 'Open to registered 1st & 2nd Year PU Students.'
   },
+  {
+    id: 'sports_basketball_boys',
+    name: 'Basketball (Boys)',
+    category: 'SPORTS',
+    type: 'TEAM',
+    minTeamSize: 5,
+    maxTeamSize: 12,
+    registrationFee: 500,
+    description: 'Full court Basketball tournament testing speed, strategy, and teamwork.',
+    rules: [
+      'Maximum 2 teams per institution.',
+      '4 quarters of 10 minutes each.',
+      'FIBA regulations apply.'
+    ],
+    eligibility: 'Open to registered 1st & 2nd Year PU Students.'
+  },
+  {
+    id: 'sports_basketball_girls',
+    name: 'Basketball (Girls)',
+    category: 'SPORTS',
+    type: 'TEAM',
+    minTeamSize: 5,
+    maxTeamSize: 12,
+    registrationFee: 500,
+    description: 'Full court Basketball tournament testing speed, strategy, and teamwork.',
+    rules: [
+      'Maximum 2 teams per institution.',
+      '4 quarters of 10 minutes each.',
+      'FIBA regulations apply.'
+    ],
+    eligibility: 'Open to registered 1st & 2nd Year PU Students.'
+  },
 
   // CULTURALS
   {

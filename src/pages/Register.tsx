@@ -675,8 +675,8 @@ export const Register: React.FC = () => {
         }
       });
 
-      if (mapping['name'] === undefined || mapping['gender'] === undefined || mapping['dob'] === undefined || mapping['className'] === undefined || mapping['govtIdProof'] === undefined || mapping['emergencyContact'] === undefined) {
-        alert('CSV is missing one or more required columns.\nRequired columns are: Name, Gender, Date of Birth, Class, ID Number, Emergency Contact.');
+      if (mapping['name'] === undefined || mapping['gender'] === undefined || mapping['dob'] === undefined || mapping['className'] === undefined || mapping['emergencyContact'] === undefined) {
+        alert('CSV is missing one or more required columns.\nRequired columns are: Name, Gender, Date of Birth, Class, Emergency Contact.');
         return;
       }
 
@@ -737,7 +737,7 @@ export const Register: React.FC = () => {
 
   // Validate Step 5 participant for Rule 2 & Duplicates
   const handleValidateParticipantRow = async (part: typeof participants[0]) => {
-    if (!part.name || !part.govtIdProof) return;
+    if (!part.name) return;
     try {
       const res = await apiFetch<{ valid: boolean; error?: string }>('/registration/validate-participant', {
         method: 'POST',
@@ -806,11 +806,6 @@ export const Register: React.FC = () => {
     }
     if (!String(poc.email || '').trim()) {
       setErrorMsg('Please enter the POC Email Address.');
-      setCurrentStep(2);
-      return;
-    }
-    if (!String(poc.govtIdProof || '').trim()) {
-      setErrorMsg('Please provide the POC Institution ID Card Photo URL.');
       setCurrentStep(2);
       return;
     }
@@ -890,11 +885,6 @@ export const Register: React.FC = () => {
           return;
         }
 
-        if (!p.govtIdProof.trim()) {
-          setErrorMsg(`Please enter the Government ID Proof of '${p.name}' in '${teamEvt?.name}'.`);
-          setCurrentStep(4);
-          return;
-        }
         if (!p.emergencyContact.trim()) {
           setErrorMsg(`Please enter the Emergency Contact of '${p.name}' in '${teamEvt?.name}'.`);
           setCurrentStep(4);
@@ -924,11 +914,6 @@ export const Register: React.FC = () => {
     // Validate Step 5 (Payment)
     if (!payment.transactionId.trim()) {
       setErrorMsg('Please enter the Bank Transaction or Ref ID.');
-      setCurrentStep(5);
-      return;
-    }
-    if (!payment.paymentProofUrl.trim()) {
-      setErrorMsg('Please upload a Payment Proof photo.');
       setCurrentStep(5);
       return;
     }
@@ -1291,19 +1276,10 @@ export const Register: React.FC = () => {
                       className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-christ-navy focus:outline-none"
                     />
                   </div>
-
-                  <div className="md:col-span-2">
-                    <FileUploadField
-                      label="Institution ID Card Photo *"
-                      value={poc.govtIdProof}
-                      onChange={(url) => setPoc({ ...poc, govtIdProof: url })}
-                      required
-                    />
-                  </div>
-                </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
             {/* STEP 3: Team Selection (Rule 1: Max 2 Teams per Event) */}
             {currentStep === 3 && (
@@ -1606,22 +1582,7 @@ export const Register: React.FC = () => {
                                       </select>
                                     </div>
 
-                                    <div className="sm:col-span-2">
-                                      <label className="block font-bold text-slate-800 mb-1">Govt ID / PU Student ID Number *</label>
-                                      <input
-                                        type="text"
-                                        required
-                                        placeholder="PUC-ID-2024-8891"
-                                        value={p.govtIdProof}
-                                        onChange={(e) => {
-                                          const newParts = [...participants];
-                                          newParts[pIdx].govtIdProof = e.target.value;
-                                          setParticipants(newParts);
-                                        }}
-                                        onBlur={() => handleValidateParticipantRow(p)}
-                                        className="w-full px-2.5 py-1.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-christ-navy focus:outline-none bg-white"
-                                      />
-                                    </div>
+
 
                                     <div className="sm:col-span-2">
                                       <label className="block font-bold text-slate-800 mb-1">Emergency Contact Number *</label>
@@ -1676,8 +1637,7 @@ export const Register: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block font-bold text-slate-800 mb-1">Bank Transaction / Ref ID *</label>
                     <input
                       type="text"
@@ -1690,16 +1650,6 @@ export const Register: React.FC = () => {
                       }`}
                     />
                   </div>
-
-                  <div>
-                    <FileUploadField
-                      label="Upload Payment Proof Photo *"
-                      value={payment.paymentProofUrl}
-                      onChange={(url) => setPayment({ ...payment, paymentProofUrl: url })}
-                      required
-                    />
-                  </div>
-                </div>
                 </div>
               </div>
             )}
@@ -1758,9 +1708,6 @@ export const Register: React.FC = () => {
                         <strong className="block text-christ-navy font-serif">Point of Contact:</strong>
                         <p>{poc.name} ({poc.designation})</p>
                         <p className="text-slate-500">Phone: {poc.phone} | Email: {poc.email}</p>
-                        <p className="text-slate-500">
-                          ID Card: <a href={poc.govtIdProof} target="_blank" rel="noopener noreferrer" className="text-christ-navy font-bold hover:underline">View ID Photo</a>
-                        </p>
                       </div>
 
                       <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1 col-span-1 md:col-span-2">
@@ -1789,7 +1736,6 @@ export const Register: React.FC = () => {
                                         <div className="font-semibold text-slate-800">{p.name || 'Unnamed Participant'} ({p.gender})</div>
                                         <div className="text-[10px] text-slate-500">
                                           <div>DOB: {p.dob || 'Not specified'} | Class: {p.className || 'Not specified'}</div>
-                                          <div>Govt ID: {p.govtIdProof || 'Not specified'}</div>
                                           <div>Emergency Contact: {p.emergencyContact || 'Not specified'}</div>
                                         </div>
                                       </div>

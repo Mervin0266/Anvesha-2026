@@ -20,23 +20,29 @@ export const VerificationDashboard: React.FC = () => {
   const [editingName, setEditingName] = useState('');
   const [isSavingName, setIsSavingName] = useState(false);
 
-  // Verification Checklist States
-  const [checkPayment, setCheckPayment] = useState(false);
+  // Verification Checklist States & Manual Chest Numbers
   const [checkNames, setCheckNames] = useState(false);
-  const [checkGovtId, setCheckGovtId] = useState(false);
   const [checkEndorsement, setCheckEndorsement] = useState(false);
+  const [manualTeamChestNumbers, setManualTeamChestNumbers] = useState<Record<string, string>>({});
 
-  // Reset checkboxes on record selection change
+  // Reset checkboxes and initialize chest numbers on record selection change
   useEffect(() => {
-    setCheckPayment(false);
     setCheckNames(false);
-    setCheckGovtId(false);
     setCheckEndorsement(false);
     setRemarks('');
     setEditingParticipantId(null);
+    if (selectedRecord && selectedRecord.teams) {
+      const initialMap: Record<string, string> = {};
+      selectedRecord.teams.forEach((t: any) => {
+        initialMap[t.id] = t.chest_number || t.chestNumber || '';
+      });
+      setManualTeamChestNumbers(initialMap);
+    } else {
+      setManualTeamChestNumbers({});
+    }
   }, [selectedRecord]);
 
-  const canApprove = checkPayment && checkNames && checkGovtId && checkEndorsement;
+  const canApprove = checkNames && checkEndorsement;
 
   const handleSaveParticipantName = async (partId: string) => {
     if (!editingName.trim()) {
@@ -109,7 +115,8 @@ export const VerificationDashboard: React.FC = () => {
         body: JSON.stringify({
           institutionId: instId,
           remarks: remarks || 'Verified physical documents and payment receipt.',
-          verifierName: user?.name
+          verifierName: user?.name,
+          teamChestNumbers: manualTeamChestNumbers
         })
       });
       if (res.success) {
@@ -335,64 +342,7 @@ export const VerificationDashboard: React.FC = () => {
                           <strong className="text-slate-800">{selectedRecord.payment?.date ? new Date(selectedRecord.payment.date).toLocaleString() : 'N/A'}</strong>
                         </div>
                       </div>
-
-                      {selectedRecord.payment?.paymentProofUrl && (
-                        <div className="pt-2 border-t border-slate-200">
-                          <p className="text-[10px] text-slate-500 uppercase tracking-tight mb-1">Receipt Screenshot Proof:</p>
-                          <a 
-                            href={selectedRecord.payment.paymentProofUrl} 
-                            target="_blank" 
-                            rel="noreferrer" 
-                            className="inline-block border border-slate-300 rounded-lg overflow-hidden max-w-full hover:border-christ-navy transition-all bg-white"
-                          >
-                            <img 
-                              src={selectedRecord.payment.paymentProofUrl} 
-                              alt="Payment Receipt" 
-                              className="w-full h-auto max-h-36 object-contain"
-                            />
-                            <span className="block text-[10px] bg-slate-100 text-center py-1.5 text-slate-600 hover:text-slate-900 font-semibold border-t border-slate-200">
-                              Click to view full size ↗
-                            </span>
-                          </a>
-                        </div>
-                      )}
                     </div>
-
-                    {/* Representative / POC ID Card Proof */}
-                    {selectedRecord.poc && (
-                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-xs">
-                        <h4 className="font-bold text-xs text-christ-navy uppercase tracking-wider font-serif border-b border-slate-200 pb-1.5 flex items-center justify-between">
-                          <span>Representative ID Card Proof</span>
-                          <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-christ-navy/10 text-christ-navy uppercase">
-                            {selectedRecord.poc.designation || 'POC'}
-                          </span>
-                        </h4>
-                        <div className="space-y-1 font-medium text-slate-800">
-                          <p><strong>Name:</strong> {selectedRecord.poc.name}</p>
-                          <p><strong>Contact:</strong> {selectedRecord.poc.phone} | {selectedRecord.poc.email}</p>
-                        </div>
-                        {selectedRecord.poc.govtIdProof && (
-                          <div className="pt-2 border-t border-slate-200">
-                            <p className="text-[10px] text-slate-500 uppercase tracking-tight mb-1">Representative ID Card:</p>
-                            <a 
-                              href={selectedRecord.poc.govtIdProof} 
-                              target="_blank" 
-                              rel="noreferrer" 
-                              className="inline-block border border-slate-300 rounded-lg overflow-hidden max-w-full hover:border-christ-navy transition-all bg-white"
-                            >
-                              <img 
-                                src={selectedRecord.poc.govtIdProof} 
-                                alt="POC ID Proof" 
-                                className="w-full h-auto max-h-32 object-contain"
-                              />
-                              <span className="block text-[10px] bg-slate-100 text-center py-1 text-slate-600 hover:text-slate-900 font-semibold border-t border-slate-200">
-                                View full ID Proof ↗
-                              </span>
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    )}
 
                     {/* Verification Checklist */}
                     <div className="border border-slate-200 rounded-xl p-4 space-y-3 bg-slate-50/50 text-xs">
@@ -400,15 +350,6 @@ export const VerificationDashboard: React.FC = () => {
                         Document Check-list
                       </h4>
                       <div className="space-y-3">
-                        <label className="flex items-start space-x-2.5 cursor-pointer">
-                          <input 
-                            type="checkbox"
-                            checked={checkPayment}
-                            onChange={(e) => setCheckPayment(e.target.checked)}
-                            className="mt-0.5 rounded text-christ-navy focus:ring-christ-navy w-4 h-4 shrink-0"
-                          />
-                          <span className="text-slate-700">I have verified the transaction ID and receipt screenshot against bank records.</span>
-                        </label>
                         <label className="flex items-start space-x-2.5 cursor-pointer">
                           <input 
                             type="checkbox"
@@ -421,15 +362,6 @@ export const VerificationDashboard: React.FC = () => {
                         <label className="flex items-start space-x-2.5 cursor-pointer">
                           <input 
                             type="checkbox"
-                            checked={checkGovtId}
-                            onChange={(e) => setCheckGovtId(e.target.checked)}
-                            className="mt-0.5 rounded text-christ-navy focus:ring-christ-navy w-4 h-4 shrink-0"
-                          />
-                          <span className="text-slate-700">I have verified the uploaded Government ID proof numbers.</span>
-                        </label>
-                        <label className="flex items-start space-x-2.5 cursor-pointer">
-                          <input 
-                            type="checkbox"
                             checked={checkEndorsement}
                             onChange={(e) => setCheckEndorsement(e.target.checked)}
                             className="mt-0.5 rounded text-christ-navy focus:ring-christ-navy w-4 h-4 shrink-0"
@@ -438,6 +370,36 @@ export const VerificationDashboard: React.FC = () => {
                         </label>
                       </div>
                     </div>
+
+                    {/* Manual Chest Number Assignment per Team */}
+                    {selectedRecord.teams && selectedRecord.teams.length > 0 && (
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-xs">
+                        <h4 className="font-bold text-xs text-christ-navy uppercase tracking-wider font-serif border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                          <span>Manual Team Chest Number Assignment</span>
+                          <span className="text-[10px] font-normal text-slate-500">Enter bib/chest numbers</span>
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedRecord.teams.map((t: any) => (
+                            <div key={t.id} className="p-2.5 bg-white border border-slate-200 rounded-lg flex items-center justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <strong className="text-slate-900 block truncate text-xs">{t.teamName || 'Team'}</strong>
+                                <span className="text-[10px] text-slate-500 font-medium">{t.eventName || t.eventId}</span>
+                              </div>
+                              <div className="flex items-center space-x-1.5 shrink-0">
+                                <span className="text-[10px] font-bold text-slate-500">Chest #:</span>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. FB-101"
+                                  value={manualTeamChestNumbers[t.id] || ''}
+                                  onChange={(e) => setManualTeamChestNumbers({ ...manualTeamChestNumbers, [t.id]: e.target.value })}
+                                  className="w-24 px-2 py-1 text-xs border border-slate-300 rounded font-mono font-bold focus:ring-1 focus:ring-christ-navy focus:outline-none bg-slate-50"
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Right Column: Participant ID proofs list */}
@@ -491,22 +453,12 @@ export const VerificationDashboard: React.FC = () => {
                                     </button>
                                   )}
                                 </div>
-                                <p className="text-[10px] text-slate-500 mt-0.5">{p.className} · ID: {p.govtIdProof}</p>
-                                {p.govtIdProof && (p.govtIdProof.startsWith('http') || p.govtIdProof.includes('/api/')) && (
-                                  <a 
-                                    href={p.govtIdProof} 
-                                    target="_blank" 
-                                    rel="noreferrer" 
-                                    className="inline-flex items-center text-[10px] text-christ-navy hover:underline font-bold mt-1"
-                                  >
-                                    View ID Proof Card ↗
-                                  </a>
-                                )}
+                                <p className="text-[10px] text-slate-500 mt-0.5">{p.className}</p>
                               </>
                             )}
                           </div>
                           <span className="font-mono font-bold px-2 py-0.5 bg-christ-navy text-christ-gold rounded text-[10px] shrink-0">
-                            {p.chestNumber || 'Pending Auto-Assign'}
+                            {p.chestNumber || manualTeamChestNumbers[p.team_id || p.teamId] || 'Unassigned'}
                           </span>
                         </div>
                       ))}

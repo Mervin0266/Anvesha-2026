@@ -80,9 +80,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole }) => {
   const navItems = getNavItems();
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Brand */}
-      <div className="px-5 py-4 border-b border-white/10" style={{ background: 'rgba(0,0,0,0.2)' }}>
+      <div className="px-5 py-4 border-b border-white/10 shrink-0" style={{ background: 'rgba(0,0,0,0.2)' }}>
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 rounded-xl bg-christ-gold flex items-center justify-center font-serif text-lg font-black text-christ-navy shrink-0">
             CU
@@ -95,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole }) => {
       </div>
 
       {/* User card */}
-      <div className="px-4 py-3 border-b border-white/10">
+      <div className="px-4 py-3 border-b border-white/10 shrink-0">
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-christ-gold/30 to-christ-gold/10 border border-christ-gold/30 flex items-center justify-center font-black text-christ-gold text-sm shrink-0">
             {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
@@ -110,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole }) => {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 min-h-0 px-3 py-4 space-y-0.5 overflow-y-auto">
         <p className="px-3 mb-3 text-[10px] font-bold uppercase tracking-widest text-white/30 font-serif">
           Main Menu
         </p>
@@ -153,7 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole }) => {
       </nav>
 
       {/* Sign Out */}
-      <div className="p-4 border-t border-white/10" style={{ background: 'rgba(0,0,0,0.2)' }}>
+      <div className="p-4 border-t border-white/10 shrink-0 mt-auto" style={{ background: 'rgba(0,0,0,0.2)' }}>
         <button
           onClick={handleLogout}
           className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold text-rose-300 hover:bg-rose-500/20 hover:text-rose-100 transition-all border border-rose-500/20 hover:border-rose-400/40"
@@ -186,7 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole }) => {
 
       {/* ── Mobile slide-over drawer ── */}
       <aside
-        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-72 flex flex-col transition-transform duration-300 ${
+        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-72 flex flex-col h-screen transition-transform duration-300 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{ background: 'linear-gradient(180deg, #001630 0%, #002147 100%)' }}
@@ -194,16 +194,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentRole }) => {
         {/* Close button */}
         <button
           onClick={() => setMobileOpen(false)}
-          className="absolute top-3 right-3 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+          className="absolute top-3 right-3 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors z-10"
         >
           <X className="w-4 h-4" />
         </button>
         <SidebarContent />
       </aside>
 
-      {/* ── Desktop fixed sidebar ── */}
+      {/* ── Desktop fixed static sidebar ── */}
       <aside
-        className="hidden lg:flex w-64 xl:w-72 flex-col shrink-0 min-h-screen sticky top-0 border-r border-white/5"
+        className="hidden lg:flex w-64 xl:w-72 flex-col shrink-0 h-screen sticky top-0 z-30 border-r border-white/5 overflow-hidden"
         style={{ background: 'linear-gradient(180deg, #001630 0%, #002147 100%)' }}
       >
         <SidebarContent />

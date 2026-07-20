@@ -896,6 +896,12 @@ export const bulkRegisterInstitutions = async (req: Request, res: Response): Pro
         if (norm.includes('volleyball') && (norm.includes('boy') || norm.includes('men'))) {
           return dbEvents.find(e => e.id === 'sports_volleyball_boys');
         }
+        if (norm.includes('basketball') && (norm.includes('girl') || norm.includes('women'))) {
+          return dbEvents.find(e => e.id === 'sports_basketball_girls');
+        }
+        if (norm.includes('basketball') && (norm.includes('boy') || norm.includes('men') || !norm.includes('girl'))) {
+          return dbEvents.find(e => e.id === 'sports_basketball_boys');
+        }
         if (norm.includes('tug') && norm.includes('war') && norm.includes('girl')) {
           return dbEvents.find(e => e.id === 'sports_tug_of_war_girls');
         }
@@ -1011,14 +1017,14 @@ export const bulkRegisterInstitutions = async (req: Request, res: Response): Pro
           const chestNumber = `${prefix}-${chestCounter}`;
           chestCounter += 1;
 
-          // Create Team record
+          // Create Team record (PENDING desk verification)
           await client.query(
             `INSERT INTO teams (id, registration_id, institution_id, event_id, team_name, status, chest_number)
              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [teamId, registrationId, instId, eventId, teamName, 'VERIFIED', chestNumber]
+            [teamId, registrationId, instId, eventId, teamName, 'PENDING', null]
           );
 
-          // Create Participant records
+          // Create Participant records (PENDING desk verification)
           for (let k = 0; k < groupParts.length; k++) {
             const p = groupParts[k];
             const partId = `part_${Date.now()}_${i}_${Math.floor(Math.random() * 10000)}`;
@@ -1039,7 +1045,7 @@ export const bulkRegisterInstitutions = async (req: Request, res: Response): Pro
               [
                 partId, registrationId, instId, teamId, eventId, p.name.trim(), gender, p.dob || '2008-01-01',
                 p.className || '1st PU', 'A', null, null, 'NIL', p.emergencyContact || (pocNumber ? pocNumber.trim() : '080-22222222'),
-                'VERIFIED', chestNumber, p.studentRegisterNumber || 'NIL'
+                'PENDING', null, p.studentRegisterNumber || 'NIL'
               ]
             );
           }
@@ -1058,12 +1064,12 @@ export const bulkRegisterInstitutions = async (req: Request, res: Response): Pro
           ]
         );
 
-        // Save Verification Record
+        // Save Verification Record (PENDING desk verification)
         const verId = `ver_${Date.now()}_${i}`;
         await client.query(
           `INSERT INTO verifications (id, registration_id, institution_id, verified_by, verified_at, status, remarks)
            VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [verId, registrationId, instId, 'Admin Bulk Import', new Date().toISOString(), 'VERIFIED', 'Imported directly via Admin Bulk Institution Import tool.']
+          [verId, registrationId, instId, 'Pending Desk Verification', new Date().toISOString(), 'PENDING', 'Bulk imported roster pending Registration Desk verification.']
         );
 
         // Save Hospitality check-in record
@@ -1209,3 +1215,50 @@ export const getAllRegistrations = async (req: Request, res: Response): Promise<
     res.status(500).json({ success: false, message: 'Failed to retrieve registration details.' });
   }
 };
+
+export const resetAllData = async (req: Request, res: Response): Promise<void> => {
+  const { userRole, confirmation } = req.body;
+
+  if (userRole !== 'admin') {
+    res.status(403).json({ success: false, message: 'Access denied. Only Chief Administrators can perform a complete system data reset.' });
+    return;
+  }
+
+  if (confirmation !== 'CLEAR ALL DATA') {
+    res.status(400).json({ success: false, message: 'Confirmation string mismatch. Please type "CLEAR ALL DATA" exactly to confirm reset.' });
+    return;
+  }
+
+  try {
+    await withTransaction(async (client) => {
+      // Truncate/delete transactional tables in strict dependency order
+      await client.query('DELETE FROM certificates');
+      await client.query('DELETE FROM edit_requests');
+      await client.query('DELETE FROM results');
+      await client.query('DELETE FROM fixtures');
+      await client.query('DELETE FROM participants');
+      await client.query('DELETE FROM teams');
+      await client.query('DELETE FROM contacts');
+      await client.query('DELETE FROM verifications');
+      await client.query('DELETE FROM payments');
+      await client.query('DELETE FROM hospitality');
+      await client.query('DELETE FROM bank_payments');
+      await client.query('DELETE FROM institution_master');
+      await client.query('DELETE FROM institutions');
+      await client.query('DELETE FROM event_states');
+      await client.query('DELETE FROM audit_logs');
+
+    });
+
+    await addAuditLog('Chief Admin', 'admin', 'SYSTEM_RESET', 'Executed complete system reset: cleared all stored institutions, participants, teams, payments, verifications, results, and audit logs.');
+
+    res.json({
+      success: true,
+      message: 'System database successfully cleared and reset.'
+    });
+  } catch (error: any) {
+    console.error('resetAllData error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to reset system data.' });
+  }
+};
+

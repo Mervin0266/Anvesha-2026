@@ -132,7 +132,7 @@ export const submitRegistration = async (req: Request, res: Response): Promise<v
       await client.query(
         `INSERT INTO contacts (id, institution_id, type, name, designation, phone, email, govt_id_proof)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [pocId, instId, 'POC', poc.name, poc.designation, poc.phone, poc.email, poc.govtIdProof]
+        [pocId, instId, 'POC', poc.name, poc.designation, poc.phone, poc.email, poc.govtIdProof || 'NIL']
       );
 
       // Process Teams and Participants
@@ -158,7 +158,7 @@ export const submitRegistration = async (req: Request, res: Response): Promise<v
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
             [
               partId, registrationId, instId, teamId, t.eventId, p.name, p.gender, p.dob, p.className, p.section,
-              p.phone || null, p.email || null, p.govtIdProof, p.emergencyContact, p.medicalInfo || null, null, 'PENDING'
+              p.phone || null, p.email || null, p.govtIdProof || 'NIL', p.emergencyContact, p.medicalInfo || null, null, 'PENDING'
             ]
           );
         }
@@ -352,25 +352,27 @@ export const spotRegisterInstitution = async (req: Request, res: Response): Prom
         const chestNumber = `${prefix}-${chestCounter}`;
         chestCounter += 1;
 
-        // Create verified team
+        // Create verified team (manual/null chest number unless provided)
+        const teamChestNumber = firstP.chestNumber || null;
         await client.query(
           `INSERT INTO teams (id, registration_id, institution_id, event_id, team_name, status, chest_number)
            VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [teamId, registrationId, instId, eventId, teamName, 'VERIFIED', chestNumber]
+          [teamId, registrationId, instId, eventId, teamName, 'VERIFIED', teamChestNumber]
         );
 
         // Save participants
         for (let pIdx = 0; pIdx < group.length; pIdx++) {
           const p = group[pIdx];
           const partId = `part_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+          const partChestNumber = p.chestNumber || teamChestNumber;
           
           await client.query(
             `INSERT INTO participants (id, registration_id, institution_id, team_id, event_id, name, gender, dob, class_name, section, phone, email, govt_id_proof, emergency_contact, medical_info, chest_number, verification_status, student_register_number)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
             [
               partId, registrationId, instId, teamId, eventId, p.name, p.gender, p.dob, p.className, 'A',
-              p.phone || '0000000000', p.email || 'student@spot.com', p.govtIdProof || `SPOT-${partId}`,
-              p.emergencyContact || '0000000000', '', chestNumber, 'VERIFIED', p.studentRegisterNumber || 'NIL'
+              p.phone || '0000000000', p.email || 'student@spot.com', 'NIL',
+              p.emergencyContact || '0000000000', '', partChestNumber, 'VERIFIED', p.studentRegisterNumber || 'NIL'
             ]
           );
 

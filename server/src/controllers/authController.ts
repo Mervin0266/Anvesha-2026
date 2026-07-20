@@ -22,6 +22,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       (u.role === 'registration_team' && (inputStr === 'registration' || inputStr === 'verify')) ||
       (u.role === 'hospitality_team' && (inputStr === 'hospitality' || inputStr === 'hosp')) ||
       (u.role === 'faculty_football' && inputStr === 'football') ||
+      (u.role === 'faculty_basketball' && (inputStr === 'basketball' || inputStr === 'bball' || inputStr === 'bball_girls')) ||
       (u.role === 'certificate_team' && (inputStr === 'certificate' || inputStr === 'certs')) ||
       (u.role === 'officials' && (inputStr === 'official' || inputStr === 'officials'))
     );

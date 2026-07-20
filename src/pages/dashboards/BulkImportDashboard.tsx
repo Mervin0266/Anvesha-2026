@@ -8,6 +8,7 @@ import {
 import { apiFetch } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import * as XLSX from 'xlsx';
+import { EVENTS_CATALOG } from '../../data/eventsCatalog';
 
 interface StudentRow {
   name: string;
@@ -29,6 +30,7 @@ interface InstitutionImportForm {
   fileName: string;
   participants: StudentRow[];
   showPreview: boolean;
+  eventId: string;
 }
 
 const convertToCSVUrl = (urlStr: string): string => {
@@ -91,7 +93,8 @@ export const BulkImportDashboard: React.FC = () => {
       pocEmail: '',
       fileName: '',
       participants: [],
-      showPreview: false
+      showPreview: false,
+      eventId: 'sports_football'
     }
   ]);
 
@@ -214,6 +217,9 @@ export const BulkImportDashboard: React.FC = () => {
         const eventNameVal = getVal('eventName', 'General');
         const rosterUrlVal = getVal('rosterUrl');
 
+        const eventObj = EVENTS_CATALOG.find(evt => evt.name.toLowerCase().includes(eventNameVal.toLowerCase()) || evt.id.toLowerCase() === eventNameVal.toLowerCase());
+        const resolvedEventId = eventObj?.id || 'sports_football';
+
         const newFormId = `form-master-${Date.now()}-${i}`;
         const newForm: InstitutionImportForm = {
           id: newFormId,
@@ -223,7 +229,8 @@ export const BulkImportDashboard: React.FC = () => {
           pocEmail: pocEmailVal,
           fileName: rosterUrlVal.substring(0, 50) + (rosterUrlVal.length > 50 ? '...' : ''),
           participants: [],
-          showPreview: false
+          showPreview: false,
+          eventId: resolvedEventId
         };
 
         parsedInstitutions.push(newForm);
@@ -268,7 +275,7 @@ export const BulkImportDashboard: React.FC = () => {
                       studentRegisterNumber: getSubVal('studentRegisterNumber', 'NIL'),
                       emergencyContact: getSubVal('emergencyContact', 'NIL'),
                       eventName: eventNameVal,
-                      team: getSubVal('team', 'A')
+                      team: 'A'
                     };
                   });
 
@@ -309,14 +316,12 @@ export const BulkImportDashboard: React.FC = () => {
       'Date of Birth',
       'PU Class',
       'Student Register Number',
-      'Emergency Contact Number',
-      'Event Name',
-      'Team'
+      'Emergency Contact Number'
     ];
     const sampleRows = [
-      ['Rohan Sen', 'Male', '2008-04-15', '1st PU', 'NIL', '9845012345', 'Football (Boys)', 'A'],
-      ['Sneha Kapoor', 'Female', '2007-09-22', '2nd PU', 'REG-882910', '9876543210', 'Group Dance', 'A'],
-      ['Aditya Rao', 'Male', '2008-11-02', '1st PU', 'NIL', '9741022931', 'Debate', 'B']
+      ['Rohan Sen', 'Male', '2008-04-15', '1st PU', 'NIL', '9845012345'],
+      ['Sneha Kapoor', 'Female', '2007-09-22', '2nd PU', 'REG-882910', '9876543210'],
+      ['Aditya Rao', 'Male', '2008-11-02', '1st PU', 'NIL', '9741022931']
     ];
     
     const csvContent = [
@@ -346,7 +351,8 @@ export const BulkImportDashboard: React.FC = () => {
         pocEmail: '',
         fileName: '',
         participants: [],
-        showPreview: false
+        showPreview: false,
+        eventId: 'sports_football'
       }
     ]);
   };
@@ -487,12 +493,17 @@ export const BulkImportDashboard: React.FC = () => {
       // Check required fields
       if (
         mapping['name'] === undefined ||
-        mapping['gender'] === undefined ||
-        mapping['eventName'] === undefined
+        mapping['gender'] === undefined
       ) {
-        alert('CSV is missing critical columns. Make sure it contains columns for: Name, Gender, and Event Name.');
+        alert('CSV is missing critical columns. Make sure it contains columns for: Name and Gender.');
         return;
       }
+
+      // Find the selected event from form state
+      const targetForm = forms.find(f => f.id === formId);
+      const selectedEventId = targetForm?.eventId || 'sports_football';
+      const eventObj = EVENTS_CATALOG.find(evt => evt.id === selectedEventId);
+      const eventNameVal = eventObj?.name || 'General';
 
       const parsedStudents: StudentRow[] = lines.slice(1).map(row => {
         const getVal = (key: string, defaultValue = '') => {
@@ -507,8 +518,8 @@ export const BulkImportDashboard: React.FC = () => {
           className: getVal('className', '1st PU'),
           studentRegisterNumber: getVal('studentRegisterNumber', 'NIL'),
           emergencyContact: getVal('emergencyContact', 'NIL'),
-          eventName: getVal('eventName'),
-          team: getVal('team', 'A')
+          eventName: eventNameVal,
+          team: 'A'
         };
       });
 
@@ -595,7 +606,8 @@ export const BulkImportDashboard: React.FC = () => {
             pocEmail: '',
             fileName: '',
             participants: [],
-            showPreview: false
+            showPreview: false,
+            eventId: 'sports_football'
           }
         ]);
       } else {
@@ -622,7 +634,7 @@ export const BulkImportDashboard: React.FC = () => {
             <div className="space-y-1 max-w-2xl">
               <h2 className="text-xl font-bold text-christ-navy font-serif">Bulk Registrar &amp; Roster Parser</h2>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Add one or more institutions using the repeater control below. Upload a formatted Excel/CSV list of student participants for each. Submitted rosters will bypass standard desk verification and will be automatically registered, verified, and assigned chest numbers.
+                Add one or more institutions using the repeater control below. Upload a formatted Excel/CSV list of student participants for each. Submitted rosters will be registered and placed in PENDING status for Registration Desk verification, document validation, and chest number assignment.
               </p>
             </div>
             <button
@@ -702,7 +714,7 @@ export const BulkImportDashboard: React.FC = () => {
 
                   {/* Form Inputs Grid */}
                   <div className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                       <div className="space-y-1.5">
                         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">Institution Name</label>
                         <input
@@ -746,6 +758,18 @@ export const BulkImportDashboard: React.FC = () => {
                           onChange={e => handleInputChange(form.id, 'pocEmail', e.target.value)}
                           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-christ-gold/20 focus:border-christ-gold focus:outline-none transition-all placeholder:text-slate-400"
                         />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">Target Event</label>
+                        <select
+                          value={form.eventId || 'sports_football'}
+                          onChange={e => handleInputChange(form.id, 'eventId', e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-christ-gold/20 focus:border-christ-gold focus:outline-none transition-all"
+                        >
+                          {EVENTS_CATALOG.map(evt => (
+                            <option key={evt.id} value={evt.id}>{evt.name}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
 
@@ -794,7 +818,6 @@ export const BulkImportDashboard: React.FC = () => {
                                   <th className="p-2">Reg No.</th>
                                   <th className="p-2">Emergency No</th>
                                   <th className="p-2">Event</th>
-                                  <th className="p-2">Team</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-100">
@@ -807,7 +830,6 @@ export const BulkImportDashboard: React.FC = () => {
                                     <td className="p-2 font-mono text-[10px] text-slate-500">{p.studentRegisterNumber}</td>
                                     <td className="p-2 text-slate-500 font-mono text-[11px]">{p.emergencyContact}</td>
                                     <td className="p-2 font-bold text-christ-navy">{p.eventName}</td>
-                                    <td className="p-2 text-slate-600 text-center font-bold">{p.team}</td>
                                   </tr>
                                 ))}
                               </tbody>

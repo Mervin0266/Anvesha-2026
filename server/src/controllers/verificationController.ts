@@ -140,7 +140,7 @@ export const getPendingVerifications = async (req: Request, res: Response): Prom
 };
 
 export const approveVerification = async (req: Request, res: Response): Promise<void> => {
-  const { institutionId, remarks, verifierName } = req.body;
+  const { institutionId, remarks, verifierName, teamChestNumbers } = req.body;
 
   try {
     const instRes = await dbQuery('SELECT * FROM institutions WHERE id = $1', [institutionId]);
@@ -179,30 +179,19 @@ export const approveVerification = async (req: Request, res: Response): Promise<
         [institutionId]
       );
 
-      // 4. Assign Chest Numbers to Teams & set VERIFIED
+      // 4. Update Chest Numbers (manual from payload if provided, no auto-sequence generation)
       const teamsRes = await client.query('SELECT * FROM teams WHERE institution_id = $1', [institutionId]);
       const teams = teamsRes.rows;
 
-      let chestCounter = 100 + Math.floor(Math.random() * 50);
       for (let idx = 0; idx < teams.length; idx++) {
         const t = teams[idx];
-        let chestNumber = t.chest_number;
-        if (!chestNumber) {
-          const prefix = t.event_id.includes('football') ? 'FB' :
-                         t.event_id.includes('volleyball') ? 'VB' :
-                         t.event_id.includes('tug_of_war') ? 'TW' :
-                         t.event_id.includes('dance') ? 'DN' :
-                         t.event_id.includes('music') ? 'MU' :
-                         t.event_id.includes('debate') ? 'DB' :
-                         t.event_id.includes('open_mic') ? 'OM' : 'TH';
-          chestNumber = `${prefix}-${chestCounter + idx}`;
-        }
+        const manualChestNumber = (teamChestNumbers && teamChestNumbers[t.id]) ? String(teamChestNumbers[t.id]).trim() : (t.chest_number || null);
 
         await client.query(
           `UPDATE teams 
            SET status = 'VERIFIED', chest_number = $1
            WHERE id = $2`,
-          [chestNumber, t.id]
+          [manualChestNumber, t.id]
         );
 
         // Assign same chest number to all participants of this team
@@ -210,7 +199,7 @@ export const approveVerification = async (req: Request, res: Response): Promise<
           `UPDATE participants 
            SET verification_status = 'VERIFIED', chest_number = $1
            WHERE team_id = $2`,
-          [chestNumber, t.id]
+          [manualChestNumber, t.id]
         );
       }
 

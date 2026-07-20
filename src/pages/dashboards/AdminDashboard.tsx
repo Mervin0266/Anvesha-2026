@@ -814,6 +814,42 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  // System Reset states
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetDatabase = async () => {
+    if (resetConfirmText.trim() !== 'CLEAR ALL DATA') {
+      alert('Security validation failed. Please type "CLEAR ALL DATA" exactly to proceed.');
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      const res = await apiFetch<{ success: boolean; message: string }>('/admin/reset-database', {
+        method: 'POST',
+        body: JSON.stringify({
+          userRole: user?.role,
+          confirmation: resetConfirmText.trim()
+        })
+      });
+
+      if (res.success) {
+        setActionMsg('Database successfully cleared and reset.');
+        setShowResetModal(false);
+        setResetConfirmText('');
+        await Promise.all([fetchAdminOverview(), fetchBankPayments(), fetchMasterList()]);
+      } else {
+        alert(res.message || 'Failed to reset database.');
+      }
+    } catch (err: any) {
+      alert(`System Reset Error: ${err.message}`);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 font-sans">
       <Sidebar currentRole="admin" />
@@ -1938,6 +1974,30 @@ export const AdminDashboard: React.FC = () => {
               </div>
             )}
 
+            {/* Danger Zone: Reset Database (Chief Admin Only) */}
+            {user?.role === 'admin' && (
+              <div className="bg-rose-50/60 rounded-2xl border-2 border-rose-200/80 p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mt-8">
+                <div className="space-y-1 max-w-2xl">
+                  <div className="flex items-center space-x-2 text-rose-700">
+                    <Trash2 className="w-5 h-5" />
+                    <h3 className="text-base font-bold font-serif uppercase tracking-wide">Danger Zone — Complete System Reset</h3>
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Permanently clear all stored festival data (institutions, participant rosters, teams, payments, verifications, match scores, certificates, and audit logs). Default crew logins and event catalogs will remain accessible.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowResetModal(true)}
+                  className="inline-flex items-center space-x-2 px-5 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-all shadow-md shrink-0"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Clear All Data Completely</span>
+                </button>
+              </div>
+            )}
+
           </div>
 
         </main>
@@ -2013,6 +2073,83 @@ Christ University`}
                 className="px-5 py-2 bg-christ-navy hover:bg-christ-darkNavy text-white font-bold rounded-lg shadow"
               >
                 Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Database Confirmation Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-rose-200 max-w-lg w-full shadow-2xl p-6 space-y-5 text-xs">
+            <div className="flex items-center justify-between border-b border-rose-100 pb-3">
+              <div className="flex items-center space-x-2 text-rose-600">
+                <Trash2 className="w-5 h-5" />
+                <h3 className="text-sm font-bold font-serif text-slate-900">Confirm Complete System Data Reset</h3>
+              </div>
+              <button 
+                onClick={() => {
+                  setShowResetModal(false);
+                  setResetConfirmText('');
+                }}
+                className="text-slate-400 hover:text-slate-600 font-bold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2 text-rose-800">
+              <p className="font-bold text-xs">⚠️ CRITICAL WARNING: Permanent Data Destruction</p>
+              <p className="text-[11px] leading-relaxed text-rose-700">
+                This action will <strong>PERMANENTLY DELETE</strong> all stored institutions, student rosters, teams, payment records, verification files, match scores, certificates, and system audit logs.
+              </p>
+              <p className="text-[11px] font-semibold text-rose-900">
+                This action CANNOT be undone or reversed.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block font-bold text-slate-800">
+                To confirm, type <span className="font-mono text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">CLEAR ALL DATA</span> in the field below:
+              </label>
+              <input 
+                type="text"
+                value={resetConfirmText}
+                onChange={(e) => setResetConfirmText(e.target.value)}
+                placeholder="Type CLEAR ALL DATA to confirm"
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 focus:outline-none transition-all"
+              />
+            </div>
+
+            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowResetModal(false);
+                  setResetConfirmText('');
+                }}
+                className="px-4 py-2.5 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={resetConfirmText.trim() !== 'CLEAR ALL DATA' || isResetting}
+                onClick={handleResetDatabase}
+                className="inline-flex items-center space-x-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-md transition-all text-xs"
+              >
+                {isResetting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Wiping Database...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>Permanently Reset Database</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

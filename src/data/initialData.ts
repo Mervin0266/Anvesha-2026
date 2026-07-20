@@ -14,6 +14,8 @@ export const INITIAL_USERS: User[] = [
   { id: 'usr_football', username: 'football@anvesha.in', name: 'Coach Rajesh Kumar (Football Boys)', role: 'faculty_football', eventId: 'sports_football_boys', email: 'football@anvesha.in' },
   { id: 'usr_volleyball', username: 'vball@anvesha.in', name: 'Coach Priya Nair (Volleyball Boys)', role: 'faculty_volleyball', eventId: 'sports_volleyball_boys', email: 'vball@anvesha.in' },
   { id: 'usr_volleyball_girls', username: 'vball_girls@anvesha.in', name: 'Coach Anjali Sen (Volleyball Girls)', role: 'faculty_volleyball', eventId: 'sports_volleyball_girls', email: 'vball_girls@anvesha.in' },
+  { id: 'usr_basketball', username: 'bball@anvesha.in', name: 'Coach David D (Basketball Boys)', role: 'faculty_basketball', eventId: 'sports_basketball_boys', email: 'bball@anvesha.in' },
+  { id: 'usr_basketball_girls', username: 'bball_girls@anvesha.in', name: 'Coach Rita Abraham (Basketball Girls)', role: 'faculty_basketball', eventId: 'sports_basketball_girls', email: 'bball_girls@anvesha.in' },
   { id: 'usr_dance', username: 'dance@anvesha.in', name: 'Prof. Ananya Roy (Group Dance)', role: 'faculty_dance', eventId: 'cultural_dance', email: 'dance@anvesha.in' },
   { id: 'usr_music', username: 'music@anvesha.in', name: 'Prof. Samuel V (Group Music)', role: 'faculty_music', eventId: 'cultural_music', email: 'music@anvesha.in' },
   { id: 'usr_debate', username: 'debate@anvesha.in', name: 'Prof. Anita Sharma (Debate)', role: 'faculty_debate', eventId: 'cultural_debate', email: 'debate@anvesha.in' },
