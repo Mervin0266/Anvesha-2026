@@ -240,7 +240,19 @@ export const BulkImportDashboard: React.FC = () => {
           
           const fetchPromise = (async () => {
             try {
-              const res = await fetch(targetUrl);
+              let res = await fetch(targetUrl);
+              // Fallback for Google Drive binary file links returning 400 Bad Request
+              if (!res.ok && rosterUrlVal.includes('drive.google.com')) {
+                const idMatch = rosterUrlVal.match(/[?&]id=([a-zA-Z0-9-_]+)/) || rosterUrlVal.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+                if (idMatch && idMatch[1]) {
+                  const fallbackUrl = `https://docs.google.com/uc?export=download&id=${idMatch[1]}`;
+                  const fallbackRes = await fetch(fallbackUrl);
+                  if (fallbackRes.ok) {
+                    res = fallbackRes;
+                  }
+                }
+              }
+
               if (!res.ok) {
                 if (res.status === 401 || res.status === 403 || res.status === 404) {
                   throw new Error("Spreadsheet is private or restricted.");
@@ -283,12 +295,12 @@ export const BulkImportDashboard: React.FC = () => {
                 }
               }
             } catch (err: any) {
-              console.error(`Failed to fetch nested roster from ${rosterUrlVal}:`, err);
+              console.warn(`Could not parse nested roster from ${rosterUrlVal}:`, err.message || err);
               const errMsg = err.message || '';
               if (errMsg.includes('Private') || errMsg.includes('Failed to fetch') || errMsg.includes('redirect')) {
-                newForm.fileName = `⚠️ Private Sheet. Enable "Anyone with the link can view", or download and upload manually.`;
+                newForm.fileName = `⚠️ Private Sheet. Set access to "Anyone with the link can view", or upload CSV manually.`;
               } else {
-                newForm.fileName = `⚠️ Fetch failed: ${err.message}`;
+                newForm.fileName = `⚠️ Roster Link Warning (${errMsg || 'HTTP Error'}). Make sure file is shared publicly.`;
               }
             }
           })();

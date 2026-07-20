@@ -45405,6 +45405,38 @@ var EVENTS_CATALOG = [
     ],
     eligibility: "Open to registered 1st & 2nd Year PU Students."
   },
+  {
+    id: "sports_basketball_boys",
+    name: "Basketball (Boys)",
+    category: "SPORTS",
+    type: "TEAM",
+    minTeamSize: 5,
+    maxTeamSize: 12,
+    registrationFee: 500,
+    description: "Full court Basketball tournament testing speed, strategy, and teamwork.",
+    rules: [
+      "Maximum 2 teams per institution.",
+      "4 quarters of 10 minutes each.",
+      "FIBA regulations apply."
+    ],
+    eligibility: "Open to registered 1st & 2nd Year PU Students."
+  },
+  {
+    id: "sports_basketball_girls",
+    name: "Basketball (Girls)",
+    category: "SPORTS",
+    type: "TEAM",
+    minTeamSize: 5,
+    maxTeamSize: 12,
+    registrationFee: 500,
+    description: "Full court Basketball tournament testing speed, strategy, and teamwork.",
+    rules: [
+      "Maximum 2 teams per institution.",
+      "4 quarters of 10 minutes each.",
+      "FIBA regulations apply."
+    ],
+    eligibility: "Open to registered 1st & 2nd Year PU Students."
+  },
   // CULTURALS
   {
     id: "cultural_dance",
@@ -45454,6 +45486,22 @@ var EVENTS_CATALOG = [
     ],
     eligibility: "Open to registered 1st & 2nd Year PU Students."
   },
+  {
+    id: "cultural_project_exhibition",
+    name: "Project Exhibition",
+    category: "CULTURALS",
+    type: "TEAM",
+    minTeamSize: 4,
+    maxTeamSize: 4,
+    registrationFee: 500,
+    description: "Showcase innovative projects, scientific models, or technical exhibitions.",
+    rules: [
+      "Maximum 2 teams per institution (Team A and Team B).",
+      "Minimum team size of 4 members and maximum of 4 members.",
+      "Projects must be set up at the designated space before judging begins."
+    ],
+    eligibility: "Open to registered 1st & 2nd Year PU Students."
+  },
   // FUN ACTIVITIES
   {
     id: "cultural_open_mic",
@@ -45498,6 +45546,8 @@ var INITIAL_USERS = [
   { id: "usr_football", username: "football@anvesha.in", name: "Coach Rajesh Kumar (Football Boys)", role: "faculty_football", eventId: "sports_football_boys", email: "football@anvesha.in" },
   { id: "usr_volleyball", username: "vball@anvesha.in", name: "Coach Priya Nair (Volleyball Boys)", role: "faculty_volleyball", eventId: "sports_volleyball_boys", email: "vball@anvesha.in" },
   { id: "usr_volleyball_girls", username: "vball_girls@anvesha.in", name: "Coach Anjali Sen (Volleyball Girls)", role: "faculty_volleyball", eventId: "sports_volleyball_girls", email: "vball_girls@anvesha.in" },
+  { id: "usr_basketball", username: "bball@anvesha.in", name: "Coach David D (Basketball Boys)", role: "faculty_basketball", eventId: "sports_basketball_boys", email: "bball@anvesha.in" },
+  { id: "usr_basketball_girls", username: "bball_girls@anvesha.in", name: "Coach Rita Abraham (Basketball Girls)", role: "faculty_basketball", eventId: "sports_basketball_girls", email: "bball_girls@anvesha.in" },
   { id: "usr_dance", username: "dance@anvesha.in", name: "Prof. Ananya Roy (Group Dance)", role: "faculty_dance", eventId: "cultural_dance", email: "dance@anvesha.in" },
   { id: "usr_music", username: "music@anvesha.in", name: "Prof. Samuel V (Group Music)", role: "faculty_music", eventId: "cultural_music", email: "music@anvesha.in" },
   { id: "usr_debate", username: "debate@anvesha.in", name: "Prof. Anita Sharma (Debate)", role: "faculty_debate", eventId: "cultural_debate", email: "debate@anvesha.in" },
@@ -45880,13 +45930,9 @@ var initDb = async () => {
     }
     await dbQuery("DELETE FROM events WHERE id = 'sports_tug_of_war'");
     await dbQuery("DELETE FROM events WHERE id = 'sports_football_girls'");
-    await dbQuery("DELETE FROM events WHERE id = 'sports_basketball_boys'");
-    await dbQuery("DELETE FROM events WHERE id = 'sports_basketball_girls'");
     await dbQuery("DELETE FROM users WHERE id = 'usr_admin'");
     await dbQuery("DELETE FROM users WHERE id = 'usr_tugofwar'");
     await dbQuery("DELETE FROM users WHERE id = 'usr_football_girls'");
-    await dbQuery("DELETE FROM users WHERE id = 'usr_basketball'");
-    await dbQuery("DELETE FROM users WHERE id = 'usr_basketball_girls'");
     console.log("Synchronizing user roles...");
     for (const u of INITIAL_USERS) {
       await dbQuery(
@@ -45917,7 +45963,7 @@ var login = async (req, res) => {
     const rowsRes = await dbQuery("SELECT * FROM users");
     const users = rowsRes.rows;
     const user = users.find(
-      (u) => u.username.toLowerCase() === inputStr || u.email.toLowerCase() === inputStr || u.username.toLowerCase().split("@")[0] === inputStr || u.role.toLowerCase() === inputStr || u.role === "admin" && inputStr === "admin" || u.role === "registration_team" && (inputStr === "registration" || inputStr === "verify") || u.role === "hospitality_team" && (inputStr === "hospitality" || inputStr === "hosp") || u.role === "faculty_football" && inputStr === "football" || u.role === "certificate_team" && (inputStr === "certificate" || inputStr === "certs") || u.role === "officials" && (inputStr === "official" || inputStr === "officials")
+      (u) => u.username.toLowerCase() === inputStr || u.email.toLowerCase() === inputStr || u.username.toLowerCase().split("@")[0] === inputStr || u.role.toLowerCase() === inputStr || u.role === "admin" && inputStr === "admin" || u.role === "registration_team" && (inputStr === "registration" || inputStr === "verify") || u.role === "hospitality_team" && (inputStr === "hospitality" || inputStr === "hosp") || u.role === "faculty_football" && inputStr === "football" || u.role === "faculty_basketball" && (inputStr === "basketball" || inputStr === "bball" || inputStr === "bball_girls") || u.role === "certificate_team" && (inputStr === "certificate" || inputStr === "certs") || u.role === "officials" && (inputStr === "official" || inputStr === "officials")
     );
     if (!user) {
       res.status(401).json({ success: false, message: "Invalid credentials. User account not found." });
@@ -46100,7 +46146,7 @@ var submitRegistration = async (req, res) => {
       await client.query(
         `INSERT INTO contacts (id, institution_id, type, name, designation, phone, email, govt_id_proof)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [pocId, instId, "POC", poc.name, poc.designation, poc.phone, poc.email, poc.govtIdProof]
+        [pocId, instId, "POC", poc.name, poc.designation, poc.phone, poc.email, poc.govtIdProof || "NIL"]
       );
       let totalPartsCount = 0;
       for (let i = 0; i < teams.length; i++) {
@@ -46132,7 +46178,7 @@ var submitRegistration = async (req, res) => {
               p.section,
               p.phone || null,
               p.email || null,
-              p.govtIdProof,
+              p.govtIdProof || "NIL",
               p.emergencyContact,
               p.medicalInfo || null,
               null,
@@ -46307,14 +46353,16 @@ var spotRegisterInstitution = async (req, res) => {
         const prefix = eventId.includes("football") ? "FB" : eventId.includes("volleyball") ? "VB" : eventId.includes("tug_of_war") ? "TW" : eventId.includes("dance") ? "DN" : eventId.includes("music") ? "MU" : eventId.includes("debate") ? "DB" : eventId.includes("open_mic") ? "OM" : "TH";
         const chestNumber = `${prefix}-${chestCounter}`;
         chestCounter += 1;
+        const teamChestNumber = firstP.chestNumber || null;
         await client.query(
           `INSERT INTO teams (id, registration_id, institution_id, event_id, team_name, status, chest_number)
            VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [teamId, registrationId, instId, eventId, teamName, "VERIFIED", chestNumber]
+          [teamId, registrationId, instId, eventId, teamName, "VERIFIED", teamChestNumber]
         );
         for (let pIdx = 0; pIdx < group.length; pIdx++) {
           const p = group[pIdx];
           const partId = `part_${Date.now()}_${Math.floor(Math.random() * 1e3)}`;
+          const partChestNumber = p.chestNumber || teamChestNumber;
           await client.query(
             `INSERT INTO participants (id, registration_id, institution_id, team_id, event_id, name, gender, dob, class_name, section, phone, email, govt_id_proof, emergency_contact, medical_info, chest_number, verification_status, student_register_number)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
@@ -46331,10 +46379,10 @@ var spotRegisterInstitution = async (req, res) => {
               "A",
               p.phone || "0000000000",
               p.email || "student@spot.com",
-              p.govtIdProof || `SPOT-${partId}`,
+              "NIL",
               p.emergencyContact || "0000000000",
               "",
-              chestNumber,
+              partChestNumber,
               "VERIFIED",
               p.studentRegisterNumber || "NIL"
             ]
@@ -46515,7 +46563,7 @@ var getPendingVerifications = async (req, res) => {
   }
 };
 var approveVerification = async (req, res) => {
-  const { institutionId, remarks, verifierName } = req.body;
+  const { institutionId, remarks, verifierName, teamChestNumbers } = req.body;
   try {
     const instRes = await dbQuery("SELECT * FROM institutions WHERE id = $1", [institutionId]);
     const inst = instRes.rows[0];
@@ -46548,25 +46596,20 @@ var approveVerification = async (req, res) => {
       );
       const teamsRes = await client.query("SELECT * FROM teams WHERE institution_id = $1", [institutionId]);
       const teams = teamsRes.rows;
-      let chestCounter = 100 + Math.floor(Math.random() * 50);
       for (let idx = 0; idx < teams.length; idx++) {
         const t = teams[idx];
-        let chestNumber = t.chest_number;
-        if (!chestNumber) {
-          const prefix = t.event_id.includes("football") ? "FB" : t.event_id.includes("volleyball") ? "VB" : t.event_id.includes("tug_of_war") ? "TW" : t.event_id.includes("dance") ? "DN" : t.event_id.includes("music") ? "MU" : t.event_id.includes("debate") ? "DB" : t.event_id.includes("open_mic") ? "OM" : "TH";
-          chestNumber = `${prefix}-${chestCounter + idx}`;
-        }
+        const manualChestNumber = teamChestNumbers && teamChestNumbers[t.id] ? String(teamChestNumbers[t.id]).trim() : t.chest_number || null;
         await client.query(
           `UPDATE teams 
            SET status = 'VERIFIED', chest_number = $1
            WHERE id = $2`,
-          [chestNumber, t.id]
+          [manualChestNumber, t.id]
         );
         await client.query(
           `UPDATE participants 
            SET verification_status = 'VERIFIED', chest_number = $1
            WHERE team_id = $2`,
-          [chestNumber, t.id]
+          [manualChestNumber, t.id]
         );
       }
       const partsRes = await client.query("SELECT id FROM participants WHERE institution_id = $1", [institutionId]);
@@ -48586,9 +48629,10 @@ var updateUserRole = async (req, res) => {
       else if (role === "faculty_volleyball_girls") eventId = "sports_volleyball_girls";
       else if (role === "faculty_tug_of_war_boys") eventId = "sports_tug_of_war_boys";
       else if (role === "faculty_tug_of_war_girls") eventId = "sports_tug_of_war_girls";
-      else if (role === "faculty_dance") eventId = "cultural_group_dance";
-      else if (role === "faculty_music") eventId = "cultural_group_music";
+      else if (role === "faculty_dance") eventId = "cultural_dance";
+      else if (role === "faculty_music") eventId = "cultural_music";
       else if (role === "faculty_debate") eventId = "cultural_debate";
+      else if (role === "faculty_project_exhibition") eventId = "cultural_project_exhibition";
     }
     await dbQuery(
       "UPDATE users SET role = $1, event_id = $2 WHERE id = $3",
@@ -48874,6 +48918,12 @@ var bulkRegisterInstitutions = async (req, res) => {
         if (norm.includes("volleyball") && (norm.includes("boy") || norm.includes("men"))) {
           return dbEvents.find((e) => e.id === "sports_volleyball_boys");
         }
+        if (norm.includes("basketball") && (norm.includes("girl") || norm.includes("women"))) {
+          return dbEvents.find((e) => e.id === "sports_basketball_girls");
+        }
+        if (norm.includes("basketball") && (norm.includes("boy") || norm.includes("men") || !norm.includes("girl"))) {
+          return dbEvents.find((e) => e.id === "sports_basketball_boys");
+        }
         if (norm.includes("tug") && norm.includes("war") && norm.includes("girl")) {
           return dbEvents.find((e) => e.id === "sports_tug_of_war_girls");
         }
@@ -48973,7 +49023,7 @@ var bulkRegisterInstitutions = async (req, res) => {
           await client.query(
             `INSERT INTO teams (id, registration_id, institution_id, event_id, team_name, status, chest_number)
              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [teamId, registrationId, instId, eventId, teamName, "VERIFIED", chestNumber]
+            [teamId, registrationId, instId, eventId, teamName, "PENDING", null]
           );
           for (let k = 0; k < groupParts.length; k++) {
             const p = groupParts[k];
@@ -49004,8 +49054,8 @@ var bulkRegisterInstitutions = async (req, res) => {
                 null,
                 "NIL",
                 p.emergencyContact || (pocNumber ? pocNumber.trim() : "080-22222222"),
-                "VERIFIED",
-                chestNumber,
+                "PENDING",
+                null,
                 p.studentRegisterNumber || "NIL"
               ]
             );
@@ -49032,7 +49082,7 @@ var bulkRegisterInstitutions = async (req, res) => {
         await client.query(
           `INSERT INTO verifications (id, registration_id, institution_id, verified_by, verified_at, status, remarks)
            VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [verId, registrationId, instId, "Admin Bulk Import", (/* @__PURE__ */ new Date()).toISOString(), "VERIFIED", "Imported directly via Admin Bulk Institution Import tool."]
+          [verId, registrationId, instId, "Pending Desk Verification", (/* @__PURE__ */ new Date()).toISOString(), "PENDING", "Bulk imported roster pending Registration Desk verification."]
         );
         const hospId = `hosp_${Date.now()}_${i}`;
         await client.query(
@@ -49126,6 +49176,82 @@ var updateSystemPassword = async (req, res) => {
   } catch (error) {
     console.error("updateSystemPassword error:", error);
     res.status(500).json({ success: false, message: "Failed to update system password." });
+  }
+};
+var getAllRegistrations = async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        p.id as "participantId",
+        p.name as "participantName",
+        p.gender,
+        p.dob,
+        p.class_name as "className",
+        p.chest_number as "chestNumber",
+        p.verification_status as "verificationStatus",
+        p.emergency_contact as "emergencyContact",
+        p.roster_status as "rosterStatus",
+        t.team_name as "teamName",
+        i.name as "institutionName",
+        c.name as "pocName",
+        c.phone as "pocMobile",
+        c.email as "pocEmail",
+        e.id as "eventId",
+        e.name as "eventName",
+        e.category as "eventCategory"
+      FROM participants p
+      LEFT JOIN teams t ON p.team_id = t.id
+      LEFT JOIN institutions i ON p.institution_id = i.id
+      LEFT JOIN contacts c ON c.institution_id = i.id AND c.type = 'POC'
+      LEFT JOIN events e ON p.event_id = e.id
+      ORDER BY e.name, i.name, t.team_name, p.name;
+    `;
+    const result = await dbQuery(query);
+    res.json({
+      success: true,
+      registrations: result.rows
+    });
+  } catch (error) {
+    console.error("getAllRegistrations error:", error);
+    res.status(500).json({ success: false, message: "Failed to retrieve registration details." });
+  }
+};
+var resetAllData = async (req, res) => {
+  const { userRole, confirmation } = req.body;
+  if (userRole !== "admin") {
+    res.status(403).json({ success: false, message: "Access denied. Only Chief Administrators can perform a complete system data reset." });
+    return;
+  }
+  if (confirmation !== "CLEAR ALL DATA") {
+    res.status(400).json({ success: false, message: 'Confirmation string mismatch. Please type "CLEAR ALL DATA" exactly to confirm reset.' });
+    return;
+  }
+  try {
+    await withTransaction(async (client) => {
+      await client.query("DELETE FROM certificates");
+      await client.query("DELETE FROM edit_requests");
+      await client.query("DELETE FROM results");
+      await client.query("DELETE FROM fixtures");
+      await client.query("DELETE FROM participants");
+      await client.query("DELETE FROM teams");
+      await client.query("DELETE FROM contacts");
+      await client.query("DELETE FROM verifications");
+      await client.query("DELETE FROM payments");
+      await client.query("DELETE FROM hospitality");
+      await client.query("DELETE FROM bank_payments");
+      await client.query("DELETE FROM institution_master");
+      await client.query("DELETE FROM institutions");
+      await client.query("DELETE FROM event_states");
+      await client.query("DELETE FROM audit_logs");
+    });
+    await addAuditLog("Chief Admin", "admin", "SYSTEM_RESET", "Executed complete system reset: cleared all stored institutions, participants, teams, payments, verifications, results, and audit logs.");
+    res.json({
+      success: true,
+      message: "System database successfully cleared and reset."
+    });
+  } catch (error) {
+    console.error("resetAllData error:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to reset system data." });
   }
 };
 
@@ -49366,8 +49492,15 @@ app.delete("/api/admin/institution-master/:id", deleteInstitutionMaster);
 app.post("/api/admin/bulk-register", bulkRegisterInstitutions);
 app.get("/api/admin/passwords", getSystemPasswords);
 app.post("/api/admin/passwords/update", updateSystemPassword);
+app.get("/api/admin/registrations", getAllRegistrations);
+app.post("/api/admin/reset-database", resetAllData);
 app.get("/api/analytics", getAnalyticsData);
-var clientDistDir = import_path.default.join(getDirname(), "../../dist");
+var possibleDistPaths = [
+  import_path.default.join(getDirname(), "../dist"),
+  import_path.default.join(getDirname(), "../../dist"),
+  import_path.default.join(process.cwd(), "dist")
+];
+var clientDistDir = possibleDistPaths.find((p) => import_fs.default.existsSync(p)) || possibleDistPaths[0];
 if (import_fs.default.existsSync(clientDistDir)) {
   app.use(import_express.default.static(clientDistDir));
   app.get("*", (req, res, next) => {

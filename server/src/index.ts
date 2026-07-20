@@ -183,7 +183,13 @@ app.post('/api/admin/reset-database', resetAllData);
 app.get('/api/analytics', getAnalyticsData);
 
 // Serve static assets from client dist
-const clientDistDir = path.join(getDirname(), '../../dist');
+const possibleDistPaths = [
+  path.join(getDirname(), '../dist'),
+  path.join(getDirname(), '../../dist'),
+  path.join(process.cwd(), 'dist')
+];
+const clientDistDir = possibleDistPaths.find(p => fs.existsSync(p)) || possibleDistPaths[0];
+
 if (fs.existsSync(clientDistDir)) {
   app.use(express.static(clientDistDir));
   
