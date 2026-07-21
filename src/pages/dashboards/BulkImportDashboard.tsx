@@ -82,6 +82,15 @@ const convertToCSVUrl = (urlStr: string): string => {
   return trimmed;
 };
 
+interface ImportAuditIssue {
+  rowNumber: number;
+  institutionName: string;
+  pocName: string;
+  issueType: 'MISSING_ROSTER_LINK' | 'PRIVATE_GOOGLE_SHEET' | 'MISSING_POC_EMAIL' | 'EMPTY_NAME' | 'ZERO_PARTICIPANTS' | 'INVALID_HEADERS';
+  details: string;
+  recommendation: string;
+}
+
 export const BulkImportDashboard: React.FC = () => {
   const { user } = useAuth();
   const [forms, setForms] = useState<InstitutionImportForm[]>([
@@ -102,6 +111,7 @@ export const BulkImportDashboard: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [masterImportStatus, setMasterImportStatus] = useState<string | null>(null);
+  const [auditIssues, setAuditIssues] = useState<ImportAuditIssue[]>([]);
 
   const downloadMasterTemplate = () => {
     const headers = [
@@ -157,9 +167,17 @@ export const BulkImportDashboard: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    console.log(`🔍 [Anvesha Bulk Import] Reading Master CSV file: "${file.name}" (${(file.size / 1024).toFixed(2)} KB)`);
     setMasterImportStatus("Reading master sheet...");
+    setAuditIssues([]);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const detectedIssues: ImportAuditIssue[] = [];
+
     try {
       const lines = await parseFileToLines(file);
+      console.log(`📊 [Anvesha Bulk Import] Master CSV contains ${lines.length} total lines.`);
       if (lines.length < 2) {
         alert('Master CSV file must contain a header row and at least one institution row.');
         setMasterImportStatus(null);
@@ -167,6 +185,7 @@ export const BulkImportDashboard: React.FC = () => {
       }
 
       const headers = lines[0];
+      console.log('📋 [Anvesha Bulk Import] Master CSV Headers:', headers);
       
       const mapping: { [key: string]: number } = {};
       headers.forEach((h, index) => {
@@ -189,6 +208,8 @@ export const BulkImportDashboard: React.FC = () => {
           mapping['rosterUrl'] = index;
         }
       });
+
+      console.log('📌 [Anvesha Bulk Import] Mapped Column Indices:', mapping);
 
       if (mapping['instName'] === undefined || mapping['pocName'] === undefined || mapping['pocNumber'] === undefined || mapping['pocEmail'] === undefined || mapping['rosterUrl'] === undefined) {
         alert('Master CSV is missing required columns. Ensure it has columns for: Name of Institution, Point of Contact (POC) Name, POC Mobile Number, POC Email, and Upload Participant Details (Excel File).');
@@ -237,6 +258,7 @@ export const BulkImportDashboard: React.FC = () => {
 
         if (rosterUrlVal) {
           const targetUrl = convertToCSVUrl(rosterUrlVal);
+          console.log(`📥 [Anvesha Bulk Import] Row #${i} (${instNameVal}): Fetching student roster from "${rosterUrlVal}" -> Exporter URL: "${targetUrl}"`);
           
           const fetchPromise = (async () => {
             try {
@@ -246,6 +268,7 @@ export const BulkImportDashboard: React.FC = () => {
                 const idMatch = rosterUrlVal.match(/[?&]id=([a-zA-Z0-9-_]+)/) || rosterUrlVal.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
                 if (idMatch && idMatch[1]) {
                   const fallbackUrl = `https://docs.google.com/uc?export=download&id=${idMatch[1]}`;
+                  console.log(`🔄 [Anvesha Bulk Import] Row #${i} (${instNameVal}): Initial URL failed with ${res.status}. Attempting direct download fallback: "${fallbackUrl}"`);
                   const fallbackRes = await fetch(fallbackUrl);
                   if (fallbackRes.ok) {
                     res = fallbackRes;
@@ -292,20 +315,57 @@ export const BulkImportDashboard: React.FC = () => {
                   });
 
                   newForm.participants = subParticipants;
+                  console.log(`✅ [Anvesha Bulk Import] Row #${i} (${instNameVal}): Successfully loaded ${subParticipants.length} student participants.`);
+                } else {
+                  console.warn(`⚠️ [Anvesha Bulk Import] Row #${i} (${instNameVal}): CSV headers missing required 'Name' column. Found:`, subHeaders);
+                  detectedIssues.push({
+                    rowNumber: i,
+                    institutionName: instNameVal || 'Unnamed',
+                    pocName: pocNameVal || 'N/A',
+                    issueType: 'ZERO_PARTICIPANTS',
+                    details: `Row #${i}: Student roster CSV header is missing the 'Name' column. Headers found: [${subHeaders.join(', ')}]`,
+                    recommendation: `Update student roster file to have columns: Name, Gender, Class, Date of Birth.`
+                  });
                 }
               }
             } catch (err: any) {
-              console.warn(`Could not parse nested roster from ${rosterUrlVal}:`, err.message || err);
+              console.warn(`❌ [Anvesha Bulk Import] Row #${i} (${instNameVal}): Failed to load roster:`, err.message || err);
               const errMsg = err.message || '';
               if (errMsg.includes('Private') || errMsg.includes('Failed to fetch') || errMsg.includes('redirect')) {
                 newForm.fileName = `⚠️ Private Sheet. Set access to "Anyone with the link can view", or upload CSV manually.`;
+                detectedIssues.push({
+                  rowNumber: i,
+                  institutionName: instNameVal || 'Unnamed',
+                  pocName: pocNameVal || 'N/A',
+                  issueType: 'PRIVATE_GOOGLE_SHEET',
+                  details: `Row #${i}: Google Sheet link is private or restricted ("${rosterUrlVal.substring(0, 45)}...").`,
+                  recommendation: `Open Google Sheet -> Share -> Set access to "Anyone with the link can view", or click "Upload CSV Roster" below to attach a local CSV file.`
+                });
               } else {
                 newForm.fileName = `⚠️ Roster Link Warning (${errMsg || 'HTTP Error'}). Make sure file is shared publicly.`;
+                detectedIssues.push({
+                  rowNumber: i,
+                  institutionName: instNameVal || 'Unnamed',
+                  pocName: pocNameVal || 'N/A',
+                  issueType: 'ZERO_PARTICIPANTS',
+                  details: `Row #${i}: Roster link failed with error: ${errMsg || 'HTTP Error'}.`,
+                  recommendation: `Make sure the URL is accessible or upload the student CSV file manually.`
+                });
               }
             }
           })();
           
           fetchPromises.push(fetchPromise);
+        } else {
+          console.warn(`⚠️ [Anvesha Bulk Import] Row #${i} (${instNameVal}): No roster URL provided in Master CSV.`);
+          detectedIssues.push({
+            rowNumber: i,
+            institutionName: instNameVal || 'Unnamed',
+            pocName: pocNameVal || 'N/A',
+            issueType: 'MISSING_ROSTER_LINK',
+            details: `Row #${i}: No student roster file link was provided in the Master CSV.`,
+            recommendation: `Upload a student roster CSV list using the "Upload CSV Roster" button on Institution Card #${i}, or remove row if invalid.`
+          });
         }
       }
 
@@ -313,8 +373,8 @@ export const BulkImportDashboard: React.FC = () => {
       await Promise.all(fetchPromises);
       
       setForms(parsedInstitutions);
+      setAuditIssues(detectedIssues);
       setMasterImportStatus(null);
-      alert(`Master sheet processed successfully! Populated ${parsedInstitutions.length} institutions.`);
     } catch (err: any) {
       alert(`Error parsing master file: ${err.message}`);
       setMasterImportStatus(null);
@@ -584,6 +644,7 @@ export const BulkImportDashboard: React.FC = () => {
         return;
       }
       if (f.participants.length === 0) {
+        console.warn(`❌ [Anvesha Bulk Import Validation Failed] Institution #${i + 1} (${f.name || 'Unnamed'}) has 0 participants.`);
         setErrorMsg(`Institution #${i + 1} (${f.name || 'Unnamed'}): Please upload a student roster CSV list.`);
         return;
       }
@@ -601,10 +662,14 @@ export const BulkImportDashboard: React.FC = () => {
         }))
       };
 
+      console.log(`📤 [Anvesha Bulk Import] Submitting bulk payload for ${forms.length} institution(s) to /api/admin/bulk-register...`, payload);
+
       const res = await apiFetch<{ success: boolean; message: string }>('/admin/bulk-register', {
         method: 'POST',
         body: JSON.stringify(payload)
       });
+
+      console.log('✅ [Anvesha Bulk Import] Bulk registration response:', res);
 
       if (res.success) {
         setSuccessMsg(res.message);
@@ -700,6 +765,80 @@ export const BulkImportDashboard: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* Detailed Master File Inspection & Mistake Audit Panel */}
+          {auditIssues.length > 0 && (
+            <div className="bg-amber-50/70 border border-amber-300/80 rounded-2xl p-6 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-amber-200/80">
+                <div className="flex items-center space-x-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0">
+                    ⚠️
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-amber-950 font-serif">
+                      Detailed Master CSV Upload Mistake Breakdown ({auditIssues.length} Issue{auditIssues.length > 1 ? 's' : ''} Found)
+                    </h3>
+                    <p className="text-[11px] text-amber-800">
+                      The uploaded Master CSV contained issues in specific rows. Review the breakdown below to resolve them.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Filter out forms that have 0 participants
+                    const validForms = forms.filter(f => f.participants.length > 0);
+                    if (validForms.length === 0) {
+                      alert('All forms in the current batch have issues or 0 participants.');
+                      return;
+                    }
+                    setForms(validForms);
+                    setAuditIssues([]);
+                  }}
+                  className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shrink-0"
+                >
+                  Clear Problematic Rows ({auditIssues.length})
+                </button>
+              </div>
+
+              <div className="overflow-x-auto rounded-xl border border-amber-200/80 bg-white">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-amber-100/60 text-amber-900 font-bold border-b border-amber-200 text-[11px] uppercase tracking-wider">
+                      <th className="py-2.5 px-3">Row #</th>
+                      <th className="py-2.5 px-3">Institution Name</th>
+                      <th className="py-2.5 px-3">Issue Category</th>
+                      <th className="py-2.5 px-3">Detailed Explanation</th>
+                      <th className="py-2.5 px-3">Recommended Fix</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-amber-100 text-slate-700">
+                    {auditIssues.map((issue, idx) => (
+                      <tr key={idx} className="hover:bg-amber-50/40 transition-colors">
+                        <td className="py-2.5 px-3 font-mono font-bold text-amber-900">#{issue.rowNumber}</td>
+                        <td className="py-2.5 px-3 font-semibold text-slate-900">{issue.institutionName}</td>
+                        <td className="py-2.5 px-3">
+                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                            issue.issueType === 'PRIVATE_GOOGLE_SHEET'
+                              ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                              : issue.issueType === 'MISSING_ROSTER_LINK'
+                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                              : 'bg-slate-100 text-slate-800 border border-slate-200'
+                          }`}>
+                            {issue.issueType === 'PRIVATE_GOOGLE_SHEET' && '🔒 Private Google Sheet'}
+                            {issue.issueType === 'MISSING_ROSTER_LINK' && '📎 Missing Roster Link'}
+                            {issue.issueType === 'ZERO_PARTICIPANTS' && '👥 0 Participants Parsed'}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-[11px] text-slate-600 max-w-xs">{issue.details}</td>
+                        <td className="py-2.5 px-3 text-[11px] font-medium text-amber-900">{issue.recommendation}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmitAll} className="space-y-6">
             {/* Repeater Forms List */}

@@ -34,10 +34,11 @@ export const RegistrationDetailsDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Filtering & Search
+  // Filtering & View Modes
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'VERIFIED' | 'PENDING'>('ALL');
   const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'SPORTS' | 'CULTURALS' | 'FUN_ACTIVITIES'>('ALL');
+  const [viewMode, setViewMode] = useState<'TEAMS' | 'FLAT'>('TEAMS');
 
   useEffect(() => {
     fetchRegistrations();
@@ -98,111 +99,146 @@ export const RegistrationDetailsDashboard: React.FC = () => {
       const safeTabName = sanitizeTabName(evtName);
       const rows = grouped[evtName];
 
-      let rowsXml = '';
-      rows.forEach(reg => {
+      let rowsXml = `
+        <Row ss:AutoFitHeight="0" ss:Height="24">
+          <Cell ss:StyleID="Header"><Data ss:Type="String">Participant Name</Data></Cell>
+          <Cell ss:StyleID="Header"><Data ss:Type="String">Gender</Data></Cell>
+          <Cell ss:StyleID="Header"><Data ss:Type="String">Date of Birth</Data></Cell>
+          <Cell ss:StyleID="Header"><Data ss:Type="String">PU Class</Data></Cell>
+          <Cell ss:StyleID="Header"><Data ss:Type="String">Institution Name</Data></Cell>
+          <Cell ss:StyleID="Header"><Data ss:Type="String">Team</Data></Cell>
+          <Cell ss:StyleID="Header"><Data ss:Type="String">POC Name</Data></Cell>
+          <Cell ss:StyleID="Header"><Data ss:Type="String">POC Contact</Data></Cell>
+          <Cell ss:StyleID="Header"><Data ss:Type="String">POC Email</Data></Cell>
+          <Cell ss:StyleID="Header"><Data ss:Type="String">Chest Number</Data></Cell>
+          <Cell ss:StyleID="Header"><Data ss:Type="String">Verification Status</Data></Cell>
+        </Row>
+      `;
+
+      rows.forEach(r => {
         rowsXml += `
-        <Row>
-          <Cell><Data ss:Type="String">${escapeXml(reg.institutionName)}</Data></Cell>
-          <Cell><Data ss:Type="String">${escapeXml(reg.pocName)}</Data></Cell>
-          <Cell><Data ss:Type="String">${escapeXml(reg.pocMobile)}</Data></Cell>
-          <Cell><Data ss:Type="String">${escapeXml(reg.pocEmail)}</Data></Cell>
-          <Cell><Data ss:Type="String">${escapeXml(reg.participantName)}</Data></Cell>
-          <Cell><Data ss:Type="String">${escapeXml(reg.gender)}</Data></Cell>
-          <Cell><Data ss:Type="String">${escapeXml(reg.dob)}</Data></Cell>
-          <Cell><Data ss:Type="String">${escapeXml(reg.className)}</Data></Cell>
-          <Cell><Data ss:Type="String">${escapeXml(reg.chestNumber || 'Pending')}</Data></Cell>
-          <Cell><Data ss:Type="String">${escapeXml(reg.teamName || 'N/A')}</Data></Cell>
-          <Cell><Data ss:Type="String">${escapeXml(reg.verificationStatus)}</Data></Cell>
-        </Row>`;
+          <Row ss:AutoFitHeight="0">
+            <Cell><Data ss:Type="String">${escapeXml(r.participantName)}</Data></Cell>
+            <Cell><Data ss:Type="String">${escapeXml(r.gender)}</Data></Cell>
+            <Cell><Data ss:Type="String">${escapeXml(r.dob)}</Data></Cell>
+            <Cell><Data ss:Type="String">${escapeXml(r.className)}</Data></Cell>
+            <Cell><Data ss:Type="String">${escapeXml(r.institutionName)}</Data></Cell>
+            <Cell><Data ss:Type="String">${escapeXml(r.teamName || 'N/A')}</Data></Cell>
+            <Cell><Data ss:Type="String">${escapeXml(r.pocName)}</Data></Cell>
+            <Cell><Data ss:Type="String">${escapeXml(r.pocMobile)}</Data></Cell>
+            <Cell><Data ss:Type="String">${escapeXml(r.pocEmail)}</Data></Cell>
+            <Cell><Data ss:Type="String">${escapeXml(r.chestNumber || 'Pending')}</Data></Cell>
+            <Cell><Data ss:Type="String">${escapeXml(r.verificationStatus)}</Data></Cell>
+          </Row>
+        `;
       });
 
       worksheetsXml += `
-  <Worksheet ss:Name="${safeTabName}">
-    <Table>
-      <Column ss:Width="180"/>
-      <Column ss:Width="120"/>
-      <Column ss:Width="100"/>
-      <Column ss:Width="150"/>
-      <Column ss:Width="120"/>
-      <Column ss:Width="60"/>
-      <Column ss:Width="80"/>
-      <Column ss:Width="80"/>
-      <Column ss:Width="80"/>
-      <Column ss:Width="60"/>
-      <Column ss:Width="100"/>
-      <Row ss:StyleID="HeaderStyle" ss:Height="22">
-        <Cell><Data ss:Type="String">Institution Name</Data></Cell>
-        <Cell><Data ss:Type="String">POC Name</Data></Cell>
-        <Cell><Data ss:Type="String">POC Mobile</Data></Cell>
-        <Cell><Data ss:Type="String">POC Email</Data></Cell>
-        <Cell><Data ss:Type="String">Participant Name</Data></Cell>
-        <Cell><Data ss:Type="String">Gender</Data></Cell>
-        <Cell><Data ss:Type="String">Date of Birth</Data></Cell>
-        <Cell><Data ss:Type="String">PU Class</Data></Cell>
-        <Cell><Data ss:Type="String">Chest Number</Data></Cell>
-        <Cell><Data ss:Type="String">Team</Data></Cell>
-        <Cell><Data ss:Type="String">Verification Status</Data></Cell>
-      </Row>
-      ${rowsXml}
-    </Table>
-  </Worksheet>`;
+        <Worksheet ss:Name="${escapeXml(safeTabName)}">
+          <Table ss:ExpandedColumnCount="11" ss:ExpandedRowCount="${rows.length + 5}" x:FullColumns="1" x:FullRows="1" ss:DefaultRowHeight="18">
+            <Column ss:Width="160"/>
+            <Column ss:Width="70"/>
+            <Column ss:Width="90"/>
+            <Column ss:Width="100"/>
+            <Column ss:Width="200"/>
+            <Column ss:Width="70"/>
+            <Column ss:Width="140"/>
+            <Column ss:Width="110"/>
+            <Column ss:Width="160"/>
+            <Column ss:Width="100"/>
+            <Column ss:Width="120"/>
+            ${rowsXml}
+          </Table>
+        </Worksheet>
+      `;
     });
 
-    const excelXml = `<?xml version="1.0"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
-  xmlns:o="urn:schemas-microsoft-com:office:office"
-  xmlns:x="urn:schemas-microsoft-com:office:excel"
-  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
-  xmlns:html="http://www.w3.org/TR/REC-html40">
-  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
-    <Author>ANVESHA</Author>
-    <Created>${new Date().toISOString()}</Created>
-  </DocumentProperties>
-  <Styles>
-    <Style ss:ID="HeaderStyle">
-      <Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="10" ss:FontName="Segoe UI"/>
-      <Interior ss:Color="#002147" ss:Pattern="Solid"/>
-      <Alignment ss:Vertical="Center" ss:Horizontal="Center"/>
-    </Style>
-  </Styles>
-  ${worksheetsXml}
-</Workbook>`;
+    const workbookXml = `<?xml version="1.0" encoding="UTF-8"?>
+      <?mso-application progid="Excel.Sheet"?>
+      <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+        xmlns:o="urn:schemas-microsoft-com:office:office"
+        xmlns:x="urn:schemas-microsoft-com:office:excel"
+        xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+        xmlns:html="http://www.w3.org/TR/REC-html40">
+        <Styles>
+          <Style ss:ID="Header">
+            <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+            <Interior ss:Color="#0A2463" ss:Pattern="Solid"/>
+            <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+          </Style>
+        </Styles>
+        ${worksheetsXml}
+      </Workbook>`;
 
-    const blob = new Blob([excelXml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const blob = new Blob([workbookXml], { type: 'application/vnd.ms-excel' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'anvesha_registration_details_by_event.xls');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Anvesha_2026_Master_Registrations_${new Date().toISOString().split('T')[0]}.xls`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
-  // Filtered List computations
   const filteredRegistrations = registrations.filter(reg => {
-    // 1. Search term match
-    const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
-      reg.participantName.toLowerCase().includes(searchLower) ||
-      reg.institutionName.toLowerCase().includes(searchLower) ||
-      reg.eventName.toLowerCase().includes(searchLower) ||
-      (reg.chestNumber && reg.chestNumber.toLowerCase().includes(searchLower));
+      searchTerm === '' ||
+      reg.participantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reg.institutionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reg.eventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (reg.chestNumber && reg.chestNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (reg.teamName && reg.teamName.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    // 2. Status match
     const matchesStatus = 
-      statusFilter === 'ALL' ||
-      (statusFilter === 'VERIFIED' && reg.verificationStatus === 'VERIFIED') ||
-      (statusFilter === 'PENDING' && reg.verificationStatus !== 'VERIFIED');
+      statusFilter === 'ALL' || 
+      reg.verificationStatus === statusFilter;
 
-    // 3. Category match
     const matchesCategory = 
       categoryFilter === 'ALL' ||
       reg.eventCategory === categoryFilter;
 
     return matchesSearch && matchesStatus && matchesCategory;
   });
+
+  // Group participants by Team (Institution + Event + TeamName)
+  interface TeamGroup {
+    groupKey: string;
+    institutionName: string;
+    eventName: string;
+    eventCategory: string;
+    teamName: string;
+    pocName: string;
+    pocMobile: string;
+    pocEmail: string;
+    verificationStatus: string;
+    chestNumber: string | null;
+    participants: RegistrationDetail[];
+  }
+
+  const groupedTeams = React.useMemo(() => {
+    const map = new Map<string, TeamGroup>();
+    filteredRegistrations.forEach(reg => {
+      const key = `${reg.institutionName}___${reg.eventName}___${reg.teamName || 'Team A'}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          groupKey: key,
+          institutionName: reg.institutionName,
+          eventName: reg.eventName,
+          eventCategory: reg.eventCategory,
+          teamName: reg.teamName || 'Team A',
+          pocName: reg.pocName,
+          pocMobile: reg.pocMobile,
+          pocEmail: reg.pocEmail,
+          verificationStatus: reg.verificationStatus,
+          chestNumber: reg.chestNumber,
+          participants: []
+        });
+      }
+      map.get(key)!.participants.push(reg);
+    });
+    return Array.from(map.values());
+  }, [filteredRegistrations]);
 
   const totalRegistered = registrations.length;
   const verifiedCount = registrations.filter(r => r.verificationStatus === 'VERIFIED').length;
@@ -264,16 +300,41 @@ export const RegistrationDetailsDashboard: React.FC = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-1">
                 <h2 className="text-base font-bold text-christ-navy font-serif">Participant Registrations Ledger</h2>
-                <p className="text-xs text-slate-500">Query student rosters and export consolidated workbooks grouped by target event.</p>
+                <p className="text-xs text-slate-500">Query student rosters grouped by institution & team, or export multi-tab Excel workbooks.</p>
               </div>
-              <button
-                type="button"
-                onClick={handleExportExcel}
-                className="inline-flex items-center justify-center space-x-2 px-4.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-colors shadow-sm shrink-0"
-              >
-                <FileSpreadsheet className="w-4 h-4" />
-                <span>Export Multi-Tab Excel</span>
-              </button>
+              
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                {/* View Mode Toggle */}
+                <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('TEAMS')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      viewMode === 'TEAMS' ? 'bg-white text-christ-navy shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    <span>👥 Grouped by Team ({groupedTeams.length})</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('FLAT')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      viewMode === 'FLAT' ? 'bg-white text-christ-navy shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    <span>📋 All Participants ({filteredRegistrations.length})</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleExportExcel}
+                  className="inline-flex items-center justify-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-colors shadow-sm shrink-0"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  <span>Export Excel</span>
+                </button>
+              </div>
             </div>
 
             {/* Filter controls */}
@@ -281,7 +342,7 @@ export const RegistrationDetailsDashboard: React.FC = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search name, institution, event or chest number..."
+                  placeholder="Search name, institution, event, team or chest number..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl bg-slate-50/50 text-xs focus:ring-1 focus:ring-christ-gold focus:border-christ-gold focus:outline-none placeholder:text-slate-400"
@@ -318,23 +379,94 @@ export const RegistrationDetailsDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Table Container */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            {isLoading ? (
-              <div className="p-12 text-center text-xs font-bold text-slate-400 flex flex-col items-center justify-center space-y-2">
-                <div className="w-6 h-6 border-2 border-christ-navy border-t-christ-gold rounded-full animate-spin"></div>
-                <span>Loading registration details...</span>
-              </div>
-            ) : error ? (
-              <div className="p-8 text-center text-xs font-bold text-rose-500 flex items-center justify-center space-x-2">
-                <AlertCircle className="w-4.5 h-4.5" />
-                <span>{error}</span>
-              </div>
-            ) : filteredRegistrations.length === 0 ? (
-              <div className="p-12 text-center text-xs font-bold text-slate-400">
-                No matching registration details found.
-              </div>
-            ) : (
+          {/* Roster View Container */}
+          {isLoading ? (
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-xs font-bold text-slate-400 flex flex-col items-center justify-center space-y-2">
+              <div className="w-6 h-6 border-2 border-christ-navy border-t-christ-gold rounded-full animate-spin"></div>
+              <span>Loading registration details...</span>
+            </div>
+          ) : error ? (
+            <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs font-bold text-rose-500 flex items-center justify-center space-x-2">
+              <AlertCircle className="w-4.5 h-4.5" />
+              <span>{error}</span>
+            </div>
+          ) : filteredRegistrations.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-xs font-bold text-slate-400">
+              No matching registration details found.
+            </div>
+          ) : viewMode === 'TEAMS' ? (
+            /* GROUPED BY TEAMS VIEW */
+            <div className="space-y-6">
+              {groupedTeams.map((group) => (
+                <div key={group.groupKey} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  {/* Team Card Header */}
+                  <div className="bg-slate-50 border-b border-slate-200 p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                        <span className="font-extrabold text-sm text-slate-900 font-serif">{group.institutionName}</span>
+                        <span className="text-slate-300">·</span>
+                        <span className="font-bold text-xs text-christ-navy bg-christ-navy/10 px-2.5 py-0.5 rounded-md border border-christ-navy/15">
+                          🏆 {group.eventName}
+                        </span>
+                        <span className="font-bold text-xs text-christ-gold bg-christ-navy px-2.5 py-0.5 rounded-md font-mono">
+                          {group.teamName}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        <strong>POC:</strong> {group.pocName} ({group.pocMobile} · {group.pocEmail}) · <strong>Roster:</strong> {group.participants.length} Member(s)
+                      </p>
+                    </div>
+
+                    <div className="flex items-center space-x-4 shrink-0">
+                      <div className="text-right">
+                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-tight">Chest Number</p>
+                        <span className="font-mono font-bold text-xs text-christ-navy">{group.chestNumber || 'Unassigned'}</span>
+                      </div>
+
+                      <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        group.verificationStatus === 'VERIFIED'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${group.verificationStatus === 'VERIFIED' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                        <span>{group.verificationStatus}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Team Participants Table */}
+                  <div className="overflow-x-auto text-xs">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-100/60 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                          <th className="p-3.5 w-12 text-center">#</th>
+                          <th className="p-3.5">Participant Name</th>
+                          <th className="p-3.5">Gender / DOB</th>
+                          <th className="p-3.5">PU Class</th>
+                          <th className="p-3.5">Emergency Contact</th>
+                          <th className="p-3.5">Chest Number</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {group.participants.map((p, pIdx) => (
+                          <tr key={p.participantId || pIdx} className="hover:bg-slate-50/50">
+                            <td className="p-3.5 text-center font-bold text-slate-400 text-[11px]">{pIdx + 1}</td>
+                            <td className="p-3.5 font-bold text-slate-800">{p.participantName}</td>
+                            <td className="p-3.5 text-slate-600 font-mono text-[11px]">{p.gender} · {p.dob}</td>
+                            <td className="p-3.5 text-slate-700 font-semibold">{p.className}</td>
+                            <td className="p-3.5 text-slate-600 font-mono text-[11px]">{p.emergencyContact || 'N/A'}</td>
+                            <td className="p-3.5 font-mono font-bold text-christ-gold">{p.chestNumber || group.chestNumber || 'Pending'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* FLAT ROSTER VIEW */
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
               <div className="overflow-x-auto text-xs">
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -390,8 +522,8 @@ export const RegistrationDetailsDashboard: React.FC = () => {
                   </tbody>
                 </table>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </main>
       </div>
     </div>

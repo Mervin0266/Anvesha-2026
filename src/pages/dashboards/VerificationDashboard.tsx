@@ -436,7 +436,7 @@ export const VerificationDashboard: React.FC = () => {
                                 </button>
                               </div>
                             ) : (
-                              <>
+                              <div>
                                 <div className="flex items-center space-x-2">
                                   <strong className="text-slate-900 block truncate">{p.name}</strong>
                                   {selectedRecord.verificationStatus === 'PENDING' && (
@@ -454,7 +454,7 @@ export const VerificationDashboard: React.FC = () => {
                                   )}
                                 </div>
                                 <p className="text-[10px] text-slate-500 mt-0.5">{p.className}</p>
-                              </>
+                              </div>
                             )}
                           </div>
                           <span className="font-mono font-bold px-2 py-0.5 bg-christ-navy text-christ-gold rounded text-[10px] shrink-0">

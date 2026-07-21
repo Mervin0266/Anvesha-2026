@@ -20,7 +20,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (!token) {
+      const storedToken = localStorage.getItem('anvesha_token');
+      if (!storedToken || storedToken === 'null' || storedToken === 'undefined' || !storedToken.trim()) {
+        localStorage.removeItem('anvesha_token');
+        setUser(null);
+        setToken(null);
         setIsLoading(false);
         return;
       }
@@ -32,7 +36,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           logout();
         }
       } catch (err) {
-        console.warn('Failed to verify token, clearing session.', err);
         logout();
       } finally {
         setIsLoading(false);
